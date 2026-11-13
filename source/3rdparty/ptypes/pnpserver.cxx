@@ -59,12 +59,12 @@ void npserver::openinst()
     sa.lpSecurityDescriptor = NULL;
     sa.bInheritHandle = TRUE;
 
-    handle = (int)CreateNamedPipeA(pipename, 
+    handle = tosyshandle(CreateNamedPipeA(pipename, 
         PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
         PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
         PIPE_UNLIMITED_INSTANCES, 
         DEF_PIPE_SYSTEM_BUF_SIZE, DEF_PIPE_SYSTEM_BUF_SIZE,
-        DEF_PIPE_TIMEOUT, &sa);
+        DEF_PIPE_TIMEOUT, &sa));
     
     if (handle == invhandle)
         error(unixerrno(), "Couldn't create");
@@ -73,7 +73,7 @@ void npserver::openinst()
 
 void npserver::closeinst()
 {
-    CloseHandle(HANDLE(pexchange(&handle, invhandle)));
+    CloseHandle(fromsyshandle(pexchange(&handle, invhandle)));
 }
 
 #endif
@@ -135,7 +135,7 @@ bool npserver::serve(namedpipe& client, int timeout)
 
     client.ovr.Offset = 0;
     client.ovr.OffsetHigh = 0;
-    bool result = ConnectNamedPipe(HANDLE(handle), &client.ovr) ?
+    bool result = ConnectNamedPipe(fromsyshandle(handle), &client.ovr) ?
         true : (GetLastError() == ERROR_PIPE_CONNECTED);
 
     if (!result && GetLastError() == ERROR_IO_PENDING)
@@ -143,7 +143,7 @@ bool npserver::serve(namedpipe& client, int timeout)
         if (WaitForSingleObject(client.ovr.hEvent, timeout) == WAIT_TIMEOUT)
             return false;
         unsigned long ret;
-        if (!GetOverlappedResult(HANDLE(handle), &client.ovr, &ret, false))
+        if (!GetOverlappedResult(fromsyshandle(handle), &client.ovr, &ret, false))
             error(unixerrno(), "Couldn't read");
         result = true;
     }

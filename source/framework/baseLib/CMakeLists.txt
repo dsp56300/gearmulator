@@ -28,7 +28,7 @@ target_sources(baseLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 if(NOT MSVC)
-	target_link_libraries(baseLib PUBLIC dl)
+	target_link_libraries(baseLib PUBLIC ${CMAKE_DL_LIBS})
 endif()
 
 set_property(TARGET baseLib PROPERTY FOLDER "Gearmulator")

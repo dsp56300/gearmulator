@@ -39,10 +39,10 @@ void infile::pipe(outfile& out)
 #endif
         error(uerrno(), "Couldn't create a local pipe");
 
-    set_syshandle(int(h[0]));
-    peerhandle = int(h[1]);
-    out.set_syshandle(int(h[1]));
-    out.peerhandle = int(h[0]);
+    set_syshandle(tosyshandle(h[0]));
+    peerhandle = tosyshandle(h[1]);
+    out.set_syshandle(tosyshandle(h[1]));
+    out.peerhandle = tosyshandle(h[0]);
     open();
     out.open();
 }

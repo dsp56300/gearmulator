@@ -26,7 +26,11 @@
 #define NOMINMAX
 #define NOSERVICE
 #include <Windows.h>
+#if __has_include(<shlobj_core.h>)
 #include <shlobj_core.h>
+#else
+#include <shlobj.h>
+#endif
 #else
 #include <dlfcn.h>
 #endif
