@@ -4351,6 +4351,85 @@ namespace
 		root.deleteRecursively();
 	}
 
+	// Whether a product has a ROM (BUG-10495): with nothing anywhere a plugin looks, there is none
+	// whatever the plugin said; with a file, it is unknown until the plugin started, and then it is what
+	// the plugin said - unless a file arrived after a start that found nothing.
+	void testRomState()
+	{
+		const Fixture fixture;
+
+		const auto root = juce::File::getSpecialLocation(juce::File::tempDirectory)
+			.getChildFile("pluginManagerTest-romstate-" + juce::String(juce::Random::getSystemRandom().nextInt64()));
+
+		const auto plugins = root.getChildFile("plugins");
+		const auto data = root.getChildFile("data");
+
+		setDataFolder(data.getFullPathName().toStdString());
+		PlatformUtils::setSettingsFolder(root.getChildFile("settings").getFullPathName().toStdString());
+
+		auto pm = makeManager(true);
+		std::string error;
+		TEST_ASSERT(pm.refresh(error));
+
+		using RomState = PluginManager::RomState;
+
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::NotInstalled);
+
+		pm.getInstallPaths().set(PluginFormat::VST3, plugins.getFullPathName().toStdString());
+
+		const auto binaryFolder = plugins.getChildFile("Synth-1000.vst3/Contents/x86_64-win");
+		TEST_ASSERT(binaryFolder.createDirectory().wasOk());
+		TEST_ASSERT(binaryFolder.getChildFile("Synth-1000.vst3").replaceWithText("x"));
+
+		const auto product = data.getChildFile("The Usual Suspects/Synth-1000");
+		const auto roms = product.getChildFile("roms");
+		TEST_ASSERT(roms.createDirectory().wasOk());
+
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Missing);
+
+		// Beside the plugin's binary counts as much as the ROM folder.
+		const auto beside = binaryFolder.getChildFile("firmware.bin");
+		TEST_ASSERT(beside.replaceWithText("rom"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Unchecked);
+		TEST_ASSERT(beside.deleteFile());
+
+		const auto rom = roms.getChildFile("firmware.bin");
+		TEST_ASSERT(rom.replaceWithText("rom"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Unchecked);
+
+		const auto status = product.getChildFile("config/romStatus.json");
+		TEST_ASSERT(status.getParentDirectory().createDirectory().wasOk());
+
+		TEST_ASSERT(status.replaceWithText(R"({"valid":true})"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Valid);
+
+		// The plugin rejected what is there, which has been there since before it started.
+		const auto earlier = juce::Time::getCurrentTime() - juce::RelativeTime::hours(1);
+		TEST_ASSERT(rom.setLastModificationTime(earlier));
+		rom.setCreationTime(earlier);	// not on every system, where it is the time of the line above, which is earlier still
+
+		TEST_ASSERT(status.replaceWithText(R"({"valid":false})"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Rejected);
+
+		// A ROM put there since has not been tried. A copy keeps the date it was written, so it is the
+		// date it arrived that says so.
+		TEST_ASSERT(status.setLastModificationTime(juce::Time::getCurrentTime() - juce::RelativeTime::minutes(1)));
+
+		const auto copied = roms.getChildFile("copied.bin");
+		TEST_ASSERT(copied.replaceWithText("rom"));
+		TEST_ASSERT(copied.setLastModificationTime(earlier));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Unchecked);
+
+		// And with every file gone there is none, whatever the plugin last said.
+		TEST_ASSERT(status.replaceWithText(R"({"valid":true})"));
+		TEST_ASSERT(rom.deleteFile() && copied.deleteFile());
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Missing);
+
+		PlatformUtils::setSettingsFolder({});
+		setDataFolder({});
+		root.deleteRecursively();
+	}
+
 	// An LV2 is a folder with a bare library in it and the turtle files that describe it. macOS asks
 	// CFBundle, which wants a bundle with an Info.plist, and an LV2 is not one; an ELF carries
 	// nothing either. So the turtle is the only thing that answers on two of the three systems, and
@@ -4507,6 +4586,7 @@ int main()
 		testAProgramIsFoundWithoutKnowingItsName();
 		testAnUpdateKeepsWhatTheUserPutInTheBundle();
 		testAnOfflineFolder();
+		testRomState();
 		testTheTeamLoginFlagSurvivesBeingWrittenBack();
 		testBackupAndRestoreOfADataFolder();
 		testBackupsGoWhereTheyArePointed();

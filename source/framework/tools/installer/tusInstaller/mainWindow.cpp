@@ -35,6 +35,7 @@ namespace pluginManager
 
 	MainWindow::MainWindow(InstallerDocument& _document)
 		: DocumentWindow(juce::String(g_appTitle) + " " + g_appVersion, juce::Colours::darkgrey, DocumentWindow::allButtons)
+		, m_document(_document)
 	{
 		setUsingNativeTitleBar(true);
 		setContentNonOwned(_document.getRmlComponent(), true);
@@ -66,6 +67,14 @@ namespace pluginManager
 	}
 
 	MainWindow::~MainWindow() = default;
+
+	void MainWindow::activeWindowStatusChanged()
+	{
+		DocumentWindow::activeWindowStatusChanged();
+
+		if (isActiveWindow())
+			m_document.refreshInstalled();
+	}
 
 	void MainWindow::closeButtonPressed()
 	{

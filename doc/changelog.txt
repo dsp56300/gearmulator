@@ -429,6 +429,11 @@ Plugin Manager:
         installs from one, and "downloads" sets the folder downloads are kept
         in.
 
+- [New] BUG-10495 The picture of an installed plugin has a ring that says
+        whether it has a ROM: green when the plugin found one it can use the
+        last time it started, red when it found none or there is no file where
+        it looks. The tooltip says where to put one.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.

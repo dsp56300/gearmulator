@@ -48,6 +48,10 @@ namespace pluginManager
 		void refreshInstalled();
 
 		void updateThumbnail();
+
+		// A ring around the picture: green for a ROM the plugin booted, red for none (BUG-10495). Part of
+		// what is on disk, so it is read again with it.
+		void updateRomState();
 		void setThumbnailFilename(std::string _filename);
 		const std::string& getThumbnailFilename() const { return m_thumbnailFilename; }
 

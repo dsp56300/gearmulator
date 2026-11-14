@@ -97,6 +97,7 @@ namespace pluginManager
 		addFormatRows();
 		addAllColumn();
 		setupPartToggles();
+		updateRomState();
 
 		claimClick(m_cancelButton, [this](Rml::Event&) { onCancelClicked(); });
 
@@ -128,6 +129,8 @@ namespace pluginManager
 			updateRow(row);
 		}
 
+		updateRomState();
+
 		// Which also tells the buttons above the list, through the row having changed.
 		updateAllColumn();
 	}
@@ -136,6 +139,39 @@ namespace pluginManager
 	{
 		if (m_thumbnailImg && !m_thumbnailFilename.empty())
 			m_thumbnailImg->SetAttribute("src", m_thumbnailFilename);
+	}
+
+	void PluginEntryController::updateRomState()
+	{
+		auto* box = m_element->QuerySelector(".plugin-thumbnail");
+
+		if (!box)
+			return;
+
+		using RomState = PluginManager::RomState;
+
+		const auto state = m_pluginManager.romState(m_product.product);
+		const auto name = m_product.name.empty() ? m_product.product : m_product.name;
+		const auto folder = juce::File(juce::String(PlatformUtils::romFolder(m_product.product))).getFullPathName().toStdString();
+
+		box->SetClass("rom-valid", state == RomState::Valid);
+		box->SetClass("rom-missing", state == RomState::Missing || state == RomState::Rejected);
+
+		std::string title;
+
+		switch (state)
+		{
+		case RomState::Valid:     title = name + " found a ROM it can use when it last started"; break;
+		case RomState::Rejected:  title = name + " found no ROM it can use when it last started. Put one into " + folder; break;
+		case RomState::Missing:   title = "No ROM yet. Put one into " + folder; break;
+		case RomState::Unchecked: title = name + " checks the ROM when it starts, and has not started since it was put there"; break;
+		case RomState::NotInstalled: break;
+		}
+
+		if (title.empty())
+			box->RemoveAttribute("title");
+		else
+			box->SetAttribute("title", title);
 	}
 
 	// The effect builds go into the same folder as the plugin, under the same login - which
@@ -908,6 +944,7 @@ namespace pluginManager
 			updateRow(row);
 		}
 
+		updateRomState();
 		updateAllColumn();
 	}
 

@@ -8,6 +8,7 @@
 #include "offlineFolder.h"
 #include "pluginInstaller.h"
 #include "selfUpdate.h"
+#include "zipExtractor.h"
 
 #include <algorithm>
 #include <map>
@@ -1301,6 +1302,72 @@ namespace pluginManager
 		}
 
 		return false;
+	}
+
+	PluginManager::RomState PluginManager::romState(const std::string& _product) const
+	{
+		// Every plugin of it that reads the ROM: its own and its effect build's, in every format but the
+		// standalone, which is a program and makes its own arrangements.
+		std::vector<juce::File> plugins;
+
+		for (const auto& product : {_product, m_catalog.fxProductOf(_product)})
+		{
+			if (product.empty())
+				continue;
+
+			for (const auto format : InstallPaths::getFormats())
+			{
+				if (format == PluginFormat::Standalone)
+					continue;
+
+				const auto dir = locateInstalled(product, format);
+
+				if (!dir.empty())
+					plugins.emplace_back(juce::String(PlatformUtils::installedFilePath(product, format, dir)));
+			}
+		}
+
+		if (plugins.empty())
+			return RomState::NotInstalled;
+
+		// Everywhere a plugin looks: its ROM folder, with anything in it, and beside itself - which for a
+		// bundle is its top and the folder of its binary, for a plain file the folder it is in.
+		auto files = juce::File(juce::String(PlatformUtils::romFolder(_product))).findChildFiles(juce::File::findFiles, false);
+
+		for (const auto& plugin : plugins)
+		{
+			if (!plugin.isDirectory())
+			{
+				files.addArray(plugin.getParentDirectory().findChildFiles(juce::File::findFiles, false, "*.bin;*.mid"));
+				continue;
+			}
+
+			for (const auto& rom : ZipExtractor::romsInside(plugin))
+				files.add(rom);
+		}
+
+		if (files.isEmpty())
+			return RomState::Missing;
+
+		const auto status = juce::File(juce::String(PlatformUtils::dataFolder(_product))).getChildFile("config/romStatus.json");
+
+		if (!status.existsAsFile())
+			return RomState::Unchecked;
+
+		if (juce::JSON::parse(status).getProperty("valid", false))
+			return RomState::Valid;
+
+		// A file put there after the plugin found nothing has not been tried yet. A copy keeps the date it
+		// was written, so the date it arrived is asked as well.
+		const auto checked = status.getLastModificationTime();
+
+		for (const auto& file : files)
+		{
+			if (file.getLastModificationTime() > checked || file.getCreationTime() > checked)
+				return RomState::Unchecked;
+		}
+
+		return RomState::Rejected;
 	}
 
 	InstallAction PluginManager::installAction(const std::string& _product, const std::string& _format, const bool _installed,

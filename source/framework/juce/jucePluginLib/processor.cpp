@@ -47,6 +47,17 @@ namespace pluginLib
 		return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	}
 
+	// Whether the last start found a ROM this plugin boots, for the Plugin Manager to show beside the
+	// product (BUG-10495): only the plugin can tell a ROM from any other file. The file's date says when,
+	// so the Plugin Manager does not judge a ROM put in place since by it.
+	void writeRomStatus(const std::string& _configFolder, const bool _valid)
+	{
+		const juce::File folder{juce::String(_configFolder)};
+
+		if (folder.createDirectory().wasOk())
+			folder.getChildFile("romStatus.json").replaceWithText(_valid ? "{\"valid\":true}\n" : "{\"valid\":false}\n");
+	}
+
 	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties)
 		: juce::AudioProcessor(_busesProperties)
 		, m_properties(std::move(_properties))
@@ -314,12 +325,25 @@ namespace pluginLib
 
 	synthLib::Device* Processor::createDevice()
 	{
-		// a product that has a better text for a missing ROM throws it from getRemoteDeviceParams
-		synthLib::DeviceCreateParams params;
-		getRemoteDeviceParams(params);
-		params.homePath = getDataFolder();
+		synthLib::Device* device = nullptr;
 
-		auto* device = newDevice(params);
+		try
+		{
+			// a product that has a better text for a missing ROM throws it from getRemoteDeviceParams
+			synthLib::DeviceCreateParams params;
+			getRemoteDeviceParams(params);
+			params.homePath = getDataFolder();
+
+			device = newDevice(params);
+		}
+		catch (const synthLib::DeviceException& e)
+		{
+			if (e.errorCode() == synthLib::DeviceError::FirmwareMissing)
+				writeRomStatus(getConfigFolder(), false);
+			throw;
+		}
+
+		writeRomStatus(getConfigFolder(), device->isValid());
 
 		if(!device->isValid())
 		{

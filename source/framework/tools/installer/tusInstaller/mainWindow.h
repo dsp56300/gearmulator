@@ -28,7 +28,12 @@ namespace pluginManager
 
 		bool keyPressed(const juce::KeyPress& _key) override;
 
+		// Coming back to the window is when what was done elsewhere shows: a ROM put in place and the
+		// plugin started on it (BUG-10495), a plugin removed by hand.
+		void activeWindowStatusChanged() override;
+
 	private:
+		InstallerDocument& m_document;
 		TextHandler m_onText;
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)

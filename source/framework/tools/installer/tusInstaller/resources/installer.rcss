@@ -397,6 +397,21 @@ scrollbarhorizontal sliderbar {
 	border-radius: 6dp;
 }
 
+/* Whether the plugin has a ROM to boot (BUG-10495): green for one it booted, red for none. The
+   padding gives back what the wider border takes, so the picture stays where it is. */
+.plugin-thumbnail.rom-valid, .plugin-thumbnail.rom-missing {
+	border-width: 2dp;
+	padding: 3dp;
+}
+
+.plugin-thumbnail.rom-valid {
+	border-color: #b5e853;
+}
+
+.plugin-thumbnail.rom-missing {
+	border-color: #ac4142;
+}
+
 /* Only the maxima are given, so the layout keeps the aspect the file has and fits it to
    whichever side runs out first - a wide screenshot ends up with a band above and below it
    rather than squashed into a shape it never had. */

@@ -92,6 +92,12 @@ namespace pluginManager
 		void loginFailed(const std::string& _message);
 		void closeLogin();
 
+		// What every row says is installed, read from the disk again. Cheap - it is the manifest and
+		// a look at whether the files are still there - and not a catalog refresh, which goes to the
+		// network and is not what changed. Also whenever the window is brought back, since what is
+		// on disk is changed elsewhere: a plugin started in a DAW says whether it found its ROM.
+		void refreshInstalled();
+
 	private:
 		// What the user has ticked. The rows own this while they exist, and every one of them is
 		// destroyed each time the catalog is read - so without a copy out here a refresh, or a walk
@@ -179,11 +185,6 @@ namespace pluginManager
 
 		// The chips read the rows, so anything that moves every row at once has to refresh them.
 		void updateFormatChips() const;
-
-		// What every row says is installed, read from the disk again. Cheap - it is the manifest and
-		// a look at whether the files are still there - and not a catalog refresh, which goes to the
-		// network and is not what changed.
-		void refreshInstalled();
 
 		// The status line under the header: how much is on offer, and why that is not everything.
 		std::string summary(size_t _shown) const;
