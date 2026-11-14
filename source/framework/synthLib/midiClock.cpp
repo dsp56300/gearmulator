@@ -18,7 +18,7 @@ namespace synthLib
 {
 	static constexpr double ClockTicksPerQuarter = 24.0;
 
-	void MidiClock::process(const float _bpm, const double _ppqPos, const bool _isPlaying, const size_t _sampleCount)
+	void MidiClock::process(const float _bpm, const double _ppqPos, const bool _isPlaying, const size_t _sampleCount, const bool _seek)
 	{
 		if(_bpm < 1.0f)
 			return;
@@ -32,6 +32,12 @@ namespace synthLib
 
 		if(_isPlaying && !m_isPlaying)
 		{
+			start(_ppqPos);
+		}
+		else if(_isPlaying && _seek)
+		{
+			LOGMC("Seek to ppqPos=" << _ppqPos);
+			stop();
 			start(_ppqPos);
 		}
 		else if(m_isPlaying && !_isPlaying)

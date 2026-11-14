@@ -147,7 +147,7 @@ namespace synthLib
 
 		processMidiInEvents();
 		insertLoopWraps(_bpm, _ppqPos, _isPlaying, _hasPpqPosition, _count, _loop);
-		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
+		processMidiClock(_bpm, _ppqPos, _isPlaying, _count, discontinuity == TransportDiscontinuity::Seek);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](const TAudioInputs& _ins, const TAudioOutputs& _outs, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
@@ -299,10 +299,10 @@ namespace synthLib
 			m_midiClock.restart();
 	}
 
-	void Plugin::processMidiClock(const float _bpm, const double _ppqPos, const bool _isPlaying, const size_t _sampleCount)
+	void Plugin::processMidiClock(const float _bpm, const double _ppqPos, const bool _isPlaying, const size_t _sampleCount, const bool _seek)
 	{
 		if (m_midiClockEnabled)
-			m_midiClock.process(_bpm, _ppqPos, _isPlaying, _sampleCount);
+			m_midiClock.process(_bpm, _ppqPos, _isPlaying, _sampleCount, _seek);
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)
