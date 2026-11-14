@@ -409,6 +409,20 @@ Plugin Manager:
 - [Fix] A product name, description, version or error message with "<" in it
         was shown cut off or not at all.
 
+- [New] BUG-10543 Offline install: the new Offline page prepares a folder with
+        the newest builds of the products and formats you tick, for this
+        computer or another system, with their pictures, the files they bring
+        and the Plugin Manager for that system. On a computer without a
+        network, start the Plugin Manager in that folder and it installs from
+        there. Any folder of our archives can be chosen to install from as well.
+
+- [New] BUG-10543 Preferences: downloads can be kept in a folder, which then
+        works as an offline install too.
+
+- [New] BUG-10543 tuspm: "export" prepares an offline install, "--folder"
+        installs from one, and "downloads" sets the folder downloads are kept
+        in.
+
 88emuPlayer:
 
 - [New] Devices: Added support for the SC-880.

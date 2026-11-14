@@ -37,11 +37,14 @@ namespace pluginManager
 		if (m_list)
 		{
 			for (const auto format : InstallPaths::getFormats())
-				addRow(format, *m_list);
+				addRow(Kind::Format, format, *m_list);
 		}
 
 		if (auto* backups = _doc.GetElementById("backup-folder-list"))
-			addRow(PluginFormat::Count, *backups);
+			addRow(Kind::Backups, PluginFormat::Count, *backups);
+
+		if (auto* downloads = _doc.GetElementById("download-folder-list"))
+			addRow(Kind::Downloads, PluginFormat::Count, *downloads);
 	}
 
 	void PreferencesPage::setHandlers(std::function<void()> _onAddDonatorLogin, std::function<void()> _onRefresh)
@@ -55,7 +58,7 @@ namespace pluginManager
 		*m_alive = false;
 	}
 
-	void PreferencesPage::addRow(const PluginFormat _format, Rml::Element& _parent)
+	void PreferencesPage::addRow(const Kind _kind, const PluginFormat _format, Rml::Element& _parent)
 	{
 		auto* templateRow = m_doc.GetElementById("preference-row-template");
 
@@ -71,9 +74,17 @@ namespace pluginManager
 		element->SetInnerRML(templateRow->GetInnerRML());
 
 		if (auto* name = element->QuerySelector(".preference-format"))
-			name->SetInnerRML(_format == PluginFormat::Count ? "Folder" : Rml::StringUtilities::EncodeRml(PlatformUtils::formatToString(_format)));
+			name->SetInnerRML(_kind != Kind::Format ? "Folder" : Rml::StringUtilities::EncodeRml(PlatformUtils::formatToString(_format)));
+
+		// Its default is keeping nothing, which is what the button does.
+		if (_kind == Kind::Downloads)
+		{
+			if (auto* off = element->QuerySelector(".preference-default"))
+				off->SetInnerRML("Off");
+		}
 
 		Row row;
+		row.kind = _kind;
 		row.format = _format;
 		row.path = dynamic_cast<Rml::ElementFormControlInput*>(element->QuerySelector(".preference-path"));
 		row.note = element->QuerySelector(".preference-note");
@@ -261,23 +272,37 @@ namespace pluginManager
 	std::string PreferencesPage::pathOf(const Row& _row) const
 	{
 		const auto& paths = m_pluginManager.getInstallPaths();
-		return _row.format == PluginFormat::Count ? paths.getBackupFolder() : paths.get(_row.format);
+
+		switch (_row.kind)
+		{
+		case Kind::Backups:   return paths.getBackupFolder();
+		case Kind::Downloads: return paths.getDownloadFolder();
+		default:              return paths.get(_row.format);
+		}
 	}
 
 	bool PreferencesPage::isCustom(const Row& _row) const
 	{
 		const auto& paths = m_pluginManager.getInstallPaths();
-		return _row.format == PluginFormat::Count ? paths.isCustomBackupFolder() : paths.isCustom(_row.format);
+
+		switch (_row.kind)
+		{
+		case Kind::Backups:   return paths.isCustomBackupFolder();
+		case Kind::Downloads: return !paths.getDownloadFolder().empty();
+		default:              return paths.isCustom(_row.format);
+		}
 	}
 
 	void PreferencesPage::storePath(const Row& _row, const std::string& _path) const
 	{
 		auto& paths = m_pluginManager.getInstallPaths();
 
-		if (_row.format == PluginFormat::Count)
-			paths.setBackupFolder(_path);
-		else
-			paths.set(_row.format, _path);
+		switch (_row.kind)
+		{
+		case Kind::Backups:   paths.setBackupFolder(_path); break;
+		case Kind::Downloads: paths.setDownloadFolder(_path); break;
+		default:              paths.set(_row.format, _path); break;
+		}
 	}
 
 	void PreferencesPage::updateNote(const Row& _row) const
@@ -288,8 +313,9 @@ namespace pluginManager
 		const auto path = pathOf(_row);
 
 		// Every format has somewhere to go now, so an empty path is one somebody emptied on purpose.
+		// Not so for the downloads, which are kept nowhere until somebody says where.
 		const char* note = path.empty()
-			? "not installed until a location is set"
+			? (_row.kind == Kind::Downloads ? "off" : "not installed until a location is set")
 			: (juce::File(juce::String(path)).isDirectory()
 				? (isCustom(_row) ? "" : "default")
 				: "will be created");
@@ -303,9 +329,10 @@ namespace pluginManager
 
 		const auto current = juce::File(juce::String(pathOf(row)));
 
-		m_chooser = std::make_unique<juce::FileChooser>(row.format == PluginFormat::Count
+		m_chooser = std::make_unique<juce::FileChooser>(row.kind == Kind::Backups
 			? juce::String("Backup folder")
-			: "Install location for " + juce::String(PlatformUtils::formatToString(row.format)), current);
+			: (row.kind == Kind::Downloads ? juce::String("Folder to keep the downloads in")
+				: "Install location for " + juce::String(PlatformUtils::formatToString(row.format))), current);
 
 		m_chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
 			[this, _index, alive = m_alive](const juce::FileChooser& _chooser)

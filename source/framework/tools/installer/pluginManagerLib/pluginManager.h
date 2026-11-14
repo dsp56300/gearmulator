@@ -17,6 +17,8 @@
 
 namespace pluginManager
 {
+	class OfflineFolder;
+
 	// What both programs drive: the catalog of everything installable here, and the logins that decide
 	// how much of it is visible.
 	//
@@ -43,6 +45,49 @@ namespace pluginManager
 		void refreshAsync(ResultCallback _callback);
 
 		const Catalog& getCatalog() const { return m_catalog; }
+
+		// Installs from a folder instead of from the server - see OfflineFolder. The next refresh reads
+		// the catalog out of that folder and nothing else, so that is all the list shows, and every
+		// download is a copy from the disk. Empty goes back to the server (BUG-10543).
+		void setLocalFolder(std::string _dir) { m_localFolder = std::move(_dir); }
+		const std::string& getLocalFolder() const { return m_localFolder; }
+
+		// What keeping a build that was just downloaded takes - see InstallPaths::getDownloadFolder -
+		// for PluginInstaller::setOnDownloaded. Gathered here, on the message thread, and run on the
+		// thread that installs: the archive is copied into the folder and written down, and the picture
+		// and the files its product brings are fetched into it once. Empty while nothing is kept.
+		std::function<void(const std::string& _archive)> keepDownload(const Asset& _asset) const;
+
+		// Preparing an offline install (BUG-10543): the newest build of every product and format asked
+		// for, for this system or another one, written into a folder with the picture and the files their
+		// products bring, and the Plugin Manager for that system beside them to install with.
+		struct OfflineExport
+		{
+			std::string folder;
+			std::string os;
+			std::string arch;
+
+			// Each one asked for by name: an effect build or a test console is a product of its own.
+			std::vector<std::string> products;
+			std::vector<std::string> formats;
+			bool withPluginManager = true;
+		};
+
+		// What that writes, worked out before anything is fetched: the newest build of each product and
+		// format there is for that system.
+		std::vector<Asset> offlineBuilds(const OfflineExport& _request) const;
+
+		// _what says what is being fetched at the moment.
+		using ExportProgress = std::function<void(float _progress, const std::string& _what)>;
+
+		// Blocking. A build that is in the folder already, from the same listing, is not fetched again, so
+		// running it twice brings a folder up to date. _message says what was written, or what went wrong.
+		bool exportOffline(const OfflineExport& _request, const ExportProgress& _onProgress,
+		                   const std::shared_ptr<bool>& _cancel, std::string& _message) const;
+
+		// On a worker thread, answering on the message thread - progress as well.
+		void exportOfflineAsync(const OfflineExport& _request, ExportProgress _onProgress,
+		                        std::shared_ptr<bool> _cancel, ResultCallback _onDone) const;
 
 		// A product's changelog: from the newest place this user can read one - the product's internal
 		// folder, then its donator folder - and else, for a product that was published, the changelog
@@ -252,6 +297,34 @@ namespace pluginManager
 
 		static bool fetchAll(Catalog& _catalog, const CredentialStore& _credentials, std::string& _error);
 
+		// The catalog of an offline folder, and nothing else.
+		static bool fetchLocal(Catalog& _catalog, const std::string& _dir, std::string& _error);
+
+		// One product as an offline folder takes it: what it is, what its builds bring, and the logins
+		// the picture and those files need. Gathered on the message thread, like the requests below.
+		struct OfflineProduct
+		{
+			Product product;
+			std::vector<FileSection> files;		// what any of the builds brings, each file once
+			Credentials internal;
+			Credentials donators;
+		};
+
+		// The product these builds belong to.
+		OfflineProduct offlineProductFor(const std::vector<Asset>& _assets) const;
+		static bool storeProduct(OfflineFolder& _folder, const OfflineProduct& _product, std::string& _error);
+
+		struct ExportPlan
+		{
+			std::string folder;
+			std::vector<std::pair<Asset, Credentials>> builds;
+			std::vector<OfflineProduct> products;
+		};
+
+		ExportPlan exportPlanFor(const OfflineExport& _request) const;
+		static bool runExport(const ExportPlan& _plan, const ExportProgress& _onProgress,
+		                      const std::shared_ptr<bool>& _cancel, std::string& _message);
+
 		// Everything fetchChangelog needs, gathered on the message thread so that the worker reads
 		// nothing that belongs to it.
 		struct ChangelogRequest
@@ -297,6 +370,7 @@ namespace pluginManager
 		                        std::string& _error);
 
 		Catalog m_catalog;
+		std::string m_localFolder;
 		CredentialStore m_credentials;
 		InstallPaths m_installPaths;
 		std::optional<Asset> m_selfUpdate;

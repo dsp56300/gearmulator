@@ -70,6 +70,12 @@ namespace pluginManager
 
 		void cancel() const { *m_cancel = true; }
 
+		// Called on the thread that installs, with the downloaded archive, before anything is unpacked -
+		// the one moment there is the whole archive on disk as the server sent it. What keeping the
+		// downloads hangs on (BUG-10543). For the installs started after it is set.
+		using DownloadedCallback = std::function<void(const std::string& _archive)>;
+		void setOnDownloaded(DownloadedCallback _callback) { m_onDownloaded = std::move(_callback); }
+
 		bool isInstalling() const { return *m_installing; }
 
 		// What the last install put into the folder, for whoever writes the install down.
@@ -84,7 +90,9 @@ namespace pluginManager
 		                const std::string& _archiveFile,
 		                const ProgressCallback& _onProgress, const std::shared_ptr<bool>& _cancel,
 		                const State& _installing, const Files& _files, std::string& _message,
-		                const Pending& _pending);
+		                const Pending& _pending, const DownloadedCallback& _onDownloaded);
+
+		DownloadedCallback m_onDownloaded;
 
 		// Shared rather than held, because an install outlives this object: the worker writes here
 		// and whoever is still around reads it.

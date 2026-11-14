@@ -149,6 +149,24 @@ namespace pluginManager
 		return _error == httpErrorMessage(404);
 	}
 
+	std::string HttpClient::fileNameOf(const std::string& _url)
+	{
+		auto path = juce::String(_url).upToFirstOccurrenceOf("?", false, false).upToFirstOccurrenceOf("#", false, false);
+		const auto name = juce::URL::removeEscapeChars(path.fromLastOccurrenceOf("/", false, false));
+
+		if (name.isEmpty() || name == "." || name == ".." || name.containsAnyOf("/\\:"))
+			return {};
+
+		return name.toStdString();
+	}
+
+	std::string HttpClient::fileUrl(const std::string& _path)
+	{
+		const auto path = juce::String(_path).replaceCharacter('\\', '/');
+
+		return ("file://" + (path.startsWithChar('/') ? path : "/" + path)).toStdString();
+	}
+
 	// Told apart by the first two bytes rather than by the Content-Encoding header. A header can
 	// be wrong in both directions - something in between may decompress on the way through without
 	// taking the header off, and a server may compress without saying so - while the bytes

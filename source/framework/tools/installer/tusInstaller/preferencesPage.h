@@ -48,15 +48,24 @@ namespace pluginManager
 		void save() const { m_pluginManager.getInstallPaths().save(); }
 
 	private:
+		// What a row sets: where a format goes, or one of the two folders that are rows like the others
+		// in every other way.
+		enum class Kind
+		{
+			Format,
+			Backups,
+			Downloads		// where the downloads are kept, empty for none (BUG-10543)
+		};
+
 		struct Row
 		{
+			Kind kind = Kind::Format;
 			PluginFormat format = PluginFormat::Count;
 			Rml::ElementFormControlInput* path = nullptr;
 			Rml::Element* note = nullptr;
 		};
 
-		// PluginFormat::Count is the backup folder, which is a row like the others in every other way.
-		void addRow(PluginFormat _format, Rml::Element& _parent);
+		void addRow(Kind _kind, PluginFormat _format, Rml::Element& _parent);
 		std::string pathOf(const Row& _row) const;
 		bool isCustom(const Row& _row) const;
 		void storePath(const Row& _row, const std::string& _path) const;

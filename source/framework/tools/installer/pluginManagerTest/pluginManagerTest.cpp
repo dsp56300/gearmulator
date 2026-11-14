@@ -18,6 +18,7 @@
 #include "pluginManagerLib/pluginInstaller.h"
 #include "pluginManagerLib/pluginManager.h"
 #include "pluginManagerLib/loginFile.h"
+#include "pluginManagerLib/offlineFolder.h"
 #include "pluginManagerLib/selfUpdate.h"
 #include "pluginManagerLib/zipExtractor.h"
 
@@ -2699,6 +2700,201 @@ namespace
 		root.deleteRecursively();
 	}
 
+	// An offline install end to end (BUG-10543): a folder prepared for another system holds that system's
+	// builds and nothing else, with the picture and the files the product brings; a second run fetches
+	// nothing that is there already; a program pointed at the folder installs from it without the
+	// server, additional files included; and a download kept by an install is such a folder as well.
+	void testAnOfflineFolder()
+	{
+		const Fixture fixture;
+
+		const auto root = fixture.dir;
+		const auto data = root.getChildFile("data");
+		setDataFolder(data.getFullPathName().toStdString());
+
+		// Two real archives, for two systems, and what the product brings, all on "the server".
+		const auto archive = [&](const juce::String& _bundle, const juce::String& _name)
+		{
+			const auto content = root.getChildFile("content-" + _name);
+			TEST_ASSERT(content.getChildFile(_bundle + "/Contents").createDirectory().wasOk());
+			TEST_ASSERT(content.getChildFile(_bundle + "/Contents/binary").replaceWithText("v1"));
+			makeZip(content, root.getChildFile("server/" + _name));
+			content.deleteRecursively();
+		};
+
+		TEST_ASSERT(root.getChildFile("server").createDirectory().wasOk());
+		archive("Synth-1000.vst3", "TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip");
+		archive("Synth-1000.component", "TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip");
+
+		// Into JSON, where a backslash of a Windows path would be an escape.
+		const auto jsonUrl = [&fixture](const std::string& _path)
+		{
+			return juce::String(fixture.url(_path)).replaceCharacter('\\', '/').toStdString();
+		};
+
+		fixture.write("server/Synth-1000_thumbnail.png", "picture");
+		fixture.write("server/Factory.mid", "factory bank");
+
+		fixture.write("cache/2.2.16.json", R"({"published_at":"2026-09-20T20:08:24Z","assets":[
+			{"name":"TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip","browser_download_url":")"
+			+ jsonUrl("server/TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip") + R"("},
+			{"name":"TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip","browser_download_url":")"
+			+ jsonUrl("server/TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip") + R"("}]})");
+
+		fixture.write("products.json", R"({"products":[
+			{"product":"Synth-1000","slug":"synth-1000","name":"Synth 1000","description":"A synth",
+			 "thumbnail":")" + jsonUrl("server/Synth-1000_thumbnail.png") + R"(",
+			 "files":[{"folder":"presets","urls":[")" + jsonUrl("server/Factory.mid") + R"("]}]}]})");
+
+		auto pm = makeManager(false);
+
+		std::string error;
+		TEST_ASSERT(pm.refresh(error));
+
+		const auto offline = root.getChildFile("offline");
+
+		PluginManager::OfflineExport request;
+		request.folder = offline.getFullPathName().toStdString();
+		request.os = "macos";
+		request.arch = "universal";
+		request.products = {"Synth-1000"};
+		request.formats = {"VST3", "AU"};
+		request.withPluginManager = false;
+
+		// For a Mac, from wherever this runs: the Mac's build and not this system's.
+		TEST_ASSERT(pm.offlineBuilds(request).size() == 1);
+
+		std::string message;
+		float lastProgress = 0.0f;
+
+		TEST_ASSERT(pm.exportOffline(request, [&](const float _progress, const std::string&) { lastProgress = _progress; },
+			std::make_shared<bool>(false), message));
+
+		TEST_ASSERT(lastProgress == 1.0f);
+		TEST_ASSERT(offline.getChildFile("TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip").existsAsFile());
+		TEST_ASSERT(!offline.getChildFile("TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip").exists());
+		TEST_ASSERT(offline.getChildFile(OfflineFolder::g_manifest).existsAsFile());
+		TEST_ASSERT(offline.getChildFile("thumbnails/Synth-1000_thumbnail.png").loadFileAsString() == "picture");
+		TEST_ASSERT(offline.getChildFile("files/Synth-1000/presets/Factory.mid").loadFileAsString() == "factory bank");
+
+		// Nothing is fetched twice, and the same folder takes this system's builds as well.
+		TEST_ASSERT(pm.exportOffline(request, {}, {}, message));
+		TEST_ASSERT(message.find("0 builds") == 0 && message.find("1 were there already") != std::string::npos);
+
+		request.os = "windows";
+		request.arch = "x86_64";
+
+		TEST_ASSERT(pm.exportOffline(request, {}, {}, message));
+		TEST_ASSERT(offline.getChildFile("TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip").existsAsFile());
+
+		// What the folder says it holds, read back: where each build came from and when, and the
+		// product with its picture and its files as files in the folder.
+		{
+			std::vector<Asset> assets;
+			std::vector<Product> products;
+
+			TEST_ASSERT(OfflineFolder::read(offline.getFullPathName().toStdString(), assets, products, error));
+			TEST_ASSERT(assets.size() == 2);
+
+			for (const auto& asset : assets)
+			{
+				TEST_ASSERT(asset.channel == Channel::Public);
+				TEST_ASSERT(asset.listed == "2026-09-20 20:08");
+				TEST_ASSERT(asset.url.rfind("file:///", 0) == 0);
+			}
+
+			TEST_ASSERT(products.size() == 1);
+			TEST_ASSERT(products[0].name == "Synth 1000");
+			TEST_ASSERT(products[0].thumbnail.rfind("file:///", 0) == 0);
+			TEST_ASSERT(products[0].files.size() == 1 && products[0].files[0].files.size() == 1);
+			TEST_ASSERT(products[0].files[0].files[0].url.find("files/Synth-1000/presets/Factory.mid") != std::string::npos);
+		}
+
+		// The server gone, the folder is the catalog: the build installs from it, and so does what the
+		// product brings.
+		fixture.write("cache/2.2.16.json", R"({"assets":[]})");
+		root.getChildFile("server").deleteRecursively();
+
+		{
+			auto local = makeManager(false);
+			local.setLocalFolder(offline.getFullPathName().toStdString());
+
+			TEST_ASSERT(local.refresh(error));
+
+			const auto* asset = local.getCatalog().find("Synth-1000", "VST3", "2.2.16", "windows", "x86_64");
+			TEST_ASSERT(asset != nullptr);
+			TEST_ASSERT(local.getCatalog().findProduct("Synth-1000") != nullptr);
+
+			const auto target = root.getChildFile("plugins");
+			PluginInstaller installer;
+
+			TEST_ASSERT(installer.install(*asset, {}, target.getFullPathName().toStdString(), {}, message));
+			TEST_ASSERT(target.getChildFile("Synth-1000.vst3/Contents/binary").loadFileAsString() == "v1");
+
+			TEST_ASSERT(local.installAdditionalFiles(*asset, message));
+			TEST_ASSERT(data.getChildFile("The Usual Suspects/Synth-1000/presets/Factory.mid").loadFileAsString() == "factory bank");
+		}
+
+		// A folder of archives somebody put together by hand is read as well: public builds, a product
+		// named after them, and their variants with them rather than on rows of their own.
+		{
+			const auto plain = root.getChildFile("plain");
+			TEST_ASSERT(plain.createDirectory().wasOk());
+
+			const auto zip = offline.getChildFile("TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip");
+			TEST_ASSERT(zip.copyFileTo(plain.getChildFile(zip.getFileName())));
+			TEST_ASSERT(zip.copyFileTo(plain.getChildFile("TheUsualSuspects-Synth-1000FX-VST3-2.2.16-win64.zip")));
+			TEST_ASSERT(plain.getChildFile("readme.txt").replaceWithText("not a build"));
+
+			std::vector<Asset> assets;
+			std::vector<Product> products;
+
+			TEST_ASSERT(OfflineFolder::read(plain.getFullPathName().toStdString(), assets, products, error));
+			TEST_ASSERT(assets.size() == 2);
+			TEST_ASSERT(products.size() == 1 && products[0].product == "Synth-1000");
+
+			// And a folder with no build in it says so.
+			const auto empty = root.getChildFile("empty");
+			TEST_ASSERT(empty.createDirectory().wasOk());
+			TEST_ASSERT(!OfflineFolder::read(empty.getFullPathName().toStdString(), assets, products, error));
+		}
+
+		// A download kept by an install makes the same kind of folder, product and all - fetched from
+		// wherever the install fetched from, which is the offline folder here.
+		{
+			auto local = makeManager(false);
+			local.setLocalFolder(offline.getFullPathName().toStdString());
+			TEST_ASSERT(local.refresh(error));
+
+			const auto kept = root.getChildFile("kept");
+			local.getInstallPaths().setDownloadFolder(kept.getFullPathName().toStdString());
+
+			const auto* asset = local.getCatalog().find("Synth-1000", "VST3", "2.2.16", "windows", "x86_64");
+			TEST_ASSERT(asset != nullptr);
+
+			PluginInstaller installer;
+			installer.setOnDownloaded(local.keepDownload(*asset));
+
+			TEST_ASSERT(installer.install(*asset, {}, root.getChildFile("plugins2").getFullPathName().toStdString(), {}, message));
+
+			TEST_ASSERT(kept.getChildFile("TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip").existsAsFile());
+			TEST_ASSERT(kept.getChildFile("files/Synth-1000/presets/Factory.mid").loadFileAsString() == "factory bank");
+
+			std::vector<Asset> assets;
+			std::vector<Product> products;
+
+			TEST_ASSERT(OfflineFolder::read(kept.getFullPathName().toStdString(), assets, products, error));
+			TEST_ASSERT(assets.size() == 1 && assets[0].listed == "2026-09-20 20:08");
+			TEST_ASSERT(products.size() == 1 && products[0].name == "Synth 1000");
+
+			// Nothing is kept while no folder is set.
+			local.getInstallPaths().setDownloadFolder({});
+			TEST_ASSERT(!local.keepDownload(*asset));
+		}
+
+		setDataFolder({});
+	}
+
 	// What the header button offers, and what it must not offer: a build older than the one
 	// running is what somebody rolling back asks for by hand, and the same one is no update at
 	// all. Written against versions nothing will ever reach rather than against a number near the
@@ -4277,6 +4473,7 @@ int main()
 		testSeveralRemovalsAreOneRun();
 		testAProgramIsFoundWithoutKnowingItsName();
 		testAnUpdateKeepsWhatTheUserPutInTheBundle();
+		testAnOfflineFolder();
 		testTheTeamLoginFlagSurvivesBeingWrittenBack();
 		testBackupAndRestoreOfADataFolder();
 		testBackupsGoWhereTheyArePointed();

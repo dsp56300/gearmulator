@@ -8,8 +8,10 @@
 #include "changelogPage.h"
 #include "detailPage.h"
 #include "installerDataProvider.h"
+#include "offlinePage.h"
 #include "pluginEntryController.h"
 #include "preferencesPage.h"
+#include "tickChip.h"
 
 #include "pluginManagerLib/config.h"
 #include "pluginManagerLib/httpClient.h"
@@ -238,6 +240,14 @@ namespace pluginManager
 			});
 		}
 
+		if (auto* offline = _doc.GetElementById("offline-button"))
+		{
+			juceRmlUi::EventListener::Add(offline, Rml::EventId::Click, [this](Rml::Event&)
+			{
+				post([this] { showPage(m_page == Page::Offline ? Page::List : Page::Offline); });
+			});
+		}
+
 		m_installSelected = _doc.GetElementById("install-selected");
 		m_upgradeAll = _doc.GetElementById("upgrade-all");
 
@@ -338,7 +348,7 @@ namespace pluginManager
 			// The box says whether it is ticked, as on the chips in the rows (BUG-10562). The format is
 			// kept on the chip as well, since its text is no longer only the name.
 			chip->SetAttribute("format", format);
-			chip->SetInnerRML(R"(<span class="tick-box"><svg class="tick" src="icon_check.svg"/></span>)" + format);
+			chip->SetInnerRML(tickChipRml(format));
 
 			juceRmlUi::EventListener::Add(chip, Rml::EventId::Click, [this, chip, format](Rml::Event&)
 			{
@@ -689,6 +699,31 @@ namespace pluginManager
 		}
 	}
 
+	void InstallerDocument::createOfflinePage(Rml::ElementDocument& _doc, PluginManager& _pluginManager)
+	{
+		if (m_offline)
+			return;
+
+		m_offline = std::make_unique<OfflinePage>(_doc, _pluginManager, *m_rmlComponent);
+		m_offline->setOnSource([this](const std::string& _folder) { setSource(_folder); });
+
+		if (auto* back = m_offline->getBackButton())
+			juceRmlUi::EventListener::Add(back, Rml::EventId::Click, [this](Rml::Event&) { post([this] { showPage(Page::List); }); });
+	}
+
+	void InstallerDocument::setSource(const std::string& _folder)
+	{
+		if (!m_pluginManager)
+			return;
+
+		m_pluginManager->setLocalFolder(_folder);
+
+		showPage(Page::List);
+
+		if (m_onRefresh)
+			m_onRefresh();
+	}
+
 	void InstallerDocument::closePreferences()
 	{
 		if (!m_preferences)
@@ -730,6 +765,37 @@ namespace pluginManager
 					m_preferences->refresh();
 
 				m_preferences->getPage()->SetClass("open", _page == Page::Preferences);
+			}
+
+			if (m_offline && m_offline->getPage())
+			{
+				// What the list has ticked is what the page starts with, the first time it is opened.
+				if (_page == Page::Offline && m_pluginManager)
+				{
+					OfflinePage::Ticked ticked;
+
+					for (const auto& entry : m_entries)
+					{
+						const auto formats = entry->getSelectedFormats();
+
+						if (formats.empty())
+							continue;
+
+						ticked.formats.insert(formats.begin(), formats.end());
+
+						if (entry->isInstrSelected())
+							ticked.products.insert(entry->getProductId());
+
+						const auto fx = m_pluginManager->getCatalog().fxProductOf(entry->getProductId());
+
+						if (entry->isFxSelected() && !fx.empty())
+							ticked.products.insert(fx);
+					}
+
+					m_offline->refresh(ticked);
+				}
+
+				m_offline->getPage()->SetClass("open", _page == Page::Offline);
 			}
 		});
 	}
@@ -942,6 +1008,7 @@ namespace pluginManager
 			updateBulkButtons();
 
 			createPreferencesPage(_doc, _pluginManager);
+			createOfflinePage(_doc, _pluginManager);
 		});
 
 		// A refresh can take the product being shown away with it - a team logout hides everything
@@ -1198,7 +1265,11 @@ namespace pluginManager
 			return m_problem.empty() ? "No builds available for this platform" : m_problem;
 		}
 
-		const auto count = std::to_string(_shown) + (_shown == 1 ? " plugin" : " plugins") + hidden;
+		// Said first, so that a list that is short because the folder is says why (BUG-10543).
+		const auto from = m_pluginManager && !m_pluginManager->getLocalFolder().empty()
+			? "From " + m_pluginManager->getLocalFolder() + ": " : std::string();
+
+		const auto count = from + std::to_string(_shown) + (_shown == 1 ? " plugin" : " plugins") + hidden;
 
 		return m_problem.empty() ? count : count + ". " + m_problem;
 	}

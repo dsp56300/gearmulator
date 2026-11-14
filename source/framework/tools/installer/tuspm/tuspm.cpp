@@ -15,6 +15,8 @@
 #include "pluginManagerLib/loginFile.h"
 #include "pluginManagerLib/pluginManager.h"
 
+#include "juce_core/juce_core.h"
+
 using namespace pluginManager;
 
 namespace
@@ -155,6 +157,52 @@ namespace
 			std::cerr << "warning: " << error << '\n';
 	}
 
+	// Everything installable by name, which is more than the products the window shows: an effect
+	// build ships under a name of its own, install takes that name, and a list that leaves it out is
+	// one a script cannot work from. A variant with no build for a platform - a test console has none
+	// for some - simply has nothing to offer there.
+	std::vector<std::string> installableProducts(const Catalog& _catalog)
+	{
+		std::vector<std::string> products;
+
+		for (const auto& product : _catalog.getProducts())
+		{
+			products.push_back(product.product);
+
+			for (auto& variant : _catalog.getVariants(product.product))
+				products.push_back(std::move(variant));
+		}
+
+		// A product whose name is the start of another one would otherwise be listed once for
+		// itself and again as the other's variant.
+		std::sort(products.begin(), products.end());
+		products.erase(std::unique(products.begin(), products.end()), products.end());
+
+		return products;
+	}
+
+	// --format and --product take several, separated by commas.
+	std::vector<std::string> splitList(const std::string& _list)
+	{
+		std::vector<std::string> items;
+
+		for (const auto& item : juce::StringArray::fromTokens(juce::String(_list), ",", {}))
+		{
+			const auto trimmed = item.trim();
+
+			if (trimmed.isNotEmpty())
+				items.push_back(trimmed.toStdString());
+		}
+
+		return items;
+	}
+
+	// A folder as the rest of the library wants it, which is not relative to wherever this was run.
+	std::string absolutePath(const std::string& _path)
+	{
+		return juce::File::getCurrentWorkingDirectory().getChildFile(juce::String(_path)).getFullPathName().toStdString();
+	}
+
 	int list(PluginManager& _pluginManager, const Args& _args)
 	{
 		refresh(_pluginManager);
@@ -165,24 +213,7 @@ namespace
 
 		const auto& wanted = _args.positionalAt(0);
 
-		// Everything installable by name, which is more than the products the window shows: an
-		// effect build ships under a name of its own, install takes that name, and a list that
-		// leaves it out is one a script cannot work from. A variant with no build for this
-		// platform - a test console has none - simply contributes no lines.
-		std::vector<std::string> products;
-
-		for (const auto& product : catalog.getProducts())
-		{
-			products.push_back(product.product);
-
-			for (auto& variant : catalog.getVariants(product.product))
-				products.push_back(std::move(variant));
-		}
-
-		// A product whose name is the start of another one would otherwise be listed once for
-		// itself and again as the other's variant.
-		std::sort(products.begin(), products.end());
-		products.erase(std::unique(products.begin(), products.end()), products.end());
+		const auto products = installableProducts(catalog);
 
 		// Tab separated, one build per line, so that a script can cut it up.
 		size_t lines = 0;
@@ -274,6 +305,9 @@ namespace
 
 			PluginInstaller installer;
 			std::string message;
+
+			// Into the folder the downloads are kept in, when there is one - see the downloads command.
+			installer.setOnDownloaded(_pluginManager.keepDownload(*asset));
 
 			if (!installer.install(*asset, _pluginManager.credentialsFor(*asset), targetDir, {}, message))
 			{
@@ -425,6 +459,117 @@ namespace
 			          << (path.empty() ? "<none>" : path) << '\t'
 			          << (installPaths.isCustom(f) ? "custom" : "default") << '\n';
 		}
+
+		return 0;
+	}
+
+	// Where every download is kept as well, as a folder to install from later - see the export command.
+	// No arguments says where that is, a folder sets it, "off" keeps nothing (BUG-10543).
+	int downloads(PluginManager& _pluginManager, const Args& _args)
+	{
+		auto& installPaths = _pluginManager.getInstallPaths();
+
+		const auto& folder = _args.positionalAt(0);
+
+		if (!folder.empty())
+		{
+			installPaths.setDownloadFolder(folder == "off" ? std::string() : absolutePath(folder));
+			installPaths.save();
+		}
+
+		const auto& current = installPaths.getDownloadFolder();
+
+		std::cout << (current.empty() ? "off" : current) << '\n';
+
+		return 0;
+	}
+
+	// An offline install, for this system or another one (BUG-10543): the newest build of each product
+	// and format, what the products bring, and the Plugin Manager for that system, all in one folder that
+	// --folder installs from where there is no network.
+	int exportOffline(PluginManager& _pluginManager, const Args& _args)
+	{
+		const auto& folder = _args.positionalAt(0);
+
+		if (folder.empty())
+		{
+			std::cerr << "export needs a folder\n";
+			return 1;
+		}
+
+		PluginManager::OfflineExport request;
+		request.folder = absolutePath(folder);
+		request.os = _args.get("os", PlatformUtils::getCurrentOS());
+
+		if (request.os != "windows" && request.os != "macos" && request.os != "linux")
+		{
+			std::cerr << "--os is windows, macos or linux\n";
+			return 1;
+		}
+
+		// A Mac build serves every Mac. Anywhere else, this machine's own unless it is another system,
+		// which is far more often an Intel machine than not.
+		const auto defaultArch = request.os == "macos" ? std::string("universal")
+			: (request.os == PlatformUtils::getCurrentOS() ? PlatformUtils::getCurrentArch() : std::string("x86_64"));
+
+		request.arch = _args.get("arch", defaultArch);
+		request.withPluginManager = _args.get("manager", "yes") != "no";
+
+		refresh(_pluginManager);
+
+		const auto& catalog = _pluginManager.getCatalog();
+
+		// Everything there is, unless named.
+		request.products = _args.has("product") ? splitList(_args.get("product")) : installableProducts(catalog);
+
+		if (_args.has("format"))
+		{
+			request.formats = splitList(_args.get("format"));
+		}
+		else
+		{
+			for (const auto& product : request.products)
+			{
+				for (const auto& format : catalog.getFormats(product, request.os, request.arch))
+				{
+					if (std::find(request.formats.begin(), request.formats.end(), format) == request.formats.end())
+						request.formats.push_back(format);
+				}
+			}
+		}
+
+		const auto builds = _pluginManager.offlineBuilds(request);
+
+		if (builds.empty())
+		{
+			std::cerr << "Nothing available for " << request.os << " " << request.arch << '\n';
+			return 1;
+		}
+
+		std::cout << "Writing " << builds.size() << " builds for " << request.os << " " << request.arch
+		          << " to " << request.folder << std::endl;
+
+		// One line per thing fetched rather than a line per percent.
+		std::string last;
+
+		const auto progress = [&last](float, const std::string& _what)
+		{
+			if (_what.empty() || _what == last)
+				return;
+
+			last = _what;
+			std::cout << "  " << _what << std::endl;
+		};
+
+		std::string message;
+
+		if (!_pluginManager.exportOffline(request, progress, std::make_shared<bool>(false), message))
+		{
+			std::cerr << message << '\n';
+			return 1;
+		}
+
+		std::cout << message << '\n';
 
 		return 0;
 	}
@@ -620,10 +765,20 @@ namespace
 			"  tuspm logout <internal|donators> [<product>]\n"
 			"  tuspm paths [<format> <location>|<format> default]\n"
 			"  tuspm changelog <product> [--version <version>] [--format text|markdown] [--out <file>]\n"
+			"  tuspm export <folder> [--os windows|macos|linux] [--arch <arch>] [--product <a,b>]\n"
+			"               [--format <a,b>] [--manager no]\n"
+			"  tuspm downloads [<folder>|off]\n"
 			"\n"
 			"--settings <folder> works with any of them, and puts the logins, the locations, the\n"
 			"record of what is installed and the log somewhere other than where this machine keeps\n"
 			"its own.\n"
+			"\n"
+			"export writes an offline install: the newest build of every product and format named -\n"
+			"all there are when none is - for that system (this one by default), what the products\n"
+			"bring, and the Plugin Manager for that system unless --manager no. Run again, it fetches\n"
+			"only what is new. list and install take --folder <folder> to install from such a folder\n"
+			"instead of from the server. downloads keeps every archive install downloads in a folder\n"
+			"of that kind as well.\n"
 			"\n"
 			"list and install take --user/--password for this run only, with --channel (internal by\n"
 			"default) and --product saying which channel the login is for. A login stored by login or\n"
@@ -679,6 +834,10 @@ int main(const int _argc, char** _argv)
 		return 1;
 	}
 
+	// An offline folder instead of the server, for every command that reads the catalog.
+	if (args.has("folder"))
+		pluginManager.setLocalFolder(absolutePath(args.get("folder")));
+
 	if (args.command == "list")
 		return list(pluginManager, args);
 
@@ -705,6 +864,12 @@ int main(const int _argc, char** _argv)
 
 	if (args.command == "changelog")
 		return changelog(pluginManager, args);
+
+	if (args.command == "export")
+		return exportOffline(pluginManager, args);
+
+	if (args.command == "downloads")
+		return downloads(pluginManager, args);
 
 	std::cerr << "Unknown command: " << args.command << "\n\n";
 	usage();

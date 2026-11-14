@@ -12,6 +12,7 @@
 		<span class="header-spacer"></span>
 		<button id="refresh-button" class="header-button"><svg class="btn-icon" src="icon_refresh.svg"/>Refresh</button>
 		<button id="preferences-button" class="header-button"><svg class="btn-icon" src="icon_settings.svg"/>Preferences</button>
+		<button id="offline-button" class="header-button"><svg class="btn-icon" src="icon_folder.svg"/>Offline</button>
 		<button id="donator-login" class="header-button"><svg class="btn-icon" src="icon_login.svg"/>Donator login</button>
 	</div>
 
@@ -251,6 +252,14 @@
 			<div id="backup-folder-list"></div>
 		</div>
 
+		<!-- Where every build an install downloads is kept as well, as a folder to install from
+		     without a network - see the Offline page (BUG-10543). Empty keeps nothing. -->
+		<div id="download-folder-section">
+			<div id="download-folder-title">Keep downloads</div>
+			<div id="download-folder-intro">Every build that is installed is also kept in this folder, with the picture and the files its product brings. Offline › Install from a folder installs from it without a network, on this computer or on another one. Empty keeps nothing.</div>
+			<div id="download-folder-list"></div>
+		</div>
+
 		<!-- The one login that is not per plugin: it opens every internal build at once, so it is a
 		     button rather than a list. A build that was not told where the internal channel is has
 		     no use for it, and then this is not here at all. -->
@@ -270,6 +279,64 @@
 				</div>
 			</div>
 			<button id="donator-login-add" class="dialog-button primary">Add a donator login</button>
+		</div>
+	</div>
+
+	<!-- Installing without a network (BUG-10543): from a folder, and preparing such a folder - for this
+	     computer or for another one, which may run another system. Filled in C++ from the catalog. -->
+	<div id="offline-page" class="page">
+		<div class="page-header">
+			<button id="offline-back" class="header-button">Back</button>
+			<span class="page-title">Offline</span>
+		</div>
+
+		<div class="offline-section">
+			<div class="offline-title">Install from a folder</div>
+			<div class="offline-intro">A folder prepared below, the folder the downloads are kept in, or any folder of our archives. The list then shows what is in that folder and installs from it, without a network. A Plugin Manager started from inside such a folder opens it by itself.</div>
+			<div class="offline-row">
+				<span class="offline-label">Installing from</span>
+				<span id="offline-source" class="offline-value">the build server</span>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label"></span>
+				<button id="offline-open" class="dialog-button primary"><svg class="btn-icon" src="icon_folder.svg"/>Choose a folder</button>
+				<button id="offline-online" class="dialog-button">Back to the build server</button>
+			</div>
+		</div>
+
+		<div class="offline-section">
+			<div class="offline-title">Prepare a folder</div>
+			<div class="offline-intro">The newest build of every product and format ticked here, for the system it is for, with the pictures and the files the products bring and the Plugin Manager for that system. Take the folder to the other computer, start the Plugin Manager in it and install. Run it again on the same folder to add only what is new.</div>
+			<div class="offline-row">
+				<span class="offline-label">Folder</span>
+				<input id="offline-folder" class="preference-path" type="text"/>
+				<button id="offline-browse" class="dialog-button"><svg class="btn-icon" src="icon_folder.svg"/>Browse</button>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label">System</span>
+				<span id="offline-systems" class="offline-chips"></span>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label">Formats</span>
+				<span id="offline-formats" class="offline-chips"></span>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label">Products</span>
+				<span id="offline-products" class="offline-chips"></span>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label">Also</span>
+				<span class="offline-chips"><span id="offline-manager" class="format-label checked"><span class="tick-box"><svg class="tick" src="icon_check.svg"/></span>The Plugin Manager</span></span>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label"></span>
+				<button id="offline-write" class="dialog-button primary">Write the folder</button>
+				<span id="offline-status" class="offline-value"></span>
+			</div>
+			<div class="offline-row">
+				<span class="offline-label"></span>
+				<progress id="offline-progress" class="progress-bar offline-progress" direction="right" value="0" max="100"/>
+			</div>
 		</div>
 	</div>
 

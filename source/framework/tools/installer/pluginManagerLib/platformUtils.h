@@ -101,5 +101,10 @@ namespace pluginManager
 		// left empty by some of our builds (a CLAP has no version resource), which is why only a
 		// name that is there and is not ours counts. An ELF names nobody, so on Linux this is empty.
 		static std::string otherMaker(const std::string& _path);
+
+		// _path beneath _root, and nothing outside it: empty for one that is absolute, names a drive or
+		// climbs out with "..". The lists that name such paths come from a server or from a folder
+		// somebody handed over, and a "../../" in one must not be able to write anywhere else on the disk.
+		static std::string inside(const std::string& _root, const std::string& _path);
 	};
 }

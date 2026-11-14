@@ -135,6 +135,7 @@ namespace pluginManager
 		m_otherSettings.clear();
 		m_teamLogin = false;
 		m_backupFolder.clear();
+		m_downloadFolder.clear();
 		m_hidden.clear();
 		m_collapsed.clear();
 		m_selfListed.clear();
@@ -175,6 +176,12 @@ namespace pluginManager
 			if (e->hasTagName("backupFolder"))
 			{
 				setBackupFolder(e->getStringAttribute("path").toStdString());
+				continue;
+			}
+
+			if (e->hasTagName("downloadFolder"))
+			{
+				setDownloadFolder(e->getStringAttribute("path").toStdString());
 				continue;
 			}
 
@@ -247,6 +254,12 @@ namespace pluginManager
 		{
 			auto* e = xml.createNewChildElement("backupFolder");
 			e->setAttribute("path", juce::String(m_backupFolder));
+		}
+
+		if (!m_downloadFolder.empty())
+		{
+			auto* e = xml.createNewChildElement("downloadFolder");
+			e->setAttribute("path", juce::String(m_downloadFolder));
 		}
 
 		if (!m_selfListed.empty() || m_selfModified)

@@ -229,6 +229,11 @@ namespace pluginManager
 		}
 	}
 
+	std::vector<Product> CatalogSource::parseProducts(const std::string& _json)
+	{
+		return pluginManager::parseProducts(_json);
+	}
+
 	std::string CatalogSource::channelUrl(const std::string& _slug, const Channel _channel)
 	{
 		const char* dir = _channel == Channel::Internal ? "internal/" : "donators/";

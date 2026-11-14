@@ -1308,7 +1308,7 @@ scrollbarhorizontal sliderbar {
 
 /* ---------------------------------------------------------------- preferences */
 
-#preferences-intro, #backup-folder-intro {
+#preferences-intro, #backup-folder-intro, #download-folder-intro {
 	display: block;
 	font-size: 12dp;
 	color: #999;
@@ -1359,13 +1359,20 @@ scrollbarhorizontal sliderbar {
 	vertical-align: middle;
 }
 
+/* "Off" in the downloads row is as wide as "Default", so the notes line up. */
+.preference-default {
+	box-sizing: border-box;
+	min-width: 72dp;
+	text-align: center;
+}
+
 /* Not padded like the sections further down, so its row lines up with the format rows above. */
-#backup-folder-section {
+#backup-folder-section, #download-folder-section {
 	display: block;
 	margin-top: 24dp;
 }
 
-#backup-folder-title {
+#backup-folder-title, #download-folder-title {
 	padding: 0 4dp;
 }
 
@@ -1375,6 +1382,100 @@ scrollbarhorizontal sliderbar {
 	font-size: 11dp;
 	color: #666;
 	vertical-align: middle;
+}
+
+/* ---------------------------------------------------------------- offline (BUG-10543) */
+
+.offline-section {
+	display: block;
+	margin-bottom: 18dp;
+}
+
+.offline-title {
+	display: block;
+	font-size: 13dp;
+	font-weight: bold;
+	color: #b5e853;
+	margin-bottom: 4dp;
+	padding: 0 4dp;
+}
+
+.offline-intro {
+	display: block;
+	font-size: 12dp;
+	color: #999;
+	padding: 4dp;
+}
+
+.offline-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6dp;
+	padding: 5dp 4dp;
+}
+
+/* The same width as the format column of the rows in Preferences, so the two pages line up. */
+.offline-label {
+	flex: 0 0 auto;
+	width: 90dp;
+	font-size: 12dp;
+	color: #b5e853;
+}
+
+.offline-value {
+	flex: 1 1 auto;
+	min-width: 0dp;
+	font-size: 12dp;
+	color: #d2d2d2;
+}
+
+/* A long status beside them wraps rather than squeezing them. */
+.offline-row button {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
+/* Chips that wrap onto as many lines as there are products, each one ticked or not on its own. */
+.offline-chips {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 4dp;
+	flex: 1 1 auto;
+	min-width: 0dp;
+}
+
+.offline-chips .format-label {
+	flex: 0 0 auto;
+}
+
+/* One system at a time: the ticked one is the one the folder is for. */
+#offline-systems .format-label.checked {
+	color: #b5e853;
+	border-color: #b5e853;
+}
+
+#offline-write.disabled, #offline-write.disabled:hover {
+	color: #555;
+	decorator: vertical-gradient( #26262600 #26262600 );
+	background-color: #262626;
+	border-color: #333333;
+}
+
+/* Only there while a folder is being written. */
+.offline-progress {
+	flex: 0 0 auto;
+	width: 430dp;
+	visibility: hidden;
+}
+
+.offline-progress.active {
+	visibility: visible;
+}
+
+#offline-online.hidden {
+	display: none;
 }
 
 /* Popup menu (the version picker). Styled here because this app opts out of the shared plugin
@@ -1566,7 +1667,7 @@ scrollbarhorizontal sliderbar {
 	padding: 4dp;
 }
 
-#donator-logins-title, #backup-folder-title {
+#donator-logins-title, #backup-folder-title, #download-folder-title {
 	display: block;
 	font-size: 13dp;
 	font-weight: bold;

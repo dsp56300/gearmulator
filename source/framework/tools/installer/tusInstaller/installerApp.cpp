@@ -6,6 +6,7 @@
 
 #include "pluginManagerLib/config.h"
 #include "pluginManagerLib/elevatedTask.h"
+#include "pluginManagerLib/offlineFolder.h"
 #include "pluginManagerLib/selfUpdate.h"
 
 #include "juceRmlUi/juceRmlComponent.h"
@@ -89,6 +90,26 @@ namespace pluginManager
 		SelfUpdate::cleanUp();
 
 		m_pluginManager = std::make_unique<PluginManager>();
+
+		// Installing from a folder rather than from the server (BUG-10543): the one named, else the one
+		// this program was started from - an offline install has it inside - or the one above, since
+		// unpacking the program's archive there may have put it into a folder of its own.
+		const auto app = juce::File::getSpecialLocation(juce::File::currentApplicationFile);
+		std::string folder;
+
+		for (const auto& dir : {app.getParentDirectory(), app.getParentDirectory().getParentDirectory()})
+		{
+			if (folder.empty() && OfflineFolder::hasManifest(dir.getFullPathName().toStdString()))
+				folder = dir.getFullPathName().toStdString();
+		}
+
+		for (size_t i = 0; i + 1 < args.size(); ++i)
+		{
+			if (args[i] == "--folder")
+				folder = juce::File::getCurrentWorkingDirectory().getChildFile(juce::String(args[i + 1])).getFullPathName().toStdString();
+		}
+
+		m_pluginManager->setLocalFolder(folder);
 
 		m_dataProvider = std::make_unique<InstallerDataProvider>();
 		m_document = std::make_unique<InstallerDocument>(*m_dataProvider);

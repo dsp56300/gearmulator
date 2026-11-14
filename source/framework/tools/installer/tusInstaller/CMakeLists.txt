@@ -14,8 +14,10 @@ set(SOURCES
 	installerDocument.cpp installerDocument.h
 	loginDialog.cpp loginDialog.h
 	mainWindow.cpp mainWindow.h
+	offlinePage.cpp offlinePage.h
 	pluginEntryController.cpp pluginEntryController.h
 	preferencesPage.cpp preferencesPage.h
+	tickChip.h
 
 	resources/installer.rml
 	resources/installer.rcss

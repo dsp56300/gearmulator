@@ -15,6 +15,7 @@ set(SOURCES
 	installPaths.cpp installPaths.h
 	installedPlugins.cpp installedPlugins.h
 	loginFile.cpp loginFile.h
+	offlineFolder.cpp offlineFolder.h
 	log.cpp log.h
 	platformUtils.cpp platformUtils.h
 	pluginInstaller.cpp pluginInstaller.h

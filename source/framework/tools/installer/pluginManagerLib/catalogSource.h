@@ -48,6 +48,10 @@ namespace pluginManager
 		// Public product display data, which carries no versions or download URLs.
 		static bool fetchPublicProducts(std::vector<Product>& _products, std::string& _error);
 
+		// The products in a product list - any of the two, a folder's products.json, or the products in
+		// an offline folder's offline.json. Nothing for something that is not one.
+		static std::vector<Product> parseProducts(const std::string& _json);
+
 		static std::string channelUrl(const std::string& _slug, Channel _channel);
 
 		// The folder name in whatever somebody typed for one.

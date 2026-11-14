@@ -115,7 +115,7 @@ namespace pluginManager
 	                          const std::string& _archiveFile,
 	                          const ProgressCallback& _onProgress, const std::shared_ptr<bool>& _cancel,
 	                          const State& _installing, const Files& _files, std::string& _message,
-	                          const Pending& _pending)
+	                          const Pending& _pending, const DownloadedCallback& _onDownloaded)
 	{
 		if (_installing->exchange(true))
 		{
@@ -173,6 +173,9 @@ namespace pluginManager
 			juce::File(tempZip).deleteFile();
 			return false;
 		}
+
+		if (_onDownloaded)
+			_onDownloaded(tempZip);
 
 		// What to look for in the archive: the Linux builds carry the plugin under a usr/local tree
 		// of their own, and what is installed is the plugin rather than the tree. The caller may
@@ -315,7 +318,7 @@ namespace pluginManager
 	                              const std::string& _archiveFile, const Pending& _pending)
 	{
 		return run(_asset, _credentials, _targetDir, _archiveFile, _onProgress, m_cancel, m_installing,
-			m_lastFiles, _message, _pending);
+			m_lastFiles, _message, _pending, m_onDownloaded);
 	}
 
 	void PluginInstaller::installAsync(const Asset& _asset, const Credentials& _credentials, const std::string& _targetDir,
@@ -327,7 +330,7 @@ namespace pluginManager
 
 		juce::Thread::launch([_asset, _credentials, _targetDir, onProgress, onComplete, cancel = m_cancel,
 		                      installing = m_installing, files = m_lastFiles, archiveFile = _archiveFile,
-		                      pending = _pending]
+		                      pending = _pending, onDownloaded = m_onDownloaded]
 		{
 			// Progress arrives on this thread, so it is handed to the message thread as well.
 			ProgressCallback progress;
@@ -343,7 +346,7 @@ namespace pluginManager
 			std::string message;
 
 			const auto success = run(_asset, _credentials, _targetDir, archiveFile, progress, cancel,
-				installing, files, message, pending);
+				installing, files, message, pending, onDownloaded);
 
 			juce::MessageManager::callAsync([onComplete, success, message]
 			{

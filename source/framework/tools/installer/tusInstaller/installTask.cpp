@@ -27,6 +27,9 @@ namespace pluginManager
 		// made, and writing it down now would record a version that is not on disk yet.
 		const auto waiting = _pending ? _pending->size() : 0;
 
+		// Into the folder the downloads are kept in, when there is one (BUG-10543).
+		m_installer.setOnDownloaded(m_pluginManager.keepDownload(asset));
+
 		m_installer.installAsync(asset, m_pluginManager.credentialsFor(asset), m_pluginManager.installPathFor(asset),
 			[this, alive = m_alive, onProgress = std::move(_onProgress)](const float _progress)
 			{

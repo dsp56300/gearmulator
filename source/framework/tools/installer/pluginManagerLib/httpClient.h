@@ -27,6 +27,13 @@ namespace pluginManager
 		static bool isAuthError(const std::string& _error);
 		static bool isNotFound(const std::string& _error);
 
+		// The last part of a URL's path, without what follows it: a query string is not part of a name.
+		// Empty when that part could not be a file name.
+		static std::string fileNameOf(const std::string& _url);
+
+		// The URL this downloads a file on disk with: file:///C:/x on Windows, file:///home/x elsewhere.
+		static std::string fileUrl(const std::string& _path);
+
 		static bool fetchString(const std::string& _url, std::string& _result, std::string& _error,
 		                        const Credentials& _credentials = {});
 

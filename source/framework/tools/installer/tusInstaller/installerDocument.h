@@ -31,6 +31,7 @@ namespace pluginManager
 	class ChangelogPage;
 	class DetailPage;
 	class InstallerDataProvider;
+	class OfflinePage;
 	class PreferencesPage;
 
 	// Owns the RmlUi document and turns the catalog into one row per product.
@@ -48,7 +49,8 @@ namespace pluginManager
 			List,
 			Detail,
 			Changelog,
-			Preferences
+			Preferences,
+			Offline
 		};
 
 		explicit InstallerDocument(InstallerDataProvider& _dataProvider);
@@ -136,6 +138,12 @@ namespace pluginManager
 		void finishBulkElevated();
 
 		void createPreferencesPage(Rml::ElementDocument& _doc, PluginManager& _pluginManager);
+
+		void createOfflinePage(Rml::ElementDocument& _doc, PluginManager& _pluginManager);
+
+		// Installing from another folder, or from the server again with an empty one: the catalog is read
+		// again from there.
+		void setSource(const std::string& _folder);
 
 		// The way out of Preferences, whether by its Back button or by pressing Preferences again.
 		void closePreferences();
@@ -233,6 +241,7 @@ namespace pluginManager
 		std::unique_ptr<DetailPage> m_detail;
 		std::unique_ptr<ChangelogPage> m_changelog;
 		std::unique_ptr<PreferencesPage> m_preferences;
+		std::unique_ptr<OfflinePage> m_offline;
 		std::unique_ptr<juceRmlUi::Tooltips> m_tooltips;
 		Rml::Element* m_pluginList = nullptr;
 		Rml::Element* m_formatToggles = nullptr;

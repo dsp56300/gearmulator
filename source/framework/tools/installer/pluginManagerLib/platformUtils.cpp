@@ -602,4 +602,21 @@ namespace pluginManager
 		return {};
 #endif
 	}
+
+	std::string PlatformUtils::inside(const std::string& _root, const std::string& _path)
+	{
+		const auto path = juce::String(_path).replaceCharacter('\\', '/');
+
+		if (path.isEmpty() || path.startsWithChar('/') || path.containsChar(':'))
+			return {};
+
+		juce::StringArray parts;
+		parts.addTokens(path, "/", {});
+		parts.removeEmptyStrings();
+
+		if (parts.isEmpty() || parts.contains("..") || parts.contains("."))
+			return {};
+
+		return juce::File(juce::String(_root)).getChildFile(parts.joinIntoString("/")).getFullPathName().toStdString();
+	}
 }

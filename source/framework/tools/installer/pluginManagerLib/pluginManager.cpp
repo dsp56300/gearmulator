@@ -5,6 +5,7 @@
 #include "elevatedTask.h"
 #include "httpClient.h"
 #include "log.h"
+#include "offlineFolder.h"
 #include "pluginInstaller.h"
 #include "selfUpdate.h"
 
@@ -135,7 +136,9 @@ namespace pluginManager
 	{
 		Catalog catalog;
 
-		const auto success = fetchAll(catalog, credentialsForFetch(), _error);
+		const auto success = m_localFolder.empty()
+			? fetchAll(catalog, credentialsForFetch(), _error)
+			: fetchLocal(catalog, m_localFolder, _error);
 
 		m_selfUpdate = evaluateSelfUpdate(catalog);
 
@@ -155,12 +158,14 @@ namespace pluginManager
 		// The worker gets its own copy of the logins and builds a catalog of its own, so a login made
 		// while it runs cannot be read half written, and nothing here is touched until the answer is
 		// back on the message thread.
-		juce::Thread::launch([this, alive, generation, callback, credentials = credentialsForFetch()]
+		juce::Thread::launch([this, alive, generation, callback, credentials = credentialsForFetch(), folder = m_localFolder]
 		{
 			auto catalog = std::make_shared<Catalog>();
 			std::string error;
 
-			const auto success = fetchAll(*catalog, credentials, error);
+			const auto success = folder.empty()
+				? fetchAll(*catalog, credentials, error)
+				: fetchLocal(*catalog, folder, error);
 
 			// Here rather than on the message thread: this is the one that may ask the server.
 			auto selfUpdate = std::make_shared<std::optional<Asset>>(evaluateSelfUpdate(*catalog));
@@ -617,35 +622,10 @@ namespace pluginManager
 
 	namespace
 	{
-		// A path beneath _root and nothing outside it: the list comes from a server, and a "../../" in
-		// it must not be able to write anywhere else on the disk.
 		juce::File inside(const juce::File& _root, const std::string& _path)
 		{
-			const auto folder = juce::String(_path).replaceCharacter('\\', '/');
-
-			if (folder.isEmpty() || folder.startsWithChar('/') || folder.containsChar(':'))
-				return {};
-
-			juce::StringArray parts;
-			parts.addTokens(folder, "/", {});
-			parts.removeEmptyStrings();
-
-			if (parts.isEmpty() || parts.contains("..") || parts.contains("."))
-				return {};
-
-			return _root.getChildFile(parts.joinIntoString("/"));
-		}
-
-		// The last part of the path, without what follows it: a query string is not part of a name.
-		std::string fileNameOf(const std::string& _url)
-		{
-			auto path = juce::String(_url).upToFirstOccurrenceOf("?", false, false).upToFirstOccurrenceOf("#", false, false);
-			const auto name = juce::URL::removeEscapeChars(path.fromLastOccurrenceOf("/", false, false));
-
-			if (name.isEmpty() || name == "." || name == ".." || name.containsAnyOf("/\\:"))
-				return {};
-
-			return name.toStdString();
+			const auto path = PlatformUtils::inside(_root.getFullPathName().toStdString(), _path);
+			return path.empty() ? juce::File() : juce::File(juce::String(path));
 		}
 	}
 
@@ -693,7 +673,7 @@ namespace pluginManager
 
 				if (path.empty() || path.back() == '/' || path.back() == '\\')
 				{
-					const auto name = fileNameOf(url);
+					const auto name = HttpClient::fileNameOf(url);
 
 					if (name.empty())
 					{
@@ -1407,5 +1387,327 @@ namespace pluginManager
 		// Not worth failing an install that already worked, so this is only written down.
 		if (!roms.isDirectory() && !roms.createDirectory().wasOk())
 			Log::write("Could not create " + roms.getFullPathName().toStdString());
+	}
+
+	bool PluginManager::fetchLocal(Catalog& _catalog, const std::string& _dir, std::string& _error)
+	{
+		std::vector<Asset> assets;
+		std::vector<Product> products;
+
+		if (!OfflineFolder::read(_dir, assets, products, _error))
+			return false;
+
+		_catalog.setProducts(std::move(products));
+		_catalog.addAssets(assets);
+
+		Log::write("Offline folder " + _dir + ": " + std::to_string(assets.size()) + " builds");
+
+		return true;
+	}
+
+	PluginManager::OfflineProduct PluginManager::offlineProductFor(const std::vector<Asset>& _assets) const
+	{
+		OfflineProduct result;
+
+		if (_assets.empty())
+			return result;
+
+		if (const auto* product = m_catalog.findOwningProduct(_assets.front().product))
+		{
+			result.product = *product;
+		}
+		else
+		{
+			result.product.product = _assets.front().product;
+			result.product.name = _assets.front().product;
+		}
+
+		// What any of the builds brings, which is not the same for each when they come from different
+		// folders - see filesRequestFor - and each file once.
+		for (const auto& asset : _assets)
+		{
+			const auto request = filesRequestFor(asset);
+
+			result.internal = request.internal;
+			result.donators = request.donators;
+
+			for (const auto& section : request.files)
+			{
+				auto it = std::find_if(result.files.begin(), result.files.end(),
+					[&section](const FileSection& _s) { return _s.folder == section.folder; });
+
+				if (it == result.files.end())
+				{
+					result.files.push_back({section.folder, {}});
+					it = result.files.end() - 1;
+				}
+
+				for (const auto& file : section.files)
+				{
+					const auto known = std::any_of(it->files.begin(), it->files.end(), [&file](const FileSection::Download& _d)
+					{
+						return _d.url == file.url && _d.path == file.path;
+					});
+
+					if (!known)
+						it->files.push_back(file);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool PluginManager::storeProduct(OfflineFolder& _folder, const OfflineProduct& _product, std::string& _error)
+	{
+		return _folder.addProduct(_product.product, _product.files, [&_product](const std::string& _url)
+		{
+			return loginForUrl(_url, _product.internal, _product.donators);
+		}, _error);
+	}
+
+	std::function<void(const std::string& _archive)> PluginManager::keepDownload(const Asset& _asset) const
+	{
+		const auto& dir = m_installPaths.getDownloadFolder();
+
+		if (dir.empty())
+			return {};
+
+		return [dir, asset = _asset, product = offlineProductFor({_asset})](const std::string& _archive)
+		{
+			std::lock_guard lock(OfflineFolder::writeLock());
+
+			OfflineFolder folder(dir);
+
+			const auto target = juce::File(juce::String(folder.archivePath(asset)));
+
+			if (target == juce::File())
+				return;
+
+			// Kept, not moved: the install goes on with the archive it downloaded. And not lost over:
+			// whatever happens here, the install is what was asked for.
+			if (!folder.hasBuild(asset))
+			{
+				if (!juce::File(juce::String(dir)).createDirectory() || !juce::File(juce::String(_archive)).copyFileTo(target))
+				{
+					Log::write("Could not keep " + target.getFullPathName().toStdString());
+					return;
+				}
+
+				folder.addBuild(asset);
+			}
+
+			// The picture and the files once per product, not once per format of it.
+			std::string error;
+
+			if (!isAppProduct(asset.product) && !folder.hasProduct(product.product, product.files) &&
+				!storeProduct(folder, product, error))
+			{
+				Log::write("Keeping " + asset.product + ": " + error);
+			}
+
+			if (!folder.save(error))
+				Log::write(error);
+			else
+				Log::write("Kept " + target.getFullPathName().toStdString());
+		};
+	}
+
+	std::vector<Asset> PluginManager::offlineBuilds(const OfflineExport& _request) const
+	{
+		std::vector<Asset> builds;
+
+		const auto add = [&](const std::string& _product, const std::string& _format)
+		{
+			const auto versions = m_catalog.getVersions(_product, _format, _request.os, _request.arch);
+
+			if (versions.empty())
+				return;
+
+			if (const auto* asset = m_catalog.find(_product, _format, versions.front(), _request.os, _request.arch))
+				builds.push_back(*asset);
+		};
+
+		for (const auto& product : _request.products)
+		{
+			for (const auto& format : _request.formats)
+				add(product, format);
+		}
+
+		if (_request.withPluginManager)
+			add(g_appProduct, "Standalone");
+
+		return builds;
+	}
+
+	PluginManager::ExportPlan PluginManager::exportPlanFor(const OfflineExport& _request) const
+	{
+		ExportPlan plan;
+		plan.folder = _request.folder;
+
+		std::map<std::string, std::vector<Asset>> byProduct;
+
+		for (const auto& asset : offlineBuilds(_request))
+		{
+			plan.builds.emplace_back(asset, credentialsFor(asset));
+
+			// The program itself is installed from the folder like any other build, but it is no row of
+			// the list and brings nothing.
+			if (isAppProduct(asset.product))
+				continue;
+
+			const auto* owner = m_catalog.findOwningProduct(asset.product);
+			byProduct[owner ? owner->product : asset.product].push_back(asset);
+		}
+
+		for (const auto& [product, assets] : byProduct)
+			plan.products.push_back(offlineProductFor(assets));
+
+		return plan;
+	}
+
+	bool PluginManager::runExport(const ExportPlan& _plan, const ExportProgress& _onProgress,
+	                              const std::shared_ptr<bool>& _cancel, std::string& _message)
+	{
+		const auto report = [&_onProgress](const float _progress, const std::string& _what)
+		{
+			if (_onProgress)
+				_onProgress(_progress, _what);
+		};
+
+		if (_plan.builds.empty())
+		{
+			_message = "There is nothing to write for that system.";
+			return false;
+		}
+
+		std::lock_guard lock(OfflineFolder::writeLock());
+
+		const auto dir = juce::File(juce::String(_plan.folder));
+
+		if (!dir.createDirectory())
+		{
+			_message = "Could not create " + _plan.folder;
+			return false;
+		}
+
+		OfflineFolder folder(_plan.folder);
+
+		const auto steps = static_cast<float>(_plan.builds.size() + _plan.products.size());
+		size_t step = 0;
+		size_t fetched = 0;
+		size_t present = 0;
+		std::string error;
+
+		for (const auto& [asset, login] : _plan.builds)
+		{
+			const auto name = OfflineFolder::archiveName(asset);
+			const auto target = juce::File(juce::String(folder.archivePath(asset)));
+
+			report(static_cast<float>(step) / steps, name);
+
+			if (folder.hasBuild(asset))
+			{
+				++present;
+				++step;
+				continue;
+			}
+
+			// Beside it first, so that a download that breaks off leaves the folder as it was.
+			const auto partial = target.getSiblingFile(target.getFileName() + ".tus-download");
+
+			const auto progress = [&report, &name, step, steps](const float _progress)
+			{
+				report((static_cast<float>(step) + std::max(0.0f, _progress)) / steps, name);
+			};
+
+			if (!HttpClient::downloadFile(asset.url, partial.getFullPathName().toStdString(), error, progress, _cancel, login)
+				|| !partial.moveFileTo(target))
+			{
+				partial.deleteFile();
+
+				// What arrived so far stays written down: running it again carries on from there.
+				std::string ignored;
+				folder.save(ignored);
+
+				_message = name + ": " + (error.empty() ? "could not write " + target.getFullPathName().toStdString() : error);
+				return false;
+			}
+
+			folder.addBuild(asset);
+
+			++fetched;
+			++step;
+		}
+
+		// A product that misses a picture or a file is still worth installing, so this is said rather
+		// than failed over.
+		std::string missing;
+
+		for (const auto& product : _plan.products)
+		{
+			report(static_cast<float>(step) / steps, product.product.name);
+
+			if (!storeProduct(folder, product, error) && missing.empty())
+				missing = error;
+
+			++step;
+		}
+
+		if (!folder.save(error))
+		{
+			_message = error;
+			return false;
+		}
+
+		report(1.0f, {});
+
+		_message = std::to_string(fetched) + (fetched == 1 ? " build" : " builds") + " written to " + _plan.folder;
+
+		if (present)
+			_message += ", " + std::to_string(present) + " were there already";
+
+		if (!missing.empty())
+			_message += ". Not everything a product brings arrived: " + missing;
+
+		Log::write("Offline install: " + _message);
+
+		return true;
+	}
+
+	bool PluginManager::exportOffline(const OfflineExport& _request, const ExportProgress& _onProgress,
+	                                  const std::shared_ptr<bool>& _cancel, std::string& _message) const
+	{
+		return runExport(exportPlanFor(_request), _onProgress, _cancel, _message);
+	}
+
+	void PluginManager::exportOfflineAsync(const OfflineExport& _request, ExportProgress _onProgress,
+	                                       std::shared_ptr<bool> _cancel, ResultCallback _onDone) const
+	{
+		auto onProgress = std::make_shared<ExportProgress>(std::move(_onProgress));
+		auto onDone = std::make_shared<ResultCallback>(std::move(_onDone));
+		auto alive = m_alive;
+
+		juce::Thread::launch([alive, onProgress, onDone, cancel = std::move(_cancel), plan = exportPlanFor(_request)]
+		{
+			const auto progress = [alive, onProgress](const float _progress, const std::string& _what)
+			{
+				juce::MessageManager::callAsync([alive, onProgress, _progress, _what]
+				{
+					if (*alive && *onProgress)
+						(*onProgress)(_progress, _what);
+				});
+			};
+
+			std::string message;
+
+			const auto success = runExport(plan, progress, cancel, message);
+
+			juce::MessageManager::callAsync([alive, onDone, success, message]
+			{
+				if (*alive && *onDone)
+					(*onDone)(success, message);
+			});
+		});
 	}
 }

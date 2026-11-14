@@ -65,6 +65,12 @@ namespace pluginManager
 		// An empty path, or the default, puts it back to the default.
 		void setBackupFolder(const std::string& _path);
 
+		// Where every archive an install downloads is kept as well, as an offline folder - see
+		// OfflineFolder - so that what was installed can be installed again without a network, or
+		// somewhere else. Empty keeps nothing, which is what it is until somebody sets one (BUG-10543).
+		const std::string& getDownloadFolder() const { return m_downloadFolder; }
+		void setDownloadFolder(const std::string& _path) { m_downloadFolder = _path; }
+
 		// Rows the user has taken out of the list. By product id rather than by name, because the
 		// name is what a product gets renamed to and the id is what everything else here uses.
 		// Nothing is uninstalled by hiding it: a hidden product that is installed stays installed,
@@ -99,6 +105,7 @@ namespace pluginManager
 		bool m_teamLogin = false;
 
 		std::string m_backupFolder;							// empty while it is the default
+		std::string m_downloadFolder;						// empty while downloads are not kept
 
 		std::string m_selfListed;							// the listing date of the build this program is
 		int64_t m_selfModified = 0;							// and its Last-Modified, in UTC seconds
