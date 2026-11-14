@@ -41,6 +41,7 @@ Add a `<script>` block in your RML file's `<head>` section:
 | `midi` | table | Live note on/off events, the current pitch bend and channel pressure. |
 | `audio` | table | Levels of the output channels, for meters. |
 | `leds` | table | Front panel LEDs of the emulated device. |
+| `rom` | table | The ROMs the product can switch between, the selected one, and switching. |
 | `Log` | table | RmlUi logging. Use `Log.Message(Log.logtype.info, "message")`. |
 | `rmlui` | table | RmlUi core API (contexts, font loading, etc.). |
 
@@ -365,6 +366,59 @@ skinvars.remove("theme", "global")
 
 Global variables are stored one per key in the plugin's config XML, prefixed `skinvar_`, and
 written as soon as they change.
+
+## ROM Selection (`rom`)
+
+The ROMs a product can switch between, the same list the ROM selector of the stock skins shows:
+
+```lua
+for i, name in ipairs(rom.getNames()) do       -- the index of a ROM is i - 1
+  Log.Message(Log.logtype.info, (i - 1) .. ": " .. name)
+end
+
+local name, index = rom.getSelected()          -- the running ROM, index 0-based, nil if there is no list
+```
+
+`rom.select` switches to another ROM, given by its name or its index:
+
+```lua
+local ok = rom.select("firmware (TI2)")        -- as getNames() lists it, or rom.select(1)
+```
+
+The device starts again with the new ROM, with the current patches, so this takes a moment.
+`select` returns false if there is no such ROM or the device does not start with it; the
+previous ROM keeps running then.
+
+### Reacting to changes
+
+```lua
+local id = rom.onChange(function(name, index)
+  document:GetElementById("romName").inner_rml = name
+end)
+
+rom.removeListener(id)
+```
+
+The callback runs whenever another ROM gets selected: from the ROM selector, from `rom.select`,
+or because the host loaded a project that uses another one. It also runs when Reboot Device found
+new ROMs, with the list grown and the selection unchanged. It does not run for the ROM that is
+selected when it is registered; read that one with `rom.getSelected()`.
+
+The selected ROM is saved with the project, per instance, so a skin does not have to store it.
+To remember something across instances, such as the ROM a skin should offer first, keep its name
+in a global skin variable:
+
+```lua
+rom.onChange(function(name)
+  skinvars.set("lastRom", name, "global")
+end)
+```
+
+| Product | ROMs |
+|---------|------|
+| Osirus, OsTIrus | every Virus ROM found, named by file and model, such as `firmware (TI2)` |
+| JE-8086 | every JP-8000 and JP-8080 ROM found |
+| Nodal Red 2x, Vavra, Xenia | none, they run the one ROM they find: `getNames()` is empty, `getSelected()` is nil, `select` returns false and the callback never runs |
 
 ## DOM Manipulation
 

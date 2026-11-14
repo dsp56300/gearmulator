@@ -14,6 +14,10 @@ Framework:
 - [Imp] BUG-10341 Skins can read the current pitch bend and channel pressure of
         every MIDI channel in Lua: midi.getPitchBend and getChannelPressure.
 
+- [Imp] BUG-10438 Skins can list, show and switch the ROMs in Lua and are told
+        when another ROM gets selected: rom.getNames, getSelected, select and
+        onChange.
+
 - [Imp] The patch manager shows the patches that come with a release without
         being told where they are: a folder named "patches" in the plugin's
         folder in Documents/The Usual Suspects is added as a data source.

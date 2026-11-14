@@ -7,6 +7,7 @@ set(SOURCES
 	rmlLuaLeds.cpp rmlLuaLeds.h
 	rmlLuaMidi.cpp rmlLuaMidi.h
 	rmlLuaParameters.cpp rmlLuaParameters.h
+	rmlLuaRom.cpp rmlLuaRom.h
 	rmlLuaSkinVariables.cpp rmlLuaSkinVariables.h
 	rmlPlugin.cpp rmlPlugin.h
 	rmlPluginContext.cpp rmlPluginContext.h
