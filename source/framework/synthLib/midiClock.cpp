@@ -66,7 +66,8 @@ namespace synthLib
 	void MidiClock::start(const double _ppqPos)
 	{
 		const double ppqPos = _ppqPos;
-		const auto quarterPos = (ppqPos - std::floor(ppqPos + 1.0));
+		// up to the next beat, 0 on a beat (ppq from a host can be a hair past it)
+		const auto quarterPos = (ppqPos - std::ceil(ppqPos - 1e-6));
 
 		m_clockTickPos = quarterPos * (ClockTicksPerQuarter);
 
