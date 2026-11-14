@@ -8,6 +8,8 @@
 #include "juceRmlUi/rmlInplaceEditor.h"
 #include "juceUiLib/messageBox.h"
 
+#include "RmlUi/Core/StringUtilities.h"
+
 namespace jucePluginEditorLib
 {
 	static constexpr const char* kCurrentPresetName = "Current";
@@ -627,7 +629,7 @@ namespace jucePluginEditorLib
 			}
 
 			if (parameterCell)
-				parameterCell->SetInnerRML(mapping.paramName);
+				parameterCell->SetInnerRML(Rml::StringUtilities::EncodeRml(mapping.paramName));	// from a preset file
 
 			if (removeButton)
 			{

@@ -7,6 +7,7 @@
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/StringUtilities.h"
 
 namespace genericVirusUI
 {
@@ -29,7 +30,8 @@ namespace genericVirusUI
 
 	void PartButton::setButtonText(const std::string& _text)
 	{
-		getElement()->SetInnerRML(_text);
+		// a patch name is text, not RML: ">>INPUT<<" lost what follows the "<"
+		getElement()->SetInnerRML(Rml::StringUtilities::EncodeRml(_text));
 	}
 
 	void PartButton::selectPreset(const Rml::Event& _event, uint8_t _part) const

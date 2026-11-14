@@ -44,6 +44,9 @@ Framework:
         the button and over other controls. It is shown for knobs and sliders
         only again.
 
+- [Fix] The value tooltip of a knob stayed empty for values written with angle
+        brackets, for example a panorama of "L< 50.0 %" or "<0>" in OsTIrus.
+
 - [Fix] BUG-10219 The patch name could not be renamed with a double click while
         the name of a parameter was shown over it, for example in the OsTIrus
         skin right after a parameter was changed.
@@ -196,6 +199,10 @@ Osirus/OsTIrus:
 - [Fix] BUG-10550 MIDI channels were shown as 0-15 instead of 1-16: on the Multi
         page of Osirus, and in both Osirus and OsTIrus for the global MIDI
         channel parameter that the host shows for automation.
+
+- [Fix] A patch name with "<" in it, for example ">>INPUT<<", was cut off in the
+        patch name display and on the part buttons. Renaming a patch with "&" in
+        its name started with "&amp;" in the text field.
 
 Osirus:
 
@@ -392,6 +399,9 @@ Plugin Manager:
 - [Imp] BUG-10562 The window is wider, so that the six formats on macOS leave
         enough room for the name of a plugin and its two chips, and the format
         chips for their tick boxes.
+
+- [Fix] A product name, description, version or error message with "<" in it
+        was shown cut off or not at all.
 
 88emuPlayer:
 

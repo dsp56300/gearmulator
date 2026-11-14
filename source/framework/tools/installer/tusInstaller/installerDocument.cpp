@@ -989,7 +989,7 @@ namespace pluginManager
 			}
 			else
 			{
-				m_selfUpdate->SetInnerRML("Update Plugin Manager to " + asset->version);
+				m_selfUpdate->SetInnerRML("Update Plugin Manager to " + Rml::StringUtilities::EncodeRml(asset->version));
 				m_selfUpdate->SetAttribute("title", "Plugin Manager " + asset->version + " is available, this is " +
 					std::string(g_appVersion));
 			}
@@ -1227,8 +1227,9 @@ namespace pluginManager
 
 	void InstallerDocument::setStatusInternal(Rml::ElementDocument& _doc, const std::string& _text)
 	{
+		// text, not RML: an error names files and logins
 		if (auto* statusText = _doc.GetElementById("status-text"))
-			statusText->SetInnerRML(_text);
+			statusText->SetInnerRML(Rml::StringUtilities::EncodeRml(_text));
 	}
 
 	// Whether there is a team login at all hides the whole section rather than the button in it,

@@ -68,6 +68,8 @@ namespace genericVirusUI
 		void onPlayModeChanged();
 		void onCurrentPartChanged(uint8_t _part) override;
 
+		// the name of the current part's single, or of the multi while that is shown instead (m_showMultiName)
+		std::string getShownPresetName() const;
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 

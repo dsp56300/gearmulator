@@ -28,6 +28,7 @@
 #include "juceUiLib/messageBox.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/StringUtilities.h"
 
 namespace genericVirusUI
 {
@@ -112,7 +113,8 @@ namespace genericVirusUI
 
 			const bool editMulti = getController().isMultiMode() && m_showMultiName;
 
-			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(m_presetName->GetInnerRML()), [this, editMulti](const std::string& _text)
+			// the name itself, not the element's RML: that has "&amp;" for the "&" of "Flam&Co HS"
+			new juceRmlUi::InplaceEditor(m_presetName, Rml::StringUtilities::StripWhitespace(getShownPresetName()), [this, editMulti](const std::string& _text)
 			{
 				auto text = Rml::StringUtilities::StripWhitespace(_text);
 				if (text.empty())
@@ -271,13 +273,18 @@ namespace genericVirusUI
 		updatePresetName();
 	}
 
-	void VirusEditor::updatePresetName() const
+	std::string VirusEditor::getShownPresetName() const
 	{
 		const auto& c = getController();
-		const auto name = (c.isMultiMode() && m_showMultiName)
+		return (c.isMultiMode() && m_showMultiName)
 			? c.getMultiPresetName()
 			: c.getCurrentPartPresetName(c.getCurrentPart());
-		m_presetName->SetInnerRML(name);
+	}
+
+	void VirusEditor::updatePresetName() const
+	{
+		// a name is text, not RML: ">>INPUT<<" lost what follows the "<"
+		m_presetName->SetInnerRML(Rml::StringUtilities::EncodeRml(getShownPresetName()));
 	}
 
 	void VirusEditor::updatePlayModeButtons() const

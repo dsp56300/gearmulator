@@ -7,6 +7,7 @@
 #include "RmlUi/Core/ElementDocument.h"
 #include "RmlUi/Core/ElementUtilities.h"
 #include "RmlUi/Core/Elements/ElementFormControlInput.h"
+#include "RmlUi/Core/StringUtilities.h"
 
 namespace jucePluginEditorLib
 {
@@ -83,7 +84,8 @@ namespace jucePluginEditorLib
 			m_label->SetProperty(Rml::PropertyId::Top, Rml::Property(y, Rml::Unit::PX));
 			m_label->SetProperty(Rml::PropertyId::Width, Rml::Property(labelWidth, Rml::Unit::PX));
 
-			m_label->SetInnerRML(_value);
+			// the value is text, not RML: "<0>" or "L< 50.0 %" (OsTIrus) did not parse and left the tooltip empty
+			m_label->SetInnerRML(Rml::StringUtilities::EncodeRml(_value));
 
 			// clamp height to not exceed height of whole document
 			const auto docHeight = m_label->GetOwnerDocument()->GetClientHeight();

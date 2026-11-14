@@ -9,6 +9,7 @@
 
 #include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Core/StringUtilities.h"
 
 #include <JuceHeader.h>
 
@@ -258,11 +259,15 @@ namespace pluginManager
 
 	void PluginEntryController::populate()
 	{
+		// both are text from the product list of the server, not RML
 		if (m_nameElem)
-			m_nameElem->SetInnerRML(m_product.name.empty() ? m_product.product : m_product.name);
+		{
+			const auto& name = m_product.name.empty() ? m_product.product : m_product.name;
+			m_nameElem->SetInnerRML(Rml::StringUtilities::EncodeRml(name));
+		}
 
 		if (m_descElem)
-			m_descElem->SetInnerRML(m_product.description);
+			m_descElem->SetInnerRML(Rml::StringUtilities::EncodeRml(m_product.description));
 	}
 
 	// A column per format on offer here, whether or not this plugin comes in it: an empty column
@@ -430,7 +435,7 @@ namespace pluginManager
 		if (!_row.versionLabel)
 			return;
 
-		_row.versionLabel->SetInnerRML(versionText(_row, _row.versionIndex, true) +
+		_row.versionLabel->SetInnerRML(Rml::StringUtilities::EncodeRml(versionText(_row, _row.versionIndex, true)) +
 			(_row.versionList.size() > 1 ? "<span class=\"version-caret\"/>" : ""));
 	}
 
@@ -609,7 +614,8 @@ namespace pluginManager
 		{
 			// An installed build that cannot say which version it is says so, rather than being left
 			// looking uninstalled.
-			_row.installedLabel->SetInnerRML(installed ? (installedVersion.empty() ? "installed" : installedVersion) : "-");
+			_row.installedLabel->SetInnerRML(Rml::StringUtilities::EncodeRml(
+				installed ? (installedVersion.empty() ? "installed" : installedVersion) : "-"));
 
 			_row.installedLabel->SetClass("current", installed && !outdated);
 			_row.installedLabel->SetClass("outdated", outdated);
@@ -1026,7 +1032,8 @@ namespace pluginManager
 		if (!m_statusElem)
 			return;
 
-		m_statusElem->SetInnerRML(_text);
+		// text, not RML: a failure names files and folders
+		m_statusElem->SetInnerRML(Rml::StringUtilities::EncodeRml(_text));
 
 		// Out of the layout entirely while it says nothing. An empty line still takes a line, and
 		// that one sat under the name and pushed it above the middle of the picture.
