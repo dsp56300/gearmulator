@@ -306,7 +306,7 @@
 
 		<div class="offline-section">
 			<div class="offline-title">Prepare a folder</div>
-			<div class="offline-intro">The newest build of every product and format ticked here, for the system it is for, with the pictures and the files the products bring and the Plugin Manager for that system. Take the folder to the other computer, start the Plugin Manager in it and install. Run it again on the same folder to add only what is new.</div>
+			<div class="offline-intro">The newest build of every product and format ticked here, for the system it is for, with the pictures and the files the products bring and the Plugin Manager for that system. Take the folder to the other computer, start the Plugin Manager in it and install. Run it again on the same folder to add only what is new. An effect version comes with its plugin, whose row in the list installs it.</div>
 			<div class="offline-row">
 				<span class="offline-label">Folder</span>
 				<input id="offline-folder" class="preference-path" type="text"/>

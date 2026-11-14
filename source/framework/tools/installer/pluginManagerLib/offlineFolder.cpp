@@ -82,8 +82,9 @@ namespace pluginManager
 		}
 
 		// Beside the target first, so that a download that breaks off does not leave half a file in place
-		// of a whole one, and then dated as the server dates it.
-		bool fetch(const std::string& _url, const juce::File& _target, const Credentials& _login, std::string& _error)
+		// of a whole one.
+		bool download(const std::string& _url, const juce::File& _target, const Credentials& _login, std::string& _error,
+		              const std::function<void(float)>& _onProgress = {}, const std::shared_ptr<bool>& _cancel = {})
 		{
 			if (!_target.getParentDirectory().createDirectory())
 			{
@@ -93,7 +94,7 @@ namespace pluginManager
 
 			const auto partial = _target.getSiblingFile(_target.getFileName() + ".tus-download");
 
-			if (!HttpClient::downloadFile(_url, partial.getFullPathName().toStdString(), _error, {}, {}, _login))
+			if (!HttpClient::downloadFile(_url, partial.getFullPathName().toStdString(), _error, _onProgress, _cancel, _login))
 			{
 				partial.deleteFile();
 				return false;
@@ -105,6 +106,15 @@ namespace pluginManager
 				_error = "Could not write " + _target.getFullPathName().toStdString();
 				return false;
 			}
+
+			return true;
+		}
+
+		// And then dated as the server dates it.
+		bool fetch(const std::string& _url, const juce::File& _target, const Credentials& _login, std::string& _error)
+		{
+			if (!download(_url, _target, _login, _error))
+				return false;
 
 			int64_t modified = 0;
 			std::string ignored;
@@ -364,6 +374,24 @@ namespace pluginManager
 
 		if (timeOf(_asset.listed, listed))
 			juce::File(juce::String(archivePath(_asset))).setLastModificationTime(listed);
+	}
+
+	bool OfflineFolder::fetchBuild(const Asset& _asset, const Credentials& _login, std::string& _error,
+	                               const std::function<void(float)>& _onProgress, const std::shared_ptr<bool>& _cancel)
+	{
+		const auto target = juce::File(juce::String(archivePath(_asset)));
+
+		if (target == juce::File())
+		{
+			_error = "No place for " + _asset.url;
+			return false;
+		}
+
+		if (!download(_asset.url, target, _login, _error, _onProgress, _cancel))
+			return false;
+
+		addBuild(_asset);
+		return true;
 	}
 
 	bool OfflineFolder::hasProduct(const Product& _product, const std::vector<FileSection>& _files) const

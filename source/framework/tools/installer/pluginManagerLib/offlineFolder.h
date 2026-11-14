@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -58,6 +59,11 @@ namespace pluginManager
 
 		// An archive that is in the folder now, written down with what its name does not say.
 		void addBuild(const Asset& _asset);
+
+		// Downloads a build into the folder and writes it down. Beside its place first, so that a download
+		// that breaks off leaves the folder as it was. Not written out: save() does that.
+		bool fetchBuild(const Asset& _asset, const Credentials& _login, std::string& _error,
+		                const std::function<void(float)>& _onProgress = {}, const std::shared_ptr<bool>& _cancel = {});
 
 		// Whether this product is written down with everything it brings, so that keeping a second format
 		// of it does not fetch its picture and its files again.

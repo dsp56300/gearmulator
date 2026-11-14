@@ -419,6 +419,8 @@ Plugin Manager:
         and the Plugin Manager for that system. On a computer without a
         network, start the Plugin Manager in that folder and it installs from
         there. Any folder of our archives can be chosen to install from as well.
+        An effect version is always written with its plugin, and a kept effect
+        version brings its plugin as well.
 
 - [New] BUG-10543 Preferences: downloads can be kept in a folder, which then
         works as an offline install too.

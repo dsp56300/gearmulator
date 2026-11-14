@@ -2725,6 +2725,7 @@ namespace
 		TEST_ASSERT(root.getChildFile("server").createDirectory().wasOk());
 		archive("Synth-1000.vst3", "TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip");
 		archive("Synth-1000.component", "TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip");
+		archive("Synth-1000FX.vst3", "TheUsualSuspects-Synth-1000FX-VST3-2.2.16-win64.zip");
 
 		// Into JSON, where a backslash of a Windows path would be an escape.
 		const auto jsonUrl = [&fixture](const std::string& _path)
@@ -2739,7 +2740,9 @@ namespace
 			{"name":"TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip","browser_download_url":")"
 			+ jsonUrl("server/TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip") + R"("},
 			{"name":"TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip","browser_download_url":")"
-			+ jsonUrl("server/TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip") + R"("}]})");
+			+ jsonUrl("server/TheUsualSuspects-Synth-1000-AU-2.2.16-MacOS.zip") + R"("},
+			{"name":"TheUsualSuspects-Synth-1000FX-VST3-2.2.16-win64.zip","browser_download_url":")"
+			+ jsonUrl("server/TheUsualSuspects-Synth-1000FX-VST3-2.2.16-win64.zip") + R"("}]})");
 
 		fixture.write("products.json", R"({"products":[
 			{"product":"Synth-1000","slug":"synth-1000","name":"Synth 1000","description":"A synth",
@@ -2763,6 +2766,36 @@ namespace
 
 		// For a Mac, from wherever this runs: the Mac's build and not this system's.
 		TEST_ASSERT(pm.offlineBuilds(request).size() == 1);
+
+		// An effect build brings its plugin along, without which the list has no row to install it from.
+		{
+			auto fxOnly = request;
+			fxOnly.os = "windows";
+			fxOnly.arch = "x86_64";
+			fxOnly.products = {"Synth-1000FX"};
+
+			const auto builds = pm.offlineBuilds(fxOnly);
+			TEST_ASSERT(builds.size() == 2);
+			TEST_ASSERT(builds[0].product == "Synth-1000" && builds[1].product == "Synth-1000FX");
+		}
+
+		// And so does a kept download of one.
+		{
+			const auto kept = root.getChildFile("keptfx");
+			pm.getInstallPaths().setDownloadFolder(kept.getFullPathName().toStdString());
+
+			const auto* fx = pm.getCatalog().find("Synth-1000FX", "VST3", "2.2.16", "windows", "x86_64");
+			TEST_ASSERT(fx != nullptr);
+
+			const auto keep = pm.keepDownload(*fx);
+			TEST_ASSERT(keep != nullptr);
+			keep(root.getChildFile("server/TheUsualSuspects-Synth-1000FX-VST3-2.2.16-win64.zip").getFullPathName().toStdString());
+
+			TEST_ASSERT(kept.getChildFile("TheUsualSuspects-Synth-1000FX-VST3-2.2.16-win64.zip").existsAsFile());
+			TEST_ASSERT(kept.getChildFile("TheUsualSuspects-Synth-1000-VST3-2.2.16-win64.zip").existsAsFile());
+
+			pm.getInstallPaths().setDownloadFolder({});
+		}
 
 		std::string message;
 		float lastProgress = 0.0f;

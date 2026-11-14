@@ -1473,7 +1473,17 @@ namespace pluginManager
 		if (dir.empty())
 			return {};
 
-		return [dir, asset = _asset, product = offlineProductFor({_asset})](const std::string& _archive)
+		// An effect build needs its plugin beside it: the list shows a row only for a plugin with builds.
+		// The same version, so the two match the way an install from the server has them.
+		std::optional<std::pair<Asset, Credentials>> plugin;
+
+		if (const auto owner = m_catalog.dataProductOf(_asset.product); owner != _asset.product)
+		{
+			if (const auto* a = m_catalog.find(owner, _asset.format, _asset.version, _asset.os, _asset.arch))
+				plugin.emplace(*a, credentialsFor(*a));
+		}
+
+		return [dir, asset = _asset, plugin, product = offlineProductFor({_asset})](const std::string& _archive)
 		{
 			std::lock_guard lock(OfflineFolder::writeLock());
 
@@ -1499,6 +1509,9 @@ namespace pluginManager
 
 			// The picture and the files once per product, not once per format of it.
 			std::string error;
+
+			if (plugin && !folder.hasBuild(plugin->first) && !folder.fetchBuild(plugin->first, plugin->second, error))
+				Log::write("Keeping " + plugin->first.product + " beside " + asset.product + ": " + error);
 
 			if (!isAppProduct(asset.product) && !folder.hasProduct(product.product, product.files) &&
 				!storeProduct(folder, product, error))
@@ -1528,7 +1541,20 @@ namespace pluginManager
 				builds.push_back(*asset);
 		};
 
+		// An effect build brings its plugin along: the list shows a row only for a plugin with builds, so
+		// an effect build alone could not be installed from the folder.
+		std::vector<std::string> products;
+
 		for (const auto& product : _request.products)
+		{
+			for (const auto& p : {m_catalog.dataProductOf(product), product})
+			{
+				if (std::find(products.begin(), products.end(), p) == products.end())
+					products.push_back(p);
+			}
+		}
+
+		for (const auto& product : products)
 		{
 			for (const auto& format : _request.formats)
 				add(product, format);
@@ -1602,7 +1628,6 @@ namespace pluginManager
 		for (const auto& [asset, login] : _plan.builds)
 		{
 			const auto name = OfflineFolder::archiveName(asset);
-			const auto target = juce::File(juce::String(folder.archivePath(asset)));
 
 			report(static_cast<float>(step) / steps, name);
 
@@ -1613,28 +1638,20 @@ namespace pluginManager
 				continue;
 			}
 
-			// Beside it first, so that a download that breaks off leaves the folder as it was.
-			const auto partial = target.getSiblingFile(target.getFileName() + ".tus-download");
-
 			const auto progress = [&report, &name, step, steps](const float _progress)
 			{
 				report((static_cast<float>(step) + std::max(0.0f, _progress)) / steps, name);
 			};
 
-			if (!HttpClient::downloadFile(asset.url, partial.getFullPathName().toStdString(), error, progress, _cancel, login)
-				|| !partial.moveFileTo(target))
+			if (!folder.fetchBuild(asset, login, error, progress, _cancel))
 			{
-				partial.deleteFile();
-
 				// What arrived so far stays written down: running it again carries on from there.
 				std::string ignored;
 				folder.save(ignored);
 
-				_message = name + ": " + (error.empty() ? "could not write " + target.getFullPathName().toStdString() : error);
+				_message = name + ": " + error;
 				return false;
 			}
-
-			folder.addBuild(asset);
 
 			++fetched;
 			++step;
