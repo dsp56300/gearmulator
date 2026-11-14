@@ -204,6 +204,12 @@ Osirus/OsTIrus:
         patch name display and on the part buttons. Renaming a patch with "&" in
         its name started with "&amp;" in the text field.
 
+- [Fix] BUG-10568 Some multis came back in single mode when a project was
+        reopened or a track was duplicated: the plugin left the multi out of
+        what it saved. A multi, a play mode change or a parameter edit made
+        while the host did not process the plugin, for example while it was
+        bypassed, was not saved either.
+
 Osirus:
 
 - [Imp] BUG-10183 Galaxpel skin: every part on the Multi page has Mute and Solo

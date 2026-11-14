@@ -110,7 +110,7 @@ private:
 	void receiveUpgradedPreset();
 	bool processMIDI(const synthLib::SMidiEvent& _ev, FrontpanelState* _fpState);
 
-	static bool isValid(const TPreset& _preset);
+	static bool isValid(const TPreset& _preset, bool _isMulti);
 
 	Hdi08List m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
@@ -140,7 +140,6 @@ private:
 	{
 		uint8_t program = 0;
 		bool isMulti = false;
-		TPreset data;
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;

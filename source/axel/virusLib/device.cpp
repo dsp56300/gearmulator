@@ -261,6 +261,30 @@ namespace virusLib
 		return m_mc->getState(_state, _type);
 	}
 
+	bool Device::getStateWithPendingMidi(std::vector<uint8_t>& _state, const synthLib::StateType _type, const std::vector<synthLib::SMidiEvent>& _pendingMidi)
+	{
+		if(!getState(_state, _type))
+			return false;
+
+		// What the editor sent waits for the next process() call: a Multi from the patch manager, a play mode switch, a
+		// parameter edit. A host that saves without processing the plug-in in between, a bypassed one for example, lost
+		// it (BUG-10568). Behind the state, a restore applies it the way process() would have
+		for (const auto& ev : _pendingMidi)
+		{
+			const auto& s = ev.sysex;
+
+			if(s.size() < 7 || s[1] != 0x00 || s[2] != 0x20 || s[3] != 0x33)
+				continue;
+
+			const auto cmd = s[6];
+
+			if(cmd == DUMP_SINGLE || cmd == DUMP_MULTI || (cmd >= PAGE_6E && cmd <= PAGE_D))
+				_state.insert(_state.end(), s.begin(), s.end());
+		}
+
+		return true;
+	}
+
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
 		return m_mc->setState(_state, _type);
