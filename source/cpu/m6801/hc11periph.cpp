@@ -131,7 +131,7 @@ u16 Hc11Peripherals::acknowledge() {
   unsigned src = kSrcSci;  // a request that went away within the instruction
   const Source promoted = kPromoted[hprio_ & 0x0F];
   if (m & (1u << promoted)) src = promoted;
-  else if (m) src = unsigned(__builtin_ctz(m));
+  else if (m) for (src = 0; !(m & (1u << src)); ++src) {}  // lowest set bit, MSVC has no __builtin_ctz
   if (src == kSrcIrq) irq_edge_ = false;
   return kVector[src];
 }
