@@ -304,7 +304,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		add_dependencies(PluginFormat_VST3 ${targetName}_VST3)
 	endif()
 
-	if(MSVC OR APPLE)
+	if(WIN32 OR APPLE)
 		if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST DESTINATION . COMPONENT ${productName}-VST2)
 			if(APPLE)
@@ -334,12 +334,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	
 	if(USE_LV2)
 		get_target_property(lv2OutputFolder ${targetName}_LV2 ARCHIVE_OUTPUT_DIRECTORY)
-		if(MSVC)
+		if(WIN32)
 			set(pattern "*.dll")
 		else()
 			set(pattern "*.so")
 		endif()
-		if(MSVC OR APPLE)
+		if(WIN32 OR APPLE)
 			set(dest .)
 		else()
 			set(dest lib/lv2/)
