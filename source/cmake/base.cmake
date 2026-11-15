@@ -136,6 +136,11 @@ else()
 	# fails on Ubuntu 22.04.
 	# Set globally on purpose: this used to be repeated per target and had already
 	# been forgotten for xtTestConsole, n2xTestConsole and the DSP bridge.
+	# MinGW also needs -static: the two options below leave libwinpthread-1.dll
+	# dynamic, and the packages do not carry it.
+	if(MINGW)
+		add_link_options(-static)
+	endif()
 	add_link_options(-static-libgcc -static-libstdc++)
 
 	execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
