@@ -282,6 +282,20 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set_target_properties(${targetName}_VST PROPERTIES PREFIX "")
 	endif()
 
+	# MinGW's CMake platform module gives shared and module libraries a "lib" prefix,
+	# MSVC's is empty. Windows hosts take the plugin name from the file name, and the
+	# LV2 bundle would otherwise carry a different DLL name than the MSVC build.
+	# Windows plugin binaries carry no prefix at all. (MSVC is already empty, so this
+	# is a no-op there.)
+	if(WIN32)
+		if(TARGET ${targetName}_VST)
+			set_target_properties(${targetName}_VST PROPERTIES PREFIX "")
+		endif()
+		if(TARGET ${targetName}_LV2)
+			set_target_properties(${targetName}_LV2 PROPERTIES PREFIX "")
+		endif()
+	endif()
+
 	if(USE_VST2)
 		add_dependencies(PluginFormat_VST2 ${targetName}_VST)
 	endif()
@@ -422,6 +436,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set(serverTarget ${productName}ServerPlugin)
 
 		add_library(${serverTarget} SHARED)
+
+		if(WIN32)
+			set_target_properties(${serverTarget} PROPERTIES PREFIX "")
+		endif()
 
 		target_compile_definitions(${serverTarget} PUBLIC 
 			PluginName="${productName}"

@@ -14,7 +14,7 @@ source_group("source" FILES ${SOURCES})
 target_link_libraries(virusTestConsole PUBLIC virusConsoleLib)
 
 # start scripts that play a ROM preset
-if(MSVC)
+if(WIN32)
 	set(deployDir ${CMAKE_SOURCE_DIR}/deploy/win/)
 else()
 	set(deployDir ${CMAKE_SOURCE_DIR}/deploy/linux/)
