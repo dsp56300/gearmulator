@@ -164,7 +164,7 @@ namespace pluginManager
 		case RomState::Valid:     title = name + " found a ROM it can use when it last started"; break;
 		case RomState::Rejected:  title = name + " found no ROM it can use when it last started. Put one into " + folder; break;
 		case RomState::Missing:   title = "No ROM yet. Put one into " + folder; break;
-		case RomState::Unchecked: title = name + " checks the ROM when it starts, and has not started since it was put there"; break;
+		case RomState::Unchecked: title = "Not known yet whether the ROM works: " + name + " tells when it starts, and has not since the ROM was put there or since it was updated to a build that tells"; break;
 		case RomState::NotInstalled: break;
 		}
 

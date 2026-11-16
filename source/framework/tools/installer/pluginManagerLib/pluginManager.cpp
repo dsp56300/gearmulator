@@ -1330,32 +1330,36 @@ namespace pluginManager
 		if (plugins.empty())
 			return RomState::NotInstalled;
 
-		// Everywhere a plugin looks: its ROM folder, with anything in it, and beside itself - which for a
-		// bundle is its top and the folder of its binary, for a plain file the folder it is in.
+		// What the plugin said beats anything seen from here: it knows every place it looks.
+		const auto status = juce::File(juce::String(PlatformUtils::dataFolder(_product))).getChildFile("config/romStatus.json");
+
+		if (status.existsAsFile() && juce::JSON::parse(status).getProperty("valid", false))
+			return RomState::Valid;
+
+		// Everywhere a plugin looks: its ROM folder, with anything in it, and beside itself - the folder
+		// it is in (getModulePath(true) strips a bundle down to that) and, for a bundle, the folder of its
+		// binary. Beside a plugin, only what has the extension of a ROM: changelogs and other plugins lie
+		// there too. A product may take a ROM of any name, so these are the ones ROMs come with.
+		const auto romTypes = "*.bin;*.mid;*.rom;*.img;*.hex;*.syx";
+
 		auto files = juce::File(juce::String(PlatformUtils::romFolder(_product))).findChildFiles(juce::File::findFiles, false);
 
 		for (const auto& plugin : plugins)
 		{
-			if (!plugin.isDirectory())
-			{
-				files.addArray(plugin.getParentDirectory().findChildFiles(juce::File::findFiles, false, "*.bin;*.mid"));
-				continue;
-			}
+			files.addArray(plugin.getParentDirectory().findChildFiles(juce::File::findFiles, false, romTypes));
 
-			for (const auto& rom : ZipExtractor::romsInside(plugin))
-				files.add(rom);
+			if (plugin.isDirectory())
+			{
+				for (const auto& rom : ZipExtractor::romsInside(plugin))
+					files.add(rom);
+			}
 		}
 
 		if (files.isEmpty())
 			return RomState::Missing;
 
-		const auto status = juce::File(juce::String(PlatformUtils::dataFolder(_product))).getChildFile("config/romStatus.json");
-
 		if (!status.existsAsFile())
 			return RomState::Unchecked;
-
-		if (juce::JSON::parse(status).getProperty("valid", false))
-			return RomState::Valid;
 
 		// A file put there after the plugin found nothing has not been tried yet. A copy keeps the date it
 		// was written, so the date it arrived is asked as well.

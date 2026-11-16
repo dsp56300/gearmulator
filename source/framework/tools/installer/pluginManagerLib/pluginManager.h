@@ -235,14 +235,14 @@ namespace pluginManager
 		// Whether a product has a ROM to boot (BUG-10495). Only a plugin can tell a ROM from any other file,
 		// so it says what it found whenever it starts - see Processor::createDevice - and this reads that.
 		// What this can tell by itself is that there is nothing: no file in the ROM folder and none where
-		// the installed plugins look beside themselves.
+		// the installed plugins look beside themselves. A plugin that found one is believed over that.
 		enum class RomState
 		{
 			NotInstalled,	// no plugin of it here, so nothing to say
 			Unchecked,		// files there, but no plugin has started since they were put there
 			Valid,			// the plugin booted a ROM the last time it started
 			Rejected,		// the plugin found none it can boot the last time it started
-			Missing			// no file anywhere the plugin looks
+			Missing			// no file anywhere the plugin looks, and it has not said it found one
 		};
 
 		RomState romState(const std::string& _product) const;

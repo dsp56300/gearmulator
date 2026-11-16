@@ -4387,11 +4387,20 @@ namespace
 
 		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Missing);
 
-		// Beside the plugin's binary counts as much as the ROM folder.
+		// Beside the plugin's binary counts as much as the ROM folder, and so does the folder the plugin is
+		// in, where only a file with the extension of a ROM counts: changelogs lie there as well.
 		const auto beside = binaryFolder.getChildFile("firmware.bin");
 		TEST_ASSERT(beside.replaceWithText("rom"));
 		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Unchecked);
 		TEST_ASSERT(beside.deleteFile());
+
+		TEST_ASSERT(plugins.getChildFile("changelog_Synth-1000.txt").replaceWithText("changes"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Missing);
+
+		const auto nextToIt = plugins.getChildFile("upper.BIN");
+		TEST_ASSERT(nextToIt.replaceWithText("rom"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Unchecked);
+		TEST_ASSERT(nextToIt.deleteFile());
 
 		const auto rom = roms.getChildFile("firmware.bin");
 		TEST_ASSERT(rom.replaceWithText("rom"));
@@ -4420,10 +4429,13 @@ namespace
 		TEST_ASSERT(copied.setLastModificationTime(earlier));
 		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Unchecked);
 
-		// And with every file gone there is none, whatever the plugin last said.
-		TEST_ASSERT(status.replaceWithText(R"({"valid":true})"));
+		// With every file gone there is none, unless the plugin said it found one: it knows places this
+		// does not.
 		TEST_ASSERT(rom.deleteFile() && copied.deleteFile());
 		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Missing);
+
+		TEST_ASSERT(status.replaceWithText(R"({"valid":true})"));
+		TEST_ASSERT(pm.romState("Synth-1000") == RomState::Valid);
 
 		PlatformUtils::setSettingsFolder({});
 		setDataFolder({});
