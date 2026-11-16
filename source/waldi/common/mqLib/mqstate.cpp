@@ -378,14 +378,16 @@ namespace mqLib
 
 		*p = _data[IdxGlobalParamValue];
 
-		// if the play mode is changed, request the edit buffer for the first single again, because on the mQ, that edit buffer is shared between multi & single
+		// The mQ shares one edit buffer between the single of single mode and the first single of a multi, and swaps its
+		// content when the play mode changes. Forget the copy of the mode switched to, the next request for it asks the
+		// device. A request sent from here instead was answered while the dumps that follow a play mode change arrived:
+		// the device lost some of them, and its answer replaced the first single the editor had sent (BUG-10184)
 		const auto param = (_data[IdxGlobalParamIndexH] << 7) | _data[IdxGlobalParamIndexL];
 
 		if(param == static_cast<uint32_t>(GlobalParameter::SingleMultiMode))
 		{
-			const auto v = _data[IdxGlobalParamValue];
-
-			requestSingle(v ? MidiBufferNum::SingleEditBufferMultiMode : MidiBufferNum::SingleEditBufferSingleMode, MidiSoundLocation::EditBufferFirstMultiSingle);
+			auto& single = _data[IdxGlobalParamValue] ? m_currentMultiSingles[0] : m_currentInstrumentSingles[0];
+			single[IdxSingleParamFirst] = 0;
 		}
 
 		return true;

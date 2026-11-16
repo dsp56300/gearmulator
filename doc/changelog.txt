@@ -264,6 +264,10 @@ Vavra:
 - [Fix] With voice expansion turned on, playback could crash the plugin when the
         computer was busy.
 
+- [Fix] BUG-10184 An Arrangement loaded while Vavra was in single mode often lost
+        its Multi or parts of it, its name and MIDI channels for example, and
+        part 1 showed the sound that was loaded before in single mode.
+
 JE8086:
 
 - [Fix] BUG-10508 The Remote KBD CH of the JP-8080 had no effect: Split, Dual,
