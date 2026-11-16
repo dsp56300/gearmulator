@@ -1,0 +1,3 @@
+// MinGW builds only currently.
+// app.manifest is a copy of the manifest embedded by the MSVC build.
+1 24 "app.manifest"
