@@ -224,8 +224,13 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 
 	addAndMakeVisible(_component);
 
-	setResizable(true, true);
 	setConstrainer(&m_sizeConstrainer);
+
+	// Only the corner resizes a window with a fixed aspect ratio (BUG-10269). Once the host may resize it, a drag of any
+	// edge leaves the aspect ratio to the plugin format: each format and host resolves it in its own way, several of
+	// them wrong. The corner goes through our constrainer in all of them. The free window mode takes any size the host
+	// asks for. Called after setConstrainer(), which lets the host resize again.
+	setResizable(isFreeWindowMode(), true);
 }
 
 void EditorWindow::updateSizeConstrainer()

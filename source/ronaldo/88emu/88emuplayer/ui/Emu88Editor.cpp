@@ -35,8 +35,10 @@ namespace emu88Player
 			m_sizeConstrainer.setMinimumSize(g_defaultWidth / 2, g_defaultHeight / 2);
 			m_sizeConstrainer.setMaximumSize(g_defaultWidth * 3, g_defaultHeight * 3);
 			m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(g_defaultWidth) / g_defaultHeight);
-			setResizable(true, true);
 			setConstrainer(&m_sizeConstrainer);
+			// only the corner, a host that resizes from an edge breaks the aspect ratio (BUG-10269); after
+			// setConstrainer(), which lets the host resize again
+			setResizable(false, true);
 		}
 
 		loadSkin(readSkinFromConfig());

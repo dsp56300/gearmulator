@@ -90,6 +90,10 @@ Framework:
         (Bitwig on macOS) flash before the UI appears, it stays black until
         the first frame.
 
+- [Fix] BUG-10269 The plugin window is resized with the corner at its lower
+        right only. Dragging another edge or corner of the window resized it in
+        a different way in every plugin format and host, often wrongly.
+
 - [Imp] BUG-10527 Linux: the standalone versions can play through JACK besides
         ALSA, and with pipewire-jack straight into PipeWire.
 
