@@ -90,6 +90,10 @@ target_compile_definitions(tusInstaller PRIVATE
 set_property(TARGET tusInstaller PROPERTY FOLDER "Gearmulator")
 set_property(TARGET installerBinaryData PROPERTY FOLDER "Gearmulator")
 
+if(MINGW)
+	tus_embedWindowsManifest(tusInstaller)
+endif()
+
 # Packaged like any other product we ship: an install rule puts it in a CPack component, which
 # cpack turns into TheUsualSuspects-PluginManager-<version>-<platform>.zip, and the export tells
 # scripts/deployAll.cmake which folder to upload that to. A bundle on macOS, a bare program on
