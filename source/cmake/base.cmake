@@ -127,7 +127,15 @@ else()
 
 	string(APPEND CMAKE_C_FLAGS_RELEASE " -Ofast -fno-stack-protector")
 	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -Ofast -fno-stack-protector")
-	string(APPEND CMAKE_CXX_FLAGS_DEBUG " -rdynamic")
+	# -rdynamic fills the ELF dynamic symbol table, which is what lets backtraces, profilers
+	# and plugins find a Debug executable's symbols at run time. PE has no such table -
+	# MinGW's driver does not even recognise the option - and Emscripten has nothing to fill,
+	# and both land in this branch, so the platform is what separates them.
+	# check_linker_flag() asks for that capability directly, but needs CMake 3.18: use it
+	# once the minimum here allows.
+	if(UNIX)
+		string(APPEND CMAKE_CXX_FLAGS_DEBUG " -rdynamic")
+	endif()
 
 	# Link the C++ runtime statically so that shipped binaries do not require the
 	# libstdc++ of the machine they happened to be built on. Without this a binary
