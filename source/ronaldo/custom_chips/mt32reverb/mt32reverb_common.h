@@ -58,8 +58,12 @@ namespace mt32ReverbLib
 
 		bool write()    const { return (control[0] & 2) == 0; }	// store input or accumulator to RAM
 		bool useInput() const { return (control[0] & 1) != 0; }	// the stored value is the input
-		bool load()     const { return (control[0] & 4) == 0; }	// the shifter takes the stored / read value
+		bool anyLoad()  const { return load(control[0]) || load(control[1]); }
+		// The shifter takes the step's RAM word (after the write, if any) after this half-step.
+		// Either half can load; the microcode ROMs only ever load on the first.
+		static bool load(const uint8_t _control)   { return (_control & 4) == 0; }
 		static bool clear(const uint8_t _control)  { return (_control & 0x10) == 0; }
+		// Inverts the saturated sum of an add; a half-step that does not add leaves it alone.
 		static bool negate(const uint8_t _control) { return (_control & 8) != 0; }
 	};
 

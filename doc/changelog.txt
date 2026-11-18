@@ -468,6 +468,10 @@ Plugin Manager:
         with the wrong timbre; a synth first partial was also ring modulated
         with the previous voice.
 
+- [Fix] MT-32/CM-32L: fixes on the reverb emulation. Tap Delay summed one of its
+        taps wrongly and sounded quite different from the hardware, and every
+        mode rounded slightly differently (thanks to NukeYKT).
+
 2.2.27:
 
 Framework:

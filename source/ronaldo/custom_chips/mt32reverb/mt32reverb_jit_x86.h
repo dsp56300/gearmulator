@@ -134,7 +134,7 @@ namespace mt32ReverbLib
 
 			const auto inputOffset = _step < InputSplit ? offsetof(State, inputRight) : offsetof(State, inputLeft);
 			const bool write = _s.write();
-			const bool load = _s.load();
+			const bool load = _s.anyLoad();
 
 			if (write || load)
 			{
@@ -143,6 +143,7 @@ namespace mt32ReverbLib
 			}
 			const auto ram = x86::word_ptr(regState, tAddr, 1, static_cast<int32_t>(offsetof(State, ram)));
 
+			// tNext: the RAM word a load gives the shifter, held across both half-steps.
 			if (write)
 			{
 				auto value = regAcc;
@@ -158,19 +159,28 @@ namespace mt32ReverbLib
 			else if (load)
 				a.movsx(tNext, ram);
 
-			// A load clears the carry ahead of the first update and it stays clear for the
-			// second; the tail recomputes it from the shifted value either way.
-			emitUpdate(_s.control[0], _s.mask[0], load);
-			if (load)
+			emitHalf(_s.control[0], _s.mask[0]);
+			emitHalf(_s.control[1], _s.mask[1]);
+		}
+
+		// The shifter and carry after a half-step: the old shifter's low bit, kept while the
+		// new shifter (shifted, or the loaded word) is negative.
+		void emitHalf(const uint8_t _control, const uint8_t _mask)
+		{
+			auto& a = *m_asm;
+			emitUpdate(_control, _mask);
+			if (Step::load(_control))
+			{
+				a.mov(regCarry, tNext);
+				a.shr(regCarry, 31);
+				a.and_(regCarry, regShift);
 				a.mov(regShift, tNext);
+			}
 			else
 			{
 				emitNextCarry();
 				a.sar(regShift, 1);
 			}
-			emitUpdate(_s.control[1], _s.mask[1], load);
-			emitNextCarry();
-			a.sar(regShift, 1);
 		}
 
 		// carry = shifter < 0 ? shifter & 1 : 0
@@ -181,69 +191,40 @@ namespace mt32ReverbLib
 			m_asm->and_(regCarry, regShift);
 		}
 
-		void emitClampHigh()
-		{
-			m_asm->cmp(tSum, 0x7fff);
-			m_asm->mov(tConst, 0x7fff);
-			m_asm->cmovg(tSum, tConst);
-		}
-
-		void emitClampLow()
-		{
-			m_asm->cmp(tSum, -0x8000);
-			m_asm->mov(tConst, -0x8000);
-			m_asm->cmovl(tSum, tConst);
-		}
-
-		// One half-step: clear, conditional shift-add with 16-bit saturation, negate. The saw
-		// test is a runtime one only for the masks that neither always nor never hit.
-		void emitUpdate(const uint8_t _control, const uint8_t _mask, const bool _carryZero)
+		// One half-step's accumulator: a clear, or the shift-add with 16-bit saturation and an
+		// optional inversion when the saw selector is in the mask. The saw test is a runtime
+		// one only for the masks that neither always nor never hit.
+		void emitUpdate(const uint8_t _control, const uint8_t _mask)
 		{
 			auto& a = *m_asm;
-			const bool clear = Step::clear(_control);
 
-			if (_mask == 0)
+			if (Step::clear(_control))
 			{
-				if (clear)
-					a.xor_(regAcc, regAcc);
+				a.xor_(regAcc, regAcc);
+				return;
 			}
+			if (_mask == 0)
+				return;
+
+			a.mov(tSum, regAcc);
+			a.add(tSum, regShift);
+			a.add(tSum, regCarry);
+			a.cmp(tSum, 0x7fff);
+			a.mov(tConst, 0x7fff);
+			a.cmovg(tSum, tConst);
+			a.cmp(tSum, -0x8000);
+			a.mov(tConst, -0x8000);
+			a.cmovl(tSum, tConst);
+			if (Step::negate(_control))
+				a.not_(tSum);
+
+			if (_mask == 0x0f)
+				a.mov(regAcc, tSum);
 			else
 			{
-				auto sum = tSum;
-				if (clear)
-				{
-					if (_carryZero)
-						sum = regShift;				// already a 16-bit value
-					else
-					{
-						a.mov(tSum, regShift);
-						a.add(tSum, regCarry);
-						emitClampHigh();
-					}
-				}
-				else
-				{
-					a.mov(tSum, regAcc);
-					a.add(tSum, regShift);
-					if (!_carryZero)
-						a.add(tSum, regCarry);
-					emitClampHigh();
-					emitClampLow();
-				}
-
-				if (_mask == 0x0f)
-					a.mov(regAcc, sum);
-				else
-				{
-					if (clear)
-						a.xor_(regAcc, regAcc);	// before the test: xor writes the flags
-					a.test(st(offsetof(State, sawBits)), _mask);
-					a.cmovnz(regAcc, sum);
-				}
+				a.test(st(offsetof(State, sawBits)), _mask);
+				a.cmovnz(regAcc, tSum);
 			}
-
-			if (Step::negate(_control))
-				a.not_(regAcc);
 		}
 
 		asmjit::JitRuntime m_jitRuntime;
