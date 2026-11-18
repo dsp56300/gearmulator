@@ -37,3 +37,11 @@ else()
 	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/88emuClapHeadless.map "{ global: clap_entry; local: *; };\n")
 	target_link_options(88emuClapHeadless PRIVATE -Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/88emuClapHeadless.map)
 endif()
+
+# Its own archive of the 88emuPlayer product, TheUsualSuspects-88emuPlayer-CLAPHeadless-<version>-<system>.zip,
+# so it is deployed and released wherever 88emuPlayer is. Hosts that bundle it (DOSBox Staging downloads it
+# from the GitHub release) unpack it straight into their plugins folder, so the .clap sits at the root on
+# every platform rather than in lib/clap/ on Linux.
+set(clapHeadlessComponent 88emuPlayer-CLAPHeadless)
+install(TARGETS 88emuClapHeadless DESTINATION . COMPONENT ${clapHeadlessComponent})
+install(FILES "${CMAKE_SOURCE_DIR}/LICENSE.md" DESTINATION . COMPONENT ${clapHeadlessComponent})

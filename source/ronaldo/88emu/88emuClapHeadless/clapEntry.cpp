@@ -3,13 +3,15 @@
  *
  * Not for music production. There is no editor, no parameter and no saved state; a DAW user wants
  * 88emuPlayer. This exists so that emulators can play their MIDI through 88emu: DOSBox Staging's
- * generic CLAP MIDI device first of all, which offers a plugin no host extension at all (no log,
- * state, params, GUI, timer or main thread callback). So everything here works without one: the
- * device is chosen by picking its plugin from the factory, and the ROMs are found on the search
- * paths that EMU88_ROM_PATH and SOUNDCANVAS_ROM_PATH add to the defaults.
+ * CLAP MIDI synths first of all, which offer a plugin no host extension at all (no log, state,
+ * params, GUI, timer or main thread callback). So everything here works without one: the device is
+ * chosen by picking its plugin from the factory, and the ROMs are found on the search paths that
+ * EMU88_ROM_PATH and SOUNDCANVAS_ROM_PATH add to the defaults.
  *
  * Written against c_interface.h only. One plugin per device, in presentation order; a device
  * whose ROMs are missing is still listed, so plugin indices stay put, and fails to init.
+ * A plugin id is com.theusualsuspects.88emuclapheadless.<device key> (emu88_get_device_key()):
+ * hosts hard-code them, so they never change once released.
  * The firmware boots in activate(), on the main thread, and takes MIDI from the first process().
  */
 
@@ -18,7 +20,6 @@
 #include "clap/clap.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -55,19 +56,6 @@ namespace emu88ClapHeadless
 
 		std::vector<Descriptor> g_descriptors;
 
-		// "CM-300 / SCC-1" -> "cm300scc1". A note in parentheses is not part of it, so that
-		// "MT-32 1.x (experimental)" keeps its id when it stops being experimental.
-		std::string toIdSuffix(const char* _name)
-		{
-			std::string suffix;
-			for(const char* c = _name; *c && *c != '('; ++c)
-			{
-				if(std::isalnum(static_cast<unsigned char>(*c)))
-					suffix += static_cast<char>(std::tolower(static_cast<unsigned char>(*c)));
-			}
-			return suffix;
-		}
-
 		void createDescriptors()
 		{
 			const auto count = emu88_get_device_count();
@@ -79,7 +67,11 @@ namespace emu88ClapHeadless
 				d.device = emu88_get_device_id(i);
 				const char* name = emu88_get_device_name(d.device);
 				d.name = name ? name : "unknown";
-				d.id = "com.theusualsuspects.88emuclapheadless." + toIdSuffix(d.name.c_str());
+
+				// Hosts pick a device by its plugin id (DOSBox Staging hard-codes them), so build it
+				// from the device key, which never changes, not from the display name, which may
+				const char* key = emu88_get_device_key(d.device);
+				d.id = std::string("com.theusualsuspects.88emuclapheadless.") + (key ? key : "unknown");
 			}
 
 			// The strings do not move any more

@@ -77,6 +77,10 @@ namespace emu88Lib
 	struct DeviceProfile
 	{
 		const char* displayName;
+		// Lowercase identifier that hosts store or match a device by: CLAP plugin ids
+		// (88emuClapHeadless), emulator config files. Unlike the display name it never
+		// changes once released, and a new device gets a new one.
+		const char* key;
 		uint8_t groupCount;
 	};
 

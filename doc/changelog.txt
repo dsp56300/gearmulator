@@ -451,6 +451,11 @@ Plugin Manager:
 - [Fix] Settings: a page taller than the window, such as General, can be
         scrolled. Its last controls were cut off.
 
+- [New] 88emuClapHeadless: 88emu as a headless CLAP instrument for emulators
+        such as DOSBox Staging, one plugin per device, in its own archive
+        (88emuPlayer-CLAPHeadless). The ROMs are found in the folders that the
+        EMU88_ROM_PATH environment variable lists.
+
 - [Imp] SC-8820, SC-8850, NU-10B and MIIG5: more accurate CPU timing, with
         the page mode and refresh of their DRAM and, on the MIIG5, the
         instruction cache of its CPU.

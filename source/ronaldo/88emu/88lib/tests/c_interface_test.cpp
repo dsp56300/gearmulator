@@ -25,17 +25,31 @@ namespace
 		const auto count = emu88_get_device_count();
 		CHECK(count > 0);
 		std::set<emu88_device_id> ids;
+		std::set<std::string> keys;
 		for(int i = 0; i < count; ++i)
 		{
 			const auto id = emu88_get_device_id(i);
 			CHECK(id >= 0);
 			CHECK(ids.insert(id).second);
 			CHECK(emu88_get_device_name(id) != nullptr);
+
+			// Keys end up in CLAP plugin ids: unique, lowercase letters and digits only
+			const auto* key = emu88_get_device_key(id);
+			CHECK(key != nullptr && *key != '\0');
+			CHECK(keys.insert(key).second);
+			for(const auto* c = key; *c; ++c)
+				CHECK((*c >= 'a' && *c <= 'z') || (*c >= '0' && *c <= '9'));
 			const auto ports = emu88_get_device_midi_port_count(id);
 			CHECK(ports >= 1 && ports <= 4);
 		}
 		CHECK(ids.count(EMU88_DEVICE_SC88PRO) == 1);
 		CHECK_EQ(emu88_get_device_midi_port_count(EMU88_DEVICE_SC8850), 4);
+
+		// Released keys never change: hosts such as DOSBox Staging hard-code them
+		CHECK_EQ(std::string(emu88_get_device_key(EMU88_DEVICE_SC88PRO)), std::string("sc88pro"));
+		CHECK_EQ(std::string(emu88_get_device_key(EMU88_DEVICE_SC55MK2)), std::string("sc55mkii"));
+		CHECK(emu88_get_device_key(-1) == nullptr);
+		CHECK(emu88_get_device_key(1000) == nullptr);
 
 		CHECK_EQ(emu88_get_device_id(-1), -1);
 		CHECK_EQ(emu88_get_device_id(count), -1);
