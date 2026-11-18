@@ -20,6 +20,10 @@
 // every 50 ms from power-on. PROE_SYSEX_FILE=<file> sends one SysEx message per line (hex) 0.1 s apart and
 // prints the LCD as it changes and what went out on the link, with the firmware's power-on protection
 // (PROE_UNPROTECTED: without); PROE_SYSEX_BUFFER adds the receive state and the MIDI IN ring after each.
+// PROE_SEQ=<row>.<bit>,... presses switches of the matrix in turn (a+b together), with the style card
+// PROE_CARD in the slot, and prints the LCD and the style state after each; PROE_PC_SCAN=<hex> lists the
+// switches that make the firmware run the code at that address (PROE_PC_SCAN_STYLE: after STYLE).
+// EMU88_PROE_TEST_CARD=<file> names a style card (a TN-SC1 dump) to check the card slot with.
 namespace
 {
 	using emu88Lib::ProE;
@@ -77,6 +81,84 @@ int main(const int _argc, char** _argv)
 
 	ProE proe(roms, sound);
 	CHECK(proe.isValid());
+
+	if(const char* sequence = std::getenv("PROE_SEQ"))
+	{
+		// Bring-up: boots with the style card PROE_CARD (if any), then presses the switches of the matrix
+		// listed as <row>.<bit>, comma separated; <row>.<bit>+<row>.<bit> presses them together. After
+		// each step the LCD, the style number (HC11 RAM 72), 2409-240B and the card state (AF).
+		std::vector<uint8_t> card;
+		if(const char* cardFile = std::getenv("PROE_CARD"))
+			card = load(cardFile);
+		ProE seq(roms, sound, card);
+		render(seq, 4.0);
+		const auto show = [&](const std::string& _what)
+		{
+			const auto* internal = seq.machine().bus().mem();
+			std::printf("%-12s |%s|%s| 72=%02x 60=%02x 0b=%02x 2409=%02x %02x %02x AF=%02x\n", _what.c_str(),
+				lcdLine(seq, 0).c_str(), lcdLine(seq, 1).c_str(), internal[0x72], internal[0x60], internal[0x0b],
+				seq.ram()[0x409], seq.ram()[0x40a], seq.ram()[0x40b], internal[0xaf]);
+		};
+		show("boot");
+		std::string step;
+		for(const char* p = sequence; ; ++p)
+		{
+			if(*p && *p != ',') { step += *p; continue; }
+			std::vector<std::pair<unsigned, unsigned>> keys;
+			for(size_t i = 0; i < step.size(); )
+			{
+				const auto dot = step.find('.', i);
+				auto end = step.find('+', i);
+				if(end == std::string::npos) end = step.size();
+				keys.emplace_back(std::stoul(step.substr(i, dot - i)), std::stoul(step.substr(dot + 1, end - dot - 1)));
+				i = end + 1;
+			}
+			for(const auto& [r, b] : keys) { seq.setKey(r, b, true); render(seq, 0.1); }
+			render(seq, 0.1);
+			for(const auto& [r, b] : keys) seq.setKey(r, b, false);
+			render(seq, 0.5);
+			show(step);
+			step.clear();
+			if(!*p) break;
+		}
+		return 0;
+	}
+
+	if(const char* target = std::getenv("PROE_PC_SCAN"))
+	{
+		// Bring-up: which switch of the matrix makes the firmware execute the code at that address (hex)
+		// within 0.3 s of being pressed, from a fresh boot each.
+		const auto pc = static_cast<uint16_t>(std::strtoul(target, nullptr, 16));
+		for(unsigned row = 0; row < 8; ++row)
+		{
+			for(unsigned b = 0; b < 11; ++b)
+			{
+				std::vector<uint8_t> card;
+				if(const char* cardFile = std::getenv("PROE_CARD"))
+					card = load(cardFile);
+				ProE scan(roms, sound, card);
+				render(scan, 4.0);
+				// PROE_PC_SCAN_STYLE: STYLE pressed first.
+				if(std::getenv("PROE_PC_SCAN_STYLE"))
+				{
+					scan.setKey(0, 0, true);
+					render(scan, 0.15);
+					scan.setKey(0, 0, false);
+					render(scan, 0.5);
+				}
+				scan.setKey(row, b, true);
+				bool hit = false;
+				for(uint64_t cycles = 0; cycles < ProE::EClock * 3 / 10 && !hit; )
+				{
+					cycles += scan.machine().step();
+					hit = scan.machine().cpu().pc() == pc;
+				}
+				if(hit)
+					std::printf("%u.%u reaches %04x\n", row, b, pc);
+			}
+		}
+		return 0;
+	}
 
 	if(const char* file = std::getenv("PROE_SYSEX_FILE"))
 	{
@@ -269,6 +351,57 @@ int main(const int _argc, char** _argv)
 		dt1(guarded);
 		std::printf("protected: LCD |%s|%s|\n", lcdLine(guarded, 0).c_str(), lcdLine(guarded, 1).c_str());
 		CHECK(protectedShown(guarded));
+	}
+
+	// The style card slot: an image the firmware takes is accepted, anything else is not.
+	{
+		std::vector<uint8_t> e20(ProE::CardBankSize, 0xff);
+		const uint8_t header[] = {'R', 'o', 'l', 'a', 'n', 'd', ' ', 'E', '-', '2', '0', ' ', 'N', 0xb1, 'Q', 0xae};
+		std::copy(std::begin(header), std::end(header), e20.begin());
+		CHECK(ProE::isCardImage(e20));
+		auto bad = e20;
+		bad[13] = 'N';
+		CHECK(!ProE::isCardImage(bad));
+		CHECK(!ProE::isCardImage(std::vector<uint8_t>(e20.begin(), e20.begin() + 0x4000)));
+	}
+	// Without a card, BANK 5 (the card's first bank) does not leave the internal styles. With one
+	// (EMU88_PROE_TEST_CARD, a TN-SC1 style card), it selects the card's styles, marked C, and they play.
+	{
+		const auto pressKey = [](ProE& _board, const ProEButton _button)
+		{
+			_board.setButtons(bit(_button));
+			render(_board, 0.15);
+			_board.setButtons(0);
+			render(_board, 0.5);
+		};
+		ProE empty(roms, sound);
+		render(empty, 4.0);
+		pressKey(empty, ProEButton::Style);
+		pressKey(empty, ProEButton::Bank5);
+		pressKey(empty, ProEButton::Number1);
+		std::printf("no card: LCD |%s|%s|\n", lcdLine(empty, 0).c_str(), lcdLine(empty, 1).c_str());
+		CHECK(lcdLine(empty, 0)[0] != 'C');
+
+		if(const char* cardFile = std::getenv("EMU88_PROE_TEST_CARD"))
+		{
+			auto card = load(cardFile);
+			CHECK(ProE::isCardImage(card));
+			ProE withCard(roms, sound, card);
+			CHECK(withCard.hasCard());
+			render(withCard, 4.0);
+			pressKey(withCard, ProEButton::Style);
+			pressKey(withCard, ProEButton::Bank5);
+			pressKey(withCard, ProEButton::Number1);
+			pressKey(withCard, ProEButton::StartStop);
+			for(const uint8_t note : {0x30, 0x34, 0x37})
+				withCard.addMidiEvent(synthLib::SMidiEvent(synthLib::MidiEventSource::Host, 0x90, note, 0x64));
+			const auto cardPeak = render(withCard, 3.0);
+			std::printf("card: LCD |%s|%s|, peak %d\n", lcdLine(withCard, 0).c_str(), lcdLine(withCard, 1).c_str(),
+				cardPeak);
+			CHECK(lcdLine(withCard, 0).rfind("C1 ", 0) == 0);
+			CHECK(cardPeak > 1000);
+			CHECK(withCard.machine().cpu().illegal_instructions() == 0);
+		}
 	}
 
 	return test::finish("proe_test");

@@ -211,6 +211,12 @@ namespace emu88Lib
 		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Mv30;
 	}
 
+	// The boards with a slot for a style card: the PRO-E, which takes its own and the E-20's (TN-SC1 series).
+	constexpr bool hasStyleCardSlot(const DeviceModel _model)
+	{
+		return _model == DeviceModel::ProE;
+	}
+
 	// Modules that run in their GM mode and nothing else: construction sets them up, and they
 	// have no panel or display here.
 	constexpr bool isGmModuleModel(const DeviceModel _model)

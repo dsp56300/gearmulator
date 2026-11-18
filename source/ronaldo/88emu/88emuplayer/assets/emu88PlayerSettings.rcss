@@ -56,14 +56,21 @@ body {
 .hardwareSettingsPages {
 	flex: 1 1 auto;
 	box-sizing: border-box;
+	/* A definite height, which a flex-sized box does not get, so that a page can scroll in it */
+	height: 100%;
 	padding: 15dp 17dp;
 	overflow: hidden;
 }
 
+/* A page taller than the window scrolls rather than cutting its last controls off. */
 .hardwareSettingsPage {
 	display: block;
+	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
+	/* keeps the controls clear of the scrollbar */
+	padding-right: 6dp;
+	overflow-y: auto;
 }
 
 .hardwareSettingsPageHeader {

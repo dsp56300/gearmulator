@@ -139,8 +139,8 @@ namespace emu88Player
 		void showRomNotices();
 		void showMissingRomNotice(emu88Lib::DeviceModel _model);
 		void showRomWarnings() const;
-		void browsePcmCard();
-		void applyPcmCardPath(const std::string& _path);
+		void browseCard(Processor::CardSlot _slot);
+		void applyCardPath(Processor::CardSlot _slot, const std::string& _path);
 
 		void timerCallback() override;
 		void setPointerButton(uint32_t _button, bool _pressed);
@@ -171,7 +171,7 @@ namespace emu88Player
 		std::unique_ptr<genericUI::MessageBox::FileDialog> m_playlistChooser;
 		std::unique_ptr<genericUI::MessageBox::FileDialog> m_playlistFileChooser;
 		std::unique_ptr<genericUI::MessageBox::FileDialog> m_recordingChooser;
-		std::unique_ptr<genericUI::MessageBox::FileDialog> m_pcmCardChooser;
+		std::unique_ptr<genericUI::MessageBox::FileDialog> m_cardChooser;
 		std::unique_ptr<TitleBarButton> m_recordButton;
 		Skin m_skin;
 		std::map<std::string, std::vector<char>> m_fileCache;

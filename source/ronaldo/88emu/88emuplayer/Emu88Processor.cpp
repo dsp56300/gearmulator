@@ -20,6 +20,17 @@ namespace emu88Player
 		constexpr auto g_factoryResetOnLoadKey = "factoryResetOnLoad";
 		constexpr auto g_fastBootKey = "fastBoot";
 		constexpr auto g_pcmCardPathKey = "pcmCardPath";
+		constexpr auto g_styleCardPathKey = "styleCardPath";
+
+		const char* cardPathKey(const Processor::CardSlot _slot)
+		{
+			return _slot == Processor::CardSlot::Style ? g_styleCardPathKey : g_pcmCardPathKey;
+		}
+
+		std::vector<uint8_t> loadCard(const Processor::CardSlot _slot, const juce::File& _file)
+		{
+			return _slot == Processor::CardSlot::Style ? loadStyleCard(_file) : loadPcmCard(_file);
+		}
 
 		std::shared_ptr<const emu88Lib::gs::ToneCatalog> loadToneCatalog(const emu88Lib::DeviceModel _model,
 			std::string& _error)
@@ -82,23 +93,27 @@ namespace emu88Player
 		if(analogMode >= 0 && emu88Lib::isAnalogOutputModeValue(static_cast<uint32_t>(analogMode)))
 			m_analogOutputMode = static_cast<emu88Lib::AnalogOutputMode>(analogMode);
 
-		// The card chosen in the settings, or this session's --pcm-card, which the launcher
-		// has already checked. One that has gone missing since it was chosen leaves the slot
+		// The cards chosen in the settings, or this session's --pcm-card, which the launcher
+		// has already checked. One that has gone missing since it was chosen leaves its slot
 		// empty rather than keeping the player from starting.
-		if(const auto cardPath = juce::String::fromUTF8(pcmCardPath().c_str());
-		   cardPath.isNotEmpty() && juce::File::isAbsolutePath(cardPath))
+		for(const auto slot : {CardSlot::Pcm, CardSlot::Style})
 		{
-			try
+			auto& card = slot == CardSlot::Style ? m_styleCard : m_pcmCard;
+			if(const auto path = juce::String::fromUTF8(cardPath(slot).c_str());
+			   path.isNotEmpty() && juce::File::isAbsolutePath(path))
 			{
-				m_pcmCard = loadPcmCard(juce::File(cardPath));
-			}
-			catch(const std::exception&)
-			{
-				m_pcmCard.clear();
+				try
+				{
+					card = loadCard(slot, juce::File(path));
+				}
+				catch(const std::exception&)
+				{
+					card.clear();
+				}
 			}
 		}
 		auto params = createDeviceParams(m_deviceModel);
-		m_device = std::make_unique<emu88Lib::HardwareDevice>(params, bootOptions(), m_pcmCard);
+		m_device = std::make_unique<emu88Lib::HardwareDevice>(params, bootOptions(), m_pcmCard, m_styleCard);
 		// Before the engine sees the device, so the first host rate it negotiates already
 		// includes the model's oversampling.
 		m_device->setAnalogOutputMode(m_analogOutputMode);
@@ -233,12 +248,17 @@ namespace emu88Player
 		m_config->saveIfNeeded();
 	}
 
-	std::string Processor::pcmCardPath() const
+	bool Processor::hasCardSlot(const CardSlot _slot, const emu88Lib::DeviceModel _model)
 	{
-		return m_config->getValue(g_pcmCardPathKey).toStdString();
+		return _slot == CardSlot::Style ? emu88Lib::hasStyleCardSlot(_model) : emu88Lib::hasPcmCardSlot(_model);
 	}
 
-	bool Processor::setPcmCardPath(const std::string& _path, std::string& _error)
+	std::string Processor::cardPath(const CardSlot _slot) const
+	{
+		return m_config->getValue(cardPathKey(_slot)).toStdString();
+	}
+
+	bool Processor::setCardPath(const CardSlot _slot, const std::string& _path, std::string& _error)
 	{
 		std::vector<uint8_t> card;
 		const auto path = juce::String::fromUTF8(_path.c_str());
@@ -253,7 +273,7 @@ namespace emu88Player
 			}
 			try
 			{
-				card = loadPcmCard(juce::File(path));
+				card = loadCard(_slot, juce::File(path));
 			}
 			catch(const std::exception& _e)
 			{
@@ -261,8 +281,8 @@ namespace emu88Player
 				return false;
 			}
 		}
-		m_pcmCard = std::move(card);
-		m_config->setValue(g_pcmCardPathKey, path);
+		(_slot == CardSlot::Style ? m_styleCard : m_pcmCard) = std::move(card);
+		m_config->setValue(cardPathKey(_slot), path);
 		m_config->saveIfNeeded();
 		return true;
 	}
@@ -318,7 +338,8 @@ namespace emu88Player
 
 		auto boot = bootOptions();
 		boot.initialPanelButtons = heldButtons;
-		auto replacementDevice = std::make_unique<emu88Lib::HardwareDevice>(createDeviceParams(_model), boot, m_pcmCard);
+		auto replacementDevice =
+			std::make_unique<emu88Lib::HardwareDevice>(createDeviceParams(_model), boot, m_pcmCard, m_styleCard);
 		replacementDevice->setAnalogOutputMode(m_analogOutputMode);
 		auto replacementEngine = std::make_unique<synthLib::Plugin>(
 			replacementDevice.get(), [](synthLib::Device*) { return nullptr; });

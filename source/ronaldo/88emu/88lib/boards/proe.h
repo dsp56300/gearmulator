@@ -77,11 +77,12 @@ namespace emu88Lib
 	//   1400-1401  MC6850 (IRQ on XIRQ)
 	//   160D       LCD control lines: bit 0 E, bit 1 R/W, bit 2 RS
 	//   160E       LCD data bus
-	//   180D       bank latch: bits 7-4 the 4000-BFFF ROM bank, bits 1-0 the 2000-3FFF RAM bank
+	//   180D       bank latch: bits 7-4 the 4000-BFFF ROM bank, bit 3 the style card in its place
+	//              (bit 2 the upper 32 KiB of a 64 KiB card), bits 1-0 the 2000-3FFF RAM bank
 	//   180E       LED latch, active low, lighting the row PA5-PA3 select (rows 1-6)
 	//   1A00-1BFF  MB63H149 (its SRAM; the key assigner itself is not modelled)
 	//   2000-3FFF  32 KiB battery-backed RAM, four banks
-	//   4000-BFFF  pattern ROM banks 0-7, 8-15 the style card slot (empty here)
+	//   4000-BFFF  pattern ROM banks 0-7, or the style card
 	//   C000-FFFF  program ROM
 	//
 	// The dial pulses PA7, which the pulse accumulator counts, with its direction on PD2.
@@ -96,6 +97,14 @@ namespace emu88Lib
 	// is MIDI at 31250 baud addressed to an MT-32-class synthesizer: SysEx with model ID 16h for
 	// the system and patch temporary areas, the parts on channels 2-9, rhythm on 10.
 	//
+	// The style card: the firmware selects it with latch value 08 (0C for its second half, the
+	// tables at ED5D) and looks for it at C37F -> D456, which reads BFFF of the card, bit 1 set
+	// meaning a card is in the slot, then checks the header at 4000: "Roland PROE D" for its own
+	// cards, "Roland E-20 N" for the E-20's TN-SC1 series, each letter followed by its complement
+	// and a second letter, X or Q, with its own. An empty slot reads 00 here, so the firmware
+	// sees none. The card's styles are on BANK 5 (style numbers 40h up, shown as C1-C8); without
+	// a card BANK 5 stays on the internal styles.
+	//
 	// Register map and key matrix after MAME's driver (roland_proe.cpp).
 	class ProE
 	{
@@ -106,8 +115,14 @@ namespace emu88Lib
 		static constexpr uint32_t CpuClock = 8000000;	// EXTAL
 		static constexpr uint32_t EClock = CpuClock / 4;
 		static constexpr size_t RamSize = 0x8000;
+		static constexpr size_t CardBankSize = 0x8000;
+		static constexpr size_t MaxCardSize = 2 * CardBankSize;
 
-		ProE(const ProERomSet& _roms, const LaRomSet& _soundBoard);
+		// _card is a style card image (PRO-E or E-20 format, see isCardImage()); empty leaves the slot empty.
+		ProE(const ProERomSet& _roms, const LaRomSet& _soundBoard, std::vector<uint8_t> _card = {});
+		// Whether _image is a style card the firmware takes: 32 or 64 KiB with a PRO-E or E-20 header.
+		static bool isCardImage(const std::vector<uint8_t>& _image);
+		bool hasCard() const { return !m_card.empty(); }
 
 		ProE(const ProE&) = delete;
 		ProE& operator=(const ProE&) = delete;
@@ -177,7 +192,7 @@ namespace emu88Lib
 		void ioWrite(uint32_t _addr, uint8_t _value);
 		size_t ramOffset(uint32_t _addr) const { return size_t(m_ramBank) * RamWindowSize + (_addr - RamWindow); }
 		void ramWrite(uint32_t _addr, uint8_t _value);
-		void selectRomBank(uint8_t _bank);
+		void selectRomBank(uint8_t _latch);
 		void lcdLines(uint8_t _value);
 		void ledIntegrate();
 		uint8_t portAPins() const;
@@ -186,6 +201,7 @@ namespace emu88Lib
 		bool m_valid = false;
 		std::vector<uint8_t> m_program;
 		std::vector<uint8_t> m_patterns;
+		std::vector<uint8_t> m_card;
 
 		m6801::Hc11Machine m_machine;
 		m6801::Mc6850 m_acia{m_machine.sched(), m_machine.cpu()};
@@ -195,6 +211,7 @@ namespace emu88Lib
 
 		std::vector<uint8_t> m_ram = std::vector<uint8_t>(RamSize, 0);
 		std::array<uint8_t, 0x800> m_keyAssigner{};
+		// The code bank selectRomBank() mapped, see there.
 		uint8_t m_romBank = 0xff, m_ramBank = 0;
 		bool m_protectAtPowerOn = false;
 

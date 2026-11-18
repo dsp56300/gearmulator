@@ -92,7 +92,7 @@ namespace emu88Lib
 	}
 
 	HardwareDevice::HardwareDevice(const synthLib::DeviceCreateParams& _params, const BootOptions& _boot,
-	                               const std::vector<uint8_t>& _pcmCard)
+	                               const std::vector<uint8_t>& _pcmCard, const std::vector<uint8_t>& _styleCard)
 		: synthLib::Device(_params)
 	{
 		if(!isDeviceModelValue(_params.customData))
@@ -149,7 +149,7 @@ namespace emu88Lib
 			const auto roms = RomLoader::findProERomSet();
 			const auto sound = RomLoader::findLaRomSet(LaModel::Cm32l);
 			if(!roms.isValid() || !sound.isValid()) break;
-			m_proe = std::make_unique<ProE>(roms, sound);
+			m_proe = std::make_unique<ProE>(roms, sound, _styleCard);
 			break;
 		}
 		case DeviceModel::Sc8820:
@@ -271,6 +271,11 @@ namespace emu88Lib
 	bool HardwareDevice::isPcmCardImage(const std::vector<uint8_t>& _image)
 	{
 		return !Cm32p::decodeCard(_image).empty();
+	}
+
+	bool HardwareDevice::isStyleCardImage(const std::vector<uint8_t>& _image)
+	{
+		return ProE::isCardImage(_image);
 	}
 
 	float HardwareDevice::getSamplerate() const

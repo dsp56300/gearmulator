@@ -83,11 +83,15 @@ namespace emu88Lib
 		};
 
 		// _pcmCard is a raw card image for a board with a PCM card slot (the CM-32P, the CM-64's
-		// PCM half, the MV-30's card A); empty leaves the slot empty.
+		// PCM half, the MV-30's card A), _styleCard one for a board with a style card slot (the
+		// PRO-E); empty leaves the slot empty.
 		explicit HardwareDevice(const synthLib::DeviceCreateParams& _params, const BootOptions& _boot = {},
-		                        const std::vector<uint8_t>& _pcmCard = {});
+		                        const std::vector<uint8_t>& _pcmCard = {},
+		                        const std::vector<uint8_t>& _styleCard = {});
 		// Whether the CM-32P can read _image as a PCM card.
 		static bool isPcmCardImage(const std::vector<uint8_t>& _image);
+		// Whether the PRO-E can read _image as a style card.
+		static bool isStyleCardImage(const std::vector<uint8_t>& _image);
 		~HardwareDevice() override;
 
 		float getSamplerate() const override;
