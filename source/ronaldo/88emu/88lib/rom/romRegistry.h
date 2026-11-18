@@ -831,7 +831,7 @@ namespace emu88Lib
          "SC-155 control", false},
 
         // -----------------------------------------------------------------
-        // NU-10B
+        // JV-1080
         // -----------------------------------------------------------------
         // The SH7034's on-chip boot ROM, the program ROM and the four PCM mask ROMs as raw
         // dumps, which de-scramble like the SC-88's.
@@ -849,7 +849,7 @@ namespace emu88Lib
          "PCM 4", false},
 
         // -----------------------------------------------------------------
-        // MIIG5
+        // XV-3080
         // -----------------------------------------------------------------
         // The SH7042A's mask ROM, the program ROM and the wave image both XPs read, already
         // decoded - its header text is legible - and stamped "Ver001" and 1999-10-13.
@@ -947,9 +947,9 @@ namespace emu88Lib
         case RomDevice::Sc155Mk2:
             return "SC-155mkII";
         case RomDevice::Nu10b:
-            return "NU-10B";
+            return "JV-1080";
         case RomDevice::Miig5:
-            return "MIIG5";
+            return "XV-3080";
         case RomDevice::Mv30:
             return "MV-30";
         case RomDevice::Sk88Pro:

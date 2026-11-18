@@ -14,7 +14,7 @@
 
 namespace emu88Lib
 {
-	// NU-10B mainboard, run as a GM module.
+	// JV-1080 mainboard, run as a GM module.
 	//
 	// SH7034 (20 MHz, 64 KiB on-chip boot ROM) on the cached threaded-code
 	// sh2::Machine7034, a 1 MiB program ROM, one XP tone generator on four

@@ -88,8 +88,8 @@ If you find any, please report it as a bug.
 | VE-GS Pro | `vegspro` | H8/510 | XP3 + LSP | uses high-level sub-mcu emulation, dual midi input, no hardware panel present |
 | SC-8820 | `sc8820` | SH7016 (SH-2) | XP6 + LSP | uses high-level sub-mcu emulation in USB mode, dual midi input, no hardware panel emulated |
 | SC-8850 | `sc8850` | SH7016 (SH-2) | 2 × XP6 + LSP | uses high-level sub-mcu emulation in USB mode, 4x midi input |
-| NU-10B | `nu10b` | SH7034 (SH-1) | XP | runs in GM mode only, no hardware panel or display emulated |
-| MIIG5 | `miig5` | SH7042A (SH-2) | 2 × XP6 | runs in GM mode only, no hardware panel or display emulated |
+| JV-1080 | `nu10b` | SH7034 (SH-1) | XP | runs in GM mode only, no hardware panel or display emulated |
+| XV-3080 | `miig5` | SH7042A (SH-2) | 2 × XP6 | runs in GM mode only, no hardware panel or display emulated |
 
 
 ## ROM loading
@@ -123,8 +123,8 @@ The tables below list accepted filenames. Sizes are binary: 1 KiB = 1,024 bytes;
 | VE-GS Pro | `vegspro_control.bin` — 1 MiB | `vegspro_wave0.bin` — 8 MiB; `vegspro_wave1.bin` — 8 MiB; `vegspro_wave2.bin` — 4 MiB |
 | SC-8820 | `sc8820_internal.bin` — 64 KiB; `sc8820_program.bin` — 2 MiB | `sc8820_wave0.bin` — 16 MiB; `sc8820_wave1.bin` — 8 MiB |
 | SC-8850 | `sc8850_internal.bin` — 64 KiB; `sc8850_program.bin` — 1 MiB; `sc8850_data.bin` — 2 MiB | `sc8850_wave.bin` — 32 MiB; **or** `sc8850_wave0.bin` and `sc8850_wave1.bin` — 16 MiB each |
-| NU-10B | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
-| MIIG5 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
+| JV-1080 | `nu10b_internal.bin` — 64 KiB; `nu10b_program.bin` — 1 MiB | `nu10b_wave0.bin` — 2 MiB; `nu10b_wave1.bin` — 2 MiB; `nu10b_wave2.bin` — 2 MiB; `nu10b_wave3.bin` — 2 MiB |
+| XV-3080 | `miig5_internal.bin` — 256 KiB; `miig5_program.bin` — 2 MiB | `miig5_wave.bin` — 32 MiB, already unscrambled |
 
 SC-88Pro, SK-88Pro, SC-880 and VE-GS Pro may also use the compatible donor waves described below. The standardized names select a device and layout; they do not change the required byte order or contents.
 
