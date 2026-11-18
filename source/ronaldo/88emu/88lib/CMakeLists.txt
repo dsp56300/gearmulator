@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
 project(88lib)
 
@@ -92,7 +92,23 @@ endfunction()
 if(NOT MSVC)
 	set(EMU88_BUNDLE_LIBS)
 	emu88_collect_static_libs(88lib EMU88_BUNDLE_LIBS)
-	set(EMU88_BUNDLE ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.a)
+
+	# A multi-config generator runs this target once per configuration, and the MRI script names
+	# every library by its per-configuration file name. One shared script name would therefore be
+	# generated with different contents for the configurations, which file(GENERATE) rejects, and
+	# one shared archive name would be produced by two configurations. Give both a configuration
+	# specific name there; single-config generators keep the path they always had.
+	# GENERATOR_IS_MULTI_CONFIG, not CMAKE_CONFIGURATION_TYPES: the latter is the list of
+	# configurations, which a user may set, and says nothing about the generator.
+	get_property(EMU88_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+	if(EMU88_MULTI_CONFIG)
+		set(EMU88_BUNDLE_DIR ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
+		set(EMU88_BUNDLE_MRI ${CMAKE_CURRENT_BINARY_DIR}/lib88emu-$<CONFIG>.mri)
+	else()
+		set(EMU88_BUNDLE_DIR ${CMAKE_CURRENT_BINARY_DIR})
+		set(EMU88_BUNDLE_MRI ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.mri)
+	endif()
+	set(EMU88_BUNDLE ${EMU88_BUNDLE_DIR}/lib88emu.a)
 
 	set(_files)
 	set(_mri "create ${EMU88_BUNDLE}\n")
@@ -106,11 +122,12 @@ if(NOT MSVC)
 		# Apple's ar has no MRI scripts; libtool merges archives.
 		set(_bundle_command libtool -static -o ${EMU88_BUNDLE} ${_files})
 	else()
-		file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.mri CONTENT "${_mri}")
-		set(_bundle_command sh -c "${CMAKE_AR} -M < ${CMAKE_CURRENT_BINARY_DIR}/lib88emu.mri")
+		file(GENERATE OUTPUT ${EMU88_BUNDLE_MRI} CONTENT "${_mri}")
+		set(_bundle_command sh -c "${CMAKE_AR} -M < ${EMU88_BUNDLE_MRI}")
 	endif()
 
 	add_custom_target(88emu_bundle
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${EMU88_BUNDLE_DIR}
 		COMMAND ${CMAKE_COMMAND} -E rm -f ${EMU88_BUNDLE}
 		COMMAND ${_bundle_command}
 		DEPENDS ${EMU88_BUNDLE_LIBS}
