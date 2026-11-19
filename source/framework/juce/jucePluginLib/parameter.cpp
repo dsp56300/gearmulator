@@ -242,7 +242,7 @@ namespace pluginLib
 
     bool Parameter::isMetaParameter() const
     {
-	    return !m_derivedParameters.empty();
+	    return m_desc.isMeta || !m_derivedParameters.empty();
     }
 
     void Parameter::setValue(const float _newValue)

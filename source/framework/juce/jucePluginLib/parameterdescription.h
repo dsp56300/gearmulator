@@ -43,6 +43,9 @@ namespace pluginLib
 		bool isDiscrete;
 		bool isBool;
 		bool isBipolar;
+		// Changing it changes other parameters too, an algorithm or mode select. Reported to the host as a meta
+		// parameter, without which auval fails ("Parameter values are different since last set").
+		bool isMeta = false;
 		int step = 0;
 		std::string toText;
 		std::string softKnobTargetSelect;

@@ -369,6 +369,7 @@ namespace pluginLib
 			d.step = readPropertyIntWithDefault("step", 0);
 			d.softKnobTargetSelect = readProperty("softknobTargetSelect", false).toString().toStdString();
 			d.softKnobTargetList = readProperty("softknobTargetList", false).toString().toStdString();
+			d.isMeta = static_cast<bool>(readProperty("isMeta", false));
 
 			d.toText = toTextName;
 
