@@ -43,6 +43,8 @@ namespace emu88Player
     std::vector<uint8_t> loadPcmCard(const juce::File& file);
     // The --pcm-card image, or empty without the option. Throws as above.
     std::vector<uint8_t> loadPcmCard(const LaunchOptions& options);
+    // The PRO-E style card image in the file. Throws if the file is missing or not a style card.
+    std::vector<uint8_t> loadStyleCard(const juce::File& file);
     void listDevices(const LaunchOptions& options);
     std::string defaultDataFolder();
     // The folder searched for ROMs, subfolders included: --rom-dir, else the player's data folder.

@@ -448,6 +448,18 @@ Plugin Manager:
 
 - [New] Devices: Added support for the PRO-E Arranger.
 
+- [New] PRO-E: style cards. Choose a card image in Settings > General, PRO-E
+        style card. Both PRO-E cards and the E-20's TN-SC1 series are
+        accepted. The card's styles are on BANK 5 and show as C1 to C8.
+
+- [Fix] Settings: a page taller than the window, such as General, can be
+        scrolled. Its last controls were cut off.
+
+- [New] 88emuClapHeadless: 88emu as a headless CLAP instrument for emulators
+        such as DOSBox Staging, one plugin per device, in its own archive
+        (88emuPlayer-CLAPHeadless). The ROMs are found in the folders that the
+        EMU88_ROM_PATH environment variable lists.
+
 - [Imp] SC-8820, SC-8850, NU-10B and MIIG5: more accurate CPU timing, with
         the page mode and refresh of their DRAM and, on the MIIG5, the
         instruction cache of its CPU.
@@ -471,6 +483,10 @@ Plugin Manager:
         their first partial on top of the ring product, up to 5 dB too loud and
         with the wrong timbre; a synth first partial was also ring modulated
         with the previous voice.
+
+- [Fix] MT-32/CM-32L: fixes on the reverb emulation. Tap Delay summed one of its
+        taps wrongly and sounded quite different from the hardware, and every
+        mode rounded slightly differently (thanks to NukeYKT).
 
 2.2.27:
 

@@ -15,7 +15,7 @@
 
 namespace emu88Lib
 {
-	// MIIG5 mainboard, run as a GM module.
+	// XV-3080 mainboard, run as a GM module.
 	//
 	// SH7042A (33 MHz, 256 KiB on-chip mask ROM) on the cached threaded-code
 	// sh2::Machine, a 2 MiB program ROM, two linked XP tone generators on one

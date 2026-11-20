@@ -13,6 +13,28 @@ namespace emu88Lib
 		constexpr uint32_t g_protectAddress = 0x2452;
 		constexpr uint8_t g_protectBit = 0x80;
 
+		// The bank latch's card select, and its choice of a 64 KiB card's half.
+		constexpr uint8_t g_latchCard = 0x08;
+		constexpr uint8_t g_latchCardHalf = 0x04;
+		// selectRomBank()'s code banks past the pattern ROMs' 0-7: the card's halves, an empty slot,
+		// and the ROM banks 8-15 the latch can name, which no chip answers.
+		constexpr uint8_t g_codeBankCard = 8, g_codeBankNoCard = 10, g_codeBankUnmapped = 11;
+
+		// D4A3-D541: the 12 bytes from 4000 against "Roland PROE " or "Roland E-20 ", then the
+		// format letter (D or N) and its complement, and X or Q (by format) and its complement.
+		bool hasCardHeader(const std::vector<uint8_t>& _card)
+		{
+			const auto letter = [&](const size_t _offset, const uint8_t _value)
+			{
+				return _card[_offset] == _value && _card[_offset + 1] == static_cast<uint8_t>(~_value);
+			};
+			if(std::memcmp(_card.data(), "Roland PROE ", 12) == 0)
+				return (letter(12, 'D') || letter(12, 'N')) && letter(14, 'X');
+			if(std::memcmp(_card.data(), "Roland E-20 ", 12) == 0)
+				return letter(12, 'N') && letter(14, 'Q');
+			return false;
+		}
+
 		// The dial's PA7 pulse: low for 0.5 ms, one detent every 2 ms.
 		constexpr uint64_t g_dialLowStates = ProE::EClock / 2000;
 		constexpr uint64_t g_dialStepStates = ProE::EClock / 500;
@@ -54,10 +76,18 @@ namespace emu88Lib
 		return result;
 	}
 
-	ProE::ProE(const ProERomSet& _roms, const LaRomSet& _soundBoard) : m_sound(_soundBoard)
+	bool ProE::isCardImage(const std::vector<uint8_t>& _image)
+	{
+		return (_image.size() == CardBankSize || _image.size() == MaxCardSize) && hasCardHeader(_image);
+	}
+
+	ProE::ProE(const ProERomSet& _roms, const LaRomSet& _soundBoard, std::vector<uint8_t> _card)
+		: m_sound(_soundBoard)
 	{
 		if(!_roms.isValid())
 			return;
+		if(isCardImage(_card))
+			m_card = std::move(_card);
 		m_program = _roms.program;
 		for(const auto& rom : _roms.patterns)
 			m_patterns.insert(m_patterns.end(), rom.begin(), rom.end());
@@ -248,7 +278,7 @@ namespace emu88Lib
 		case 0x160d: lcdLines(_value); return;
 		case 0x160e: m_lcdBus = _value; return;
 		case 0x180d:
-			selectRomBank(_value >> 4);
+			selectRomBank(_value);
 			m_ramBank = _value & 3;
 			return;
 		case 0x180e:
@@ -318,17 +348,28 @@ namespace emu88Lib
 		m_ram[ramOffset(_addr)] = _value;
 	}
 
-	void ProE::selectRomBank(const uint8_t _bank)
+	void ProE::selectRomBank(const uint8_t _latch)
 	{
-		if(_bank == m_romBank)
+		// A card of 32 KiB lacks the line that picks the half, so it shows in both.
+		const bool card = _latch & g_latchCard;
+		const bool upperHalf = (_latch & g_latchCardHalf) && m_card.size() > CardBankSize;
+		const auto romBank = static_cast<uint8_t>(_latch >> 4);
+		const uint8_t bank = card ? (m_card.empty() ? g_codeBankNoCard : static_cast<uint8_t>(g_codeBankCard + upperHalf))
+			: romBank < 8         ? romBank
+			                      : g_codeBankUnmapped;
+		if(bank == m_romBank)
 			return;
-		m_romBank = _bank;
+		m_romBank = bank;
 		uint8_t* window = m_machine.bus().mem() + RomWindow;
-		if(_bank < 8)
-			std::memcpy(window, m_patterns.data() + size_t(_bank) * RomWindowSize, RomWindowSize);
-		else
+		if(bank < 8)
+			std::memcpy(window, m_patterns.data() + size_t(bank) * RomWindowSize, RomWindowSize);
+		else if(bank == g_codeBankNoCard)
+			std::memset(window, 0x00, RomWindowSize);
+		else if(bank == g_codeBankUnmapped)
 			std::memset(window, 0xff, RomWindowSize);
+		else
+			std::memcpy(window, m_card.data() + size_t(bank - g_codeBankCard) * CardBankSize, RomWindowSize);
 		// Code runs from the window too.
-		m_machine.cpu().select_code_bank(RomWindow, RomWindowSize, _bank);
+		m_machine.cpu().select_code_bank(RomWindow, RomWindowSize, bank);
 	}
 }

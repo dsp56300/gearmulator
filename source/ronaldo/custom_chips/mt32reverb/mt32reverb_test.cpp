@@ -53,6 +53,97 @@ namespace
 		       _a.outRight == _b.outRight;
 	}
 
+	constexpr uint8_t Nop = 0x16;
+
+	struct Program
+	{
+		std::vector<uint8_t> bytes = std::vector<uint8_t>(ProgramBytes, 0);
+		Program() { for (unsigned k = 0; k < StepCount; ++k) set(k, Nop, Nop); }
+		// _mask0 / _mask1: the saw-mask bit that lives in byte 2 (bit 0 of the half's mask).
+		void set(const unsigned _step, const uint8_t _c0, const uint8_t _c1, const bool _mask0 = false, const bool _mask1 = false)
+		{
+			bytes[_step * 4 + 1] = _c0;
+			bytes[_step * 4 + 2] = static_cast<uint8_t>((_mask0 ? 0x80 : 0) | (_mask1 ? 0x40 : 0));
+			bytes[_step * 4 + 3] = _c1;
+		}
+	};
+
+	// One frame on the interpreter and, where there is one, on the JIT; both must agree.
+	State runRule(const Program& _p, State _s)
+	{
+		State interpreted = _s;
+		Interpreter::renderFrame(_p.bytes.data(), interpreted);
+#if MT32REVERB_JIT
+		Jit jit;
+		assert(jit.compile(_p.bytes.data(), _p.bytes.size()));
+		jit.program(0)(&_s);
+		assert(sameState(interpreted, _s));
+#endif
+		return interpreted;
+	}
+
+	void testHalfStepRules()
+	{
+		// A clear leaves the accumulator at zero even when the saw selector is in the mask:
+		// it does not start a new sum from the shifter.
+		{
+			Program p;
+			p.set(0, 0xe6, Nop, true);
+			State s;
+			s.accumulator = 1234;
+			s.shifter = 100;
+			s.sawBits = 1;
+			const auto r = runRule(p, s);
+			assert(r.accumulator == 0);
+			assert(r.outRight == 0 && r.outLeft == 0);
+		}
+		// The add of a half-step that loads uses the carry from before the load.
+		{
+			Program p;
+			p.set(0, 0x32, Nop);	// add (mask bit 1), then load
+			State s;
+			s.shifter = 10;
+			s.carry = 1;
+			s.sawBits = 2;
+			assert(runRule(p, s).accumulator == 11);
+		}
+		// A load keeps the old shifter's low bit as the carry while the loaded word is
+		// negative, and drops it for a positive one.
+		{
+			Program p;
+			p.set(0, 0x12, 0x36);	// load, then add
+			State s;
+			s.shifter = 3;
+			s.sawBits = 2;
+			s.ram[0] = -4;
+			assert(runRule(p, s).accumulator == -3);
+			s.ram[0] = 4;
+			assert(runRule(p, s).accumulator == 4);
+		}
+		// The inversion belongs to the add: a half-step whose mask misses leaves the
+		// accumulator as it is, one that hits stores the inverted sum.
+		{
+			Program p;
+			p.set(0, 0x3e, Nop);	// negate, mask bit 1
+			State s;
+			s.accumulator = 5;
+			s.sawBits = 1;
+			assert(runRule(p, s).accumulator == 5);
+			s.sawBits = 2;
+			assert(runRule(p, s).accumulator == ~5);
+		}
+		// The second half-step loads on its own control byte too.
+		{
+			Program p;
+			p.set(0, Nop, 0x12);	// load on the second half
+			p.set(1, 0x36, Nop);	// add
+			State s;
+			s.sawBits = 2;
+			s.ram[0] = 77;
+			assert(runRule(p, s).accumulator == 77);
+		}
+	}
+
 #if MT32REVERB_JIT
 	// Both engines from one state, frame by frame, on every program and saw selector.
 	void compareEngines(const std::vector<uint8_t>& _rom, const unsigned _frames, const uint32_t _seed)
@@ -169,6 +260,8 @@ int main(const int _argc, char** _argv)
 		assert(!chip.setRom(std::vector<uint8_t>(0x1000)));
 		assert((chip.renderFrame({1000, -1000}) == std::pair<int32_t, int32_t>{}));
 	}
+
+	testHalfStepRules();
 
 	std::vector<std::vector<uint8_t>> roms;
 	roms.push_back(randomRom(0x8000, 1));

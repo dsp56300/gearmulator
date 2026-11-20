@@ -145,6 +145,9 @@ EMU88_EXPORT int emu88_get_device_count(void);
 EMU88_EXPORT emu88_device_id emu88_get_device_id(int index);
 /* Display name, or NULL for an unknown id. */
 EMU88_EXPORT const char* emu88_get_device_name(emu88_device_id device);
+/* Short lowercase identifier ("mt322x", "sc88pro"), or NULL for an unknown id. Store or match a
+ * device by this, never by its display name: a key never changes once released, a name may. */
+EMU88_EXPORT const char* emu88_get_device_key(emu88_device_id device);
 /* Number of MIDI inputs the device tells apart; 0 for an unknown id. */
 EMU88_EXPORT int emu88_get_device_midi_port_count(emu88_device_id device);
 /* The lowest MIDI channel the device answers on from power-on, 0-based: 1 on the MT-32 and CM-32L

@@ -77,6 +77,10 @@ namespace emu88Lib
 	struct DeviceProfile
 	{
 		const char* displayName;
+		// Lowercase identifier that hosts store or match a device by: CLAP plugin ids
+		// (88emuClapHeadless), emulator config files. Unlike the display name it never
+		// changes once released, and a new device gets a new one.
+		const char* key;
 		uint8_t groupCount;
 	};
 
@@ -209,6 +213,12 @@ namespace emu88Lib
 	constexpr bool hasPcmCardSlot(const DeviceModel _model)
 	{
 		return _model == DeviceModel::Cm32p || _model == DeviceModel::Cm64 || _model == DeviceModel::Mv30;
+	}
+
+	// The boards with a slot for a style card: the PRO-E, which takes its own and the E-20's (TN-SC1 series).
+	constexpr bool hasStyleCardSlot(const DeviceModel _model)
+	{
+		return _model == DeviceModel::ProE;
 	}
 
 	// Modules that run in their GM mode and nothing else: construction sets them up, and they

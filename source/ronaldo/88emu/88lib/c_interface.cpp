@@ -193,6 +193,12 @@ const char* emu88_get_device_name(const emu88_device_id _device)
 	return toModel(_device, model) ? emu88Lib::getDeviceProfile(model).displayName : nullptr;
 }
 
+const char* emu88_get_device_key(const emu88_device_id _device)
+{
+	emu88Lib::DeviceModel model;
+	return toModel(_device, model) ? emu88Lib::getDeviceProfile(model).key : nullptr;
+}
+
 int emu88_get_device_midi_port_count(const emu88_device_id _device)
 {
 	emu88Lib::DeviceModel model;

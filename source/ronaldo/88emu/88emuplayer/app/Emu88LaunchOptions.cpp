@@ -208,6 +208,19 @@ namespace emu88Player
         return card;
     }
 
+    std::vector<uint8_t> loadStyleCard(const juce::File& file)
+    {
+        juce::MemoryBlock data;
+        if (!file.existsAsFile() || !file.loadFileAsData(data))
+            throw std::runtime_error("Style card not found: " + file.getFullPathName().toStdString());
+        const auto* bytes = static_cast<const uint8_t*>(data.getData());
+        std::vector<uint8_t> card(bytes, bytes + data.getSize());
+        if (!emu88Lib::HardwareDevice::isStyleCardImage(card))
+            throw std::runtime_error("Not a PRO-E or E-20 style card image (32 or 64 KiB, starting with "
+                                     "\"Roland PROE\" or \"Roland E-20\"): " + file.getFullPathName().toStdString());
+        return card;
+    }
+
     std::string LaunchOptions::get(const std::string& key, const std::string& fallback) const
     {
         const auto found = values.find(key);

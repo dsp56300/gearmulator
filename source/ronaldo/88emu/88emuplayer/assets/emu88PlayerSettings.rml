@@ -39,6 +39,11 @@
 					<input id="pcmCardPath" type="text"/>
 					<button id="btPcmCardBrowse" class="button">Open...</button>
 				</div>
+				<div class="hardwareSettingsSectionLabel">PRO-E style card</div>
+				<div class="hardwareFileRow">
+					<input id="styleCardPath" type="text"/>
+					<button id="btStyleCardBrowse" class="button">Open...</button>
+				</div>
 			</div>
 
 			<div id="pageSettingsSkin" class="hardwareSettingsPage" style="display: none;">

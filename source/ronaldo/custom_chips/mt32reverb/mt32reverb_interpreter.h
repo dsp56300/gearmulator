@@ -58,38 +58,37 @@ namespace mt32ReverbLib
 			unsigned sawBits = 0;
 		};
 
-		static void update(Regs& _r, const uint8_t _control, const unsigned _mask)
+		// One half-step, in the order of the gate array:
+		// the accumulator is cleared, or the shift-add runs if the saw selector is in the mask,
+		// saturating and then optionally inverted; a clear adds nothing and inverts nothing.
+		// Then the shifter shifts right or takes the step's RAM word, and the carry for the
+		// next add is the old shifter's low bit, kept only while the new shifter is negative
+		// (the rounding of the arithmetic shift, gated by the sign the shifter has now).
+		static void half(Regs& _r, const uint8_t _control, const unsigned _mask, const int16_t _loaded)
 		{
-			if ((_control & 0x10) == 0) _r.accumulator = 0;
-			if (_mask & _r.sawBits)
+			if (Step::clear(_control))
+				_r.accumulator = 0;
+			else if (_mask & _r.sawBits)
 			{
-				const int sum = int(_r.accumulator) + int(_r.shifter) + _r.carry;
-				_r.accumulator = static_cast<int16_t>(std::clamp(sum, -0x8000, 0x7fff));
+				int sum = std::clamp(int(_r.accumulator) + int(_r.shifter) + _r.carry, -0x8000, 0x7fff);
+				if (Step::negate(_control))
+					sum = ~sum;
+				_r.accumulator = static_cast<int16_t>(sum);
 			}
-			if (_control & 8) _r.accumulator = static_cast<int16_t>(~_r.accumulator);
+			const auto lsb = static_cast<int16_t>(_r.shifter & 1);
+			_r.shifter = Step::load(_control) ? _loaded : static_cast<int16_t>(_r.shifter >> 1);
+			_r.carry = _r.shifter < 0 ? lsb : 0;
 		}
 
 		static void cycle(const uint8_t* _program, const unsigned _step, State& _s, Regs& _r, const int16_t _input)
 		{
-			const uint8_t* rom = _program + _step * StepBytes;
-			const unsigned ramAddress = (_s.position + (rom[0] | (unsigned(rom[2]) << 8))) & RamMask;
-			uint8_t control = rom[1];
-			int16_t nextShifter = _r.shifter >> 1;
-			int16_t nextCarry = _r.shifter < 0 ? _r.shifter & 1 : 0;
-			if ((control & 2) == 0)
-			{
-				const int16_t value = (control & 1) ? _input : _r.accumulator;
-				_s.ram[ramAddress] = value;
-				if ((control & 4) == 0) { nextShifter = value; _r.carry = nextCarry = 0; }
-			}
-			else if ((control & 4) == 0) { nextShifter = _s.ram[ramAddress]; _r.carry = nextCarry = 0; }
-			update(_r, control, ((control >> 4) & 0x0e) | (rom[2] >> 7));
-			_r.carry = nextCarry;
-			_r.shifter = nextShifter;
-			control = rom[3];
-			update(_r, control, ((control >> 4) & 0x0e) | ((rom[2] >> 6) & 1));
-			_r.carry = _r.shifter < 0 ? _r.shifter & 1 : 0;
-			_r.shifter >>= 1;
+			const Step step = decodeStep(_program, _step);
+			const unsigned ramAddress = (_s.position + step.offset) & RamMask;
+			if (step.write())
+				_s.ram[ramAddress] = step.useInput() ? _input : _r.accumulator;
+			const int16_t loaded = _s.ram[ramAddress];
+			half(_r, step.control[0], step.mask[0], loaded);
+			half(_r, step.control[1], step.mask[1], loaded);
 		}
 	};
 }
