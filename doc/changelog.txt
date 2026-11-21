@@ -462,6 +462,9 @@ Plugin Manager:
         (88emuPlayer-CLAPHeadless). The ROMs are found in the folders that the
         EMU88_ROM_PATH environment variable lists.
 
+- [Imp] Finding the ROMs takes about half the time: a file of the size of a
+        ROM is read and hashed only when its first four bytes can begin one.
+
 - [Imp] SC-8820, SC-8850, NU-10B and MIIG5: more accurate CPU timing, with
         the page mode and refresh of their DRAM and, on the MIIG5, the
         instruction cache of its CPU.

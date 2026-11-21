@@ -1,4 +1,5 @@
 #include "88lib/rom/romloader.h"
+#include "88lib/rom/romSignatures.h"
 #include "common/test_util.hpp"
 
 #include <algorithm>
@@ -181,6 +182,19 @@ namespace
 			for (const auto& spec : g_romFileSpecs)
 				CHECK(spec.device != mirrored.device || spec.slot != mirrored.slot || spec.index != mirrored.index ||
 				      spec.size != mirrored.dumpSize);
+		}
+	}
+
+	// A signature is looked up by the MD5 of its row, so one that names no row is never used,
+	// and two for one MD5 would leave it to the order of the table which one counts.
+	void testSignaturesMatchRegistry()
+	{
+		std::set<std::string> seen;
+		for (const auto& signature : g_romSignatures)
+		{
+			CHECK(seen.insert(signature.hash.toString()).second);
+			CHECK(std::any_of(std::begin(g_romRegistry), std::end(g_romRegistry),
+			                  [&](const RomRegistryEntry& _entry) { return _entry.hash == signature.hash; }));
 		}
 	}
 
@@ -514,6 +528,7 @@ int main()
 	testCompositeSlotsMatchRegistry();
 	testSc88ProChipsTileTheWaveSet();
 	testMirroredSlotsMatchRegistry();
+	testSignaturesMatchRegistry();
 	testInterleavedComposite();
 	testConcatenatedComposite();
 	testSc88ProChipComposite();

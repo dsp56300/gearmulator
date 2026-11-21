@@ -34,7 +34,7 @@ set(SOURCES
 	rom/rom.cpp rom/rom.h
 	rom/romloader.cpp rom/romloader.h
 	rom/romInventory.cpp rom/romScanner.cpp
-	rom/romRegistry.h
+	rom/romRegistry.h rom/romSignatures.h
 	boards/sc55Board.cpp boards/sc55Board.h
 	mcu/sc55_submcu.cpp mcu/sc55_submcu.h
 	boards/sc88.cpp boards/sc88.h

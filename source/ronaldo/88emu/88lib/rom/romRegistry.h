@@ -377,7 +377,8 @@ namespace emu88Lib
         // Chip index within a multi-image slot, or zero for a single image.
         uint8_t index;
         // Exact byte count. Nothing of another size is ever read, so this
-        // doubles as the scan's prefilter.
+        // doubles as the scan's prefilter; the signature in romSignatures.h
+        // is the second one.
         size_t size;
         // MD5 of this source layout, after optional CPU word-order normalization.
         baseLib::MD5 hash;

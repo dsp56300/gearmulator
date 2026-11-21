@@ -5,8 +5,11 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <sstream>
+
+#include "88lib/rom/romSignatures.h"
 
 #include "baseLib/filesystem.h"
 #include "common/romDescramble.h"
@@ -80,12 +83,176 @@ namespace emu88Lib
             return false;
         }
 
+        // ---- signatures: the first four bytes of an image, byte 0 in the top bits
+
+        uint32_t headOf(const uint8_t* _data)
+        {
+            return static_cast<uint32_t>(_data[0]) << 24 | static_cast<uint32_t>(_data[1]) << 16 |
+                static_cast<uint32_t>(_data[2]) << 8 | static_cast<uint32_t>(_data[3]);
+        }
+
+        // The head of the same bytes with the two bytes of each word swapped
+        uint32_t swapHead(const uint32_t _head)
+        {
+            return (_head & 0xff00ff00u) >> 8 | (_head & 0x00ff00ffu) << 8;
+        }
+
+        bool readHead(uint32_t& _head, const std::string& _file, const size_t _offset)
+        {
+            std::vector<uint8_t> data;
+            if (!baseLib::filesystem::readFileRegion(data, _file, _offset, 4) || data.size() != 4)
+                return false;
+            _head = headOf(data.data());
+            return true;
+        }
+
+        // The signature of a registry row, if one is known
+        const std::optional<uint32_t>& signatureOf(const RomRegistryEntry& _entry)
+        {
+            static const auto signatures = []
+            {
+                std::vector<std::optional<uint32_t>> result(std::size(g_romRegistry));
+                for (size_t i = 0; i < result.size(); ++i)
+                {
+                    if (!g_romRegistry[i].hash.isValid())
+                        continue;
+                    for (const auto& signature : g_romSignatures)
+                    {
+                        if (signature.hash == g_romRegistry[i].hash)
+                        {
+                            result[i] = signature.head;
+                            break;
+                        }
+                    }
+                }
+                return result;
+            }();
+            return signatures[static_cast<size_t>(&_entry - std::begin(g_romRegistry))];
+        }
+
+        // Whether an image whose first four bytes are _head can be the MD5 of _entry, as it is or,
+        // with _swapped, once its words are swapped. A row without a signature can be anything.
+        bool signatureAllows(const RomRegistryEntry& _entry, const uint32_t _head, const bool _swapped)
+        {
+            if (!_entry.hash.isValid() || (_swapped && !_entry.wordSwapped))
+                return false;
+            const auto& signature = signatureOf(_entry);
+            return !signature || *signature == (_swapped ? swapHead(_head) : _head);
+        }
+
+        bool isProEpromRead(const size_t _size)
+        {
+            return _size == 2 * Sc88ProRomSet::FirmwareSize || _size == 4 * Sc88ProRomSet::FirmwareSize;
+        }
+
+        bool isProControl(const RomRegistryEntry& _entry)
+        {
+            return _entry.size == Sc88ProRomSet::FirmwareSize && _entry.slot == RomSlot::Control &&
+                (usedBy(_entry, RomDevice::Sc88Pro) || usedBy(_entry, RomDevice::VeGsPro));
+        }
+
+        // Whether a bank of an oversized EPROM read starting with _head can be a Pro control ROM
+        bool proControlAllows(const uint32_t _head, const bool _swapped)
+        {
+            for (const auto& entry : g_romRegistry)
+            {
+                if (isProControl(entry) && signatureAllows(entry, _head, _swapped))
+                    return true;
+            }
+            return false;
+        }
+
+        bool isMirroredImage(const RomRegistryEntry& _entry, const RomMirroredSlot& _mirrored)
+        {
+            return usedBy(_entry, _mirrored.device) && _entry.slot == _mirrored.slot &&
+                _entry.index == _mirrored.index && _entry.size == _mirrored.imageSize;
+        }
+
+        bool mirroredAllows(const RomMirroredSlot& _mirrored, const uint32_t _head)
+        {
+            for (const auto& entry : g_romRegistry)
+            {
+                if (isMirroredImage(entry, _mirrored) && signatureAllows(entry, _head, false))
+                    return true;
+            }
+            return false;
+        }
+
+        // The digests a candidate needs
+        struct HashPlan
+        {
+            bool raw = false;
+            bool swapped = false;
+            bool sha1 = false;
+            bool sha256 = false;
+            // A known image may lie inside the file: a Pro control ROM in a bank of an oversized
+            // EPROM read, or the image a mirrored dump repeats. Looked for whenever the file is read.
+            bool embedded = false;
+
+            bool any() const { return raw || swapped || sha1 || sha256 || embedded; }
+        };
+
+        // Everything a file of _size can be identified by, for a file of a standardized name
+        HashPlan fullPlan(const size_t _size, const bool _normalizeH8Words)
+        {
+            HashPlan plan;
+            plan.raw = true;
+            plan.swapped = _normalizeH8Words || anyWordSwappedAt(_size);
+            plan.sha1 = anySha1At(_size);
+            plan.sha256 = anySha256At(_size);
+            plan.embedded = true;
+            return plan;
+        }
+
+        // What a file of _size can be, judged by its first bytes before it is read whole: only
+        // digests of rows whose signatures those bytes allow. Rows known by a published digest
+        // have no signature, so the files of their size are always hashed for them. Nothing
+        // planned means no row can match and the file is not read at all.
+        HashPlan planHashes(const std::string& _file, const size_t _size)
+        {
+            HashPlan plan;
+            uint32_t head = 0;
+            if (!readHead(head, _file, 0))
+                return plan;
+
+            for (const auto& entry : g_romRegistry)
+            {
+                if (entry.size != _size)
+                    continue;
+                if (!entry.hash.isValid())
+                {
+                    plan.sha1 |= entry.sha1.isValid();
+                    plan.sha256 |= entry.sha256.isValid();
+                    continue;
+                }
+                plan.raw |= signatureAllows(entry, head, false);
+                plan.swapped |= signatureAllows(entry, head, true);
+            }
+            // A word-swapped match reports the digest of the file as it is
+            plan.raw |= plan.swapped;
+
+            if (isProEpromRead(_size))
+            {
+                for (size_t offset = 0; offset < _size && !plan.embedded; offset += Sc88ProRomSet::FirmwareSize)
+                {
+                    uint32_t bankHead = 0;
+                    plan.embedded = readHead(bankHead, _file, offset) &&
+                        (proControlAllows(bankHead, false) || proControlAllows(bankHead, true));
+                }
+            }
+            for (const auto& mirrored : g_romMirroredSlots)
+                plan.embedded |= _size == mirrored.dumpSize && mirroredAllows(mirrored, head);
+
+            return plan;
+        }
+
         // Reuse digests until the file size or modification time changes.
         struct HashCacheEntry
         {
             size_t size = 0;
             uint64_t modificationTime = 0;
             baseLib::MD5 raw;
+            bool hasRaw = false;
             baseLib::MD5 swapped;
             bool hasSwapped = false;
             baseLib::SHA1 sha1;
@@ -103,7 +270,7 @@ namespace emu88Lib
         bool matchesRaw(const RomRegistryEntry& _entry, const HashCacheEntry& _hashes)
         {
             if (_entry.hash.isValid())
-                return _entry.hash == _hashes.raw;
+                return _hashes.hasRaw && _entry.hash == _hashes.raw;
             if (_entry.sha1.isValid())
                 return _hashes.hasSha1 && _entry.sha1 == _hashes.sha1;
             return _entry.sha256.isValid() && _hashes.hasSha256 && _entry.sha256 == _hashes.sha256;
@@ -124,7 +291,7 @@ namespace emu88Lib
         // Digests for one candidate, from the cache where possible. Returns
         // false if the file could not be read at its expected size.
         bool hashCandidate(HashCacheEntry& _result, const std::string& _file, const size_t _size,
-                           const bool _wantSwapped, const bool _wantSha1, const bool _wantSha256)
+                           const HashPlan& _plan)
         {
             const auto modificationTime = baseLib::filesystem::getFileModificationTime(_file);
 
@@ -132,8 +299,9 @@ namespace emu88Lib
                 const std::lock_guard lock(hashCacheMutex());
                 const auto it = hashCache().find(_file);
                 if (it != hashCache().end() && it->second.size == _size &&
-                    it->second.modificationTime == modificationTime && (!_wantSwapped || it->second.hasSwapped) &&
-                    (!_wantSha1 || it->second.hasSha1) && (!_wantSha256 || it->second.hasSha256))
+                    it->second.modificationTime == modificationTime && (!_plan.raw || it->second.hasRaw) &&
+                    (!_plan.swapped || it->second.hasSwapped) &&
+                    (!_plan.sha1 || it->second.hasSha1) && (!_plan.sha256 || it->second.hasSha256))
                 {
                     _result = it->second;
                     return true;
@@ -146,25 +314,30 @@ namespace emu88Lib
 
             _result.size = _size;
             _result.modificationTime = modificationTime;
-            _result.raw = baseLib::MD5(data);
+            _result.hasRaw = _plan.raw;
+            if (_plan.raw)
+                _result.raw = baseLib::MD5(data);
             _result.embeddedCopies.clear();
             // Oversized EPROM reads can contain damaged mirrors followed by
             // intact copies. Examine every 1 MiB bank in 2/4 MiB dumps; never
             // assume the first copy (or a filename-specific offset) is correct.
-            if (_size == 2 * Sc88ProRomSet::FirmwareSize || _size == 4 * Sc88ProRomSet::FirmwareSize)
+            // Only banks whose signature allows a Pro control ROM are hashed.
+            if (isProEpromRead(_size))
             {
                 std::set<const RomRegistryEntry*> found;
                 for (size_t offset = 0; offset < _size; offset += Sc88ProRomSet::FirmwareSize)
                 {
-                    std::vector<uint8_t> copy(data.begin() + offset,
-                                              data.begin() + offset + Sc88ProRomSet::FirmwareSize);
+                    const auto bankHead = headOf(data.data() + offset);
+                    std::vector<uint8_t> copy;
                     for (const bool swapped : {false, true})
                     {
+                        if (!proControlAllows(bankHead, swapped))
+                            continue;
+                        copy.assign(data.begin() + offset, data.begin() + offset + Sc88ProRomSet::FirmwareSize);
                         if (swapped)
                             swapWords(copy);
                         const auto* entry = findRegistryEntry(copy.size(), baseLib::MD5(copy), swapped);
-                        if (entry && (usedBy(*entry, RomDevice::Sc88Pro) || usedBy(*entry, RomDevice::VeGsPro)) &&
-                            entry->slot == RomSlot::Control && found.insert(entry).second)
+                        if (entry && isProControl(*entry) && found.insert(entry).second)
                         {
                             FoundRom rom;
                             rom.entry = entry;
@@ -179,14 +352,13 @@ namespace emu88Lib
             }
             for (const auto& mirrored : g_romMirroredSlots)
             {
-                if (_size != mirrored.dumpSize || !isRepeated(data, mirrored.imageSize))
+                if (_size != mirrored.dumpSize || !mirroredAllows(mirrored, headOf(data.data())) ||
+                    !isRepeated(data, mirrored.imageSize))
                     continue;
                 const baseLib::MD5 copy(data.data(), static_cast<uint32_t>(mirrored.imageSize));
                 for (const auto& entry : g_romRegistry)
                 {
-                    if (!usedBy(entry, mirrored.device) || entry.slot != mirrored.slot ||
-                        entry.index != mirrored.index || entry.size != mirrored.imageSize ||
-                        !entry.hash.isValid() || entry.hash != copy)
+                    if (!isMirroredImage(entry, mirrored) || !entry.hash.isValid() || entry.hash != copy)
                         continue;
                     FoundRom rom;
                     rom.entry = &entry;
@@ -197,15 +369,15 @@ namespace emu88Lib
             }
             // Before any swapping: a published digest always describes the file as it
             // is on disk.
-            _result.hasSha1 = _wantSha1;
-            if (_wantSha1)
+            _result.hasSha1 = _plan.sha1;
+            if (_plan.sha1)
                 _result.sha1 = baseLib::SHA1(data);
-            _result.hasSha256 = _wantSha256;
-            if (_wantSha256)
+            _result.hasSha256 = _plan.sha256;
+            if (_plan.sha256)
                 _result.sha256 = baseLib::SHA256(data);
 
-            _result.hasSwapped = _wantSwapped;
-            if (_wantSwapped)
+            _result.hasSwapped = _plan.swapped;
+            if (_plan.swapped)
             {
                 swapWords(data);
                 _result.swapped = baseLib::MD5(data);
@@ -370,8 +542,7 @@ namespace emu88Lib
                     continue;
 
                 HashCacheEntry hashes;
-                if (!hashCandidate(hashes, path, size, spec.normalizeH8Words || anyWordSwappedAt(size),
-                                   anySha1At(size), anySha256At(size)))
+                if (!hashCandidate(hashes, path, size, fullPlan(size, spec.normalizeH8Words)))
                     continue;
                 bool knownHash = false;
                 bool needsWordSwap = false;
@@ -395,8 +566,13 @@ namespace emu88Lib
             if (!sizes.count(size))
                 continue;
 
+            // Size first, then the signature, and only then the whole file
+            const auto plan = planHashes(path, size);
+            if (!plan.any())
+                continue;
+
             HashCacheEntry hashes;
-            if (!hashCandidate(hashes, path, size, anyWordSwappedAt(size), anySha1At(size), anySha256At(size)))
+            if (!hashCandidate(hashes, path, size, plan))
                 continue;
             embeddedCopies.insert(embeddedCopies.end(), hashes.embeddedCopies.begin(), hashes.embeddedCopies.end());
 
