@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <memory>
 #include <tuple>
 #include "baseLib/filesystem.h"
 #include "synthLib/plugin.h"
@@ -34,7 +35,8 @@ int main()
 			using Sc88Pro::extRead8;
 			using Sc88Pro::extWrite8;
 		};
-		PanelBoard panel;
+		auto panelOwner = std::make_unique<PanelBoard>();
+		PanelBoard& panel = *panelOwner;
 		panel.extWrite8(0xefc101, 0xfc);
 		for(unsigned bit = 0; bit < 8; ++bit)
 		{
@@ -71,7 +73,8 @@ int main()
 			DisplayBoard() : Sc88Pro(std::vector<uint8_t>(RomSize), {}, false) {}
 			using Sc88Pro::portWrite;
 		};
-		DisplayBoard display;
+		auto displayOwner = std::make_unique<DisplayBoard>();
+		DisplayBoard& display = *displayOwner;
 		CHECK(display.lcdEnabled());
 		display.portWrite(0xfe8b, 0xfe);
 		CHECK(!display.lcdEnabled());
