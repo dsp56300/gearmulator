@@ -86,7 +86,8 @@ namespace synthLib
         uint32_t m_factor = 1;
         uint32_t m_phase = 0;
         size_t m_frames = 0;
-        size_t m_position = 0;
+        // One branch per output phase, each running over the frames from the newest, so that
+        // an output sample is the dot product of two contiguous arrays.
         std::vector<double> m_taps;
         std::array<std::vector<double>, 2> m_history;
     };

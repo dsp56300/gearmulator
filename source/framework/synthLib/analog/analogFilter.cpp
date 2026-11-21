@@ -186,6 +186,16 @@ namespace synthLib
         for (auto& tap : m_taps)
             tap *= static_cast<double>(_factor) / sum;
 
+        // The design comes out of the windowed sinc phase-minor; the branches want it
+        // phase-major, so transpose it once here rather than stride through it per sample.
+        std::vector<double> branches(m_taps.size());
+        for (size_t k = 0; k < m_frames; ++k)
+        {
+            for (uint32_t phase = 0; phase < _factor; ++phase)
+                branches[static_cast<size_t>(phase) * m_frames + k] = m_taps[k * _factor + phase];
+        }
+        m_taps.swap(branches);
+
         for (auto& history : m_history)
             history.assign(m_frames, 0.0);
     }
@@ -193,7 +203,6 @@ namespace synthLib
     void Interpolator::reset()
     {
         m_phase = 0;
-        m_position = 0;
         for (auto& history : m_history)
             std::fill(history.begin(), history.end(), 0.0);
     }
@@ -207,20 +216,23 @@ namespace synthLib
 
         if (m_phase == 0)
         {
-            m_position = (m_position + 1) % m_frames;
-            m_history[0][m_position] = _left;
-            m_history[1][m_position] = _right;
+            const float incoming[2] = {_left, _right};
+            for (size_t channel = 0; channel < 2; ++channel)
+            {
+                auto& history = m_history[channel];
+                std::copy_backward(history.begin(), history.end() - 1, history.end());
+                history[0] = incoming[channel];
+            }
         }
+
+        const double* const branch = m_taps.data() + static_cast<size_t>(m_phase) * m_frames;
 
         for (size_t channel = 0; channel < 2; ++channel)
         {
+            const double* const history = m_history[channel].data();
             double acc = 0.0;
-            size_t index = m_position;
             for (size_t k = 0; k < m_frames; ++k)
-            {
-                acc += m_taps[k * m_factor + m_phase] * m_history[channel][index];
-                index = index == 0 ? m_frames - 1 : index - 1;
-            }
+                acc += branch[k] * history[k];
             *samples[channel] = static_cast<float>(acc);
         }
 
