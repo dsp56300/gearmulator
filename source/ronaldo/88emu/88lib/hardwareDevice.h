@@ -90,8 +90,8 @@ namespace emu88Lib
 		                        const std::vector<uint8_t>& _styleCard = {});
 		// Whether the CM-32P can read _image as a PCM card.
 		static bool isPcmCardImage(const std::vector<uint8_t>& _image);
-		// Whether the PRO-E can read _image as a style card.
-		static bool isStyleCardImage(const std::vector<uint8_t>& _image);
+		// The style cards the PRO-E can read in _image: 1 for a card, more for a multi-card's dump, 0 for none.
+		static size_t styleCardCount(const std::vector<uint8_t>& _image);
 		~HardwareDevice() override;
 
 		float getSamplerate() const override;

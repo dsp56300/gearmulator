@@ -187,6 +187,12 @@ namespace emu88Player
 		// Loads the card at _path for every board with the slot from the next device load on and remembers
 		// the path; an empty one empties the slot. On failure nothing changes and _error says why.
 		bool setCardPath(CardSlot _slot, const std::string& _path, std::string& _error);
+		// The cards in the style card image, one label each: several for a multi-card's dump.
+		std::vector<std::string> styleCardLabels() const;
+		// Which card of the image is in the slot; a new image starts with its first.
+		size_t styleCardIndex() const;
+		// Puts card _index of the image in the slot from the next device load on and remembers it.
+		bool setStyleCardIndex(size_t _index);
 
 		// A board can only be selected once every ROM the registry lists for it
 		// is present; the device menu offers the rest greyed out.
@@ -224,6 +230,8 @@ namespace emu88Player
 		// The cards in every board with the slot this session loads, see cardPath().
 		std::vector<uint8_t> m_pcmCard;
 		std::vector<uint8_t> m_styleCard;
+		// The style card image m_styleCard is one card of, see styleCardIndex().
+		std::vector<uint8_t> m_styleCardImage;
 		emu88Lib::DeviceModel m_deviceModel = emu88Lib::DeviceModel::Sc88Pro;
 		std::atomic<bool> m_reverseOutputChannels{false};
 		std::atomic<float> m_outputGain{kUnityOutputGain};

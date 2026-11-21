@@ -141,6 +141,8 @@ namespace emu88Player
 		void showRomWarnings() const;
 		void browseCard(Processor::CardSlot _slot);
 		void applyCardPath(Processor::CardSlot _slot, const std::string& _path);
+		// The choice of the card in a multi-card image, hidden for an image of one card.
+		void populateStyleCardChoice();
 
 		void timerCallback() override;
 		void setPointerButton(uint32_t _button, bool _pressed);

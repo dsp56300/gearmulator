@@ -380,6 +380,31 @@ namespace emu88Player
             if (auto* browse = m_settingsRoot->GetElementById(ui.browseId))
                 juceRmlUi::EventListener::AddClick(browse, [this, slot] { browseCard(slot); });
         }
+        if (auto* choice = dynamic_cast<juceRmlUi::ElemComboBox*>(m_settingsRoot->GetElementById("styleCardIndex")))
+        {
+            juceRmlUi::EventListener::Add(
+                choice, Rml::EventId::Change,
+                [this, choice](Rml::Event&)
+                {
+                    const auto index = choice->getSelectedIndex();
+                    if (index < 0 || static_cast<size_t>(index) == m_processor.styleCardIndex() ||
+                        !m_processor.setStyleCardIndex(static_cast<size_t>(index)))
+                        return;
+                    // Turning the multi-card's switch is changing the card: a running board restarts.
+                    if (Processor::hasCardSlot(Processor::CardSlot::Style, m_processor.deviceModel()) &&
+                        m_processor.isPoweredOn())
+                    {
+                        const juce::WeakReference<Editor> safeThis(this);
+                        juce::MessageManager::callAsync(
+                            [safeThis]
+                            {
+                                if (auto* editor = safeThis.get())
+                                    editor->selectDeviceModel(editor->m_processor.deviceModel(), true);
+                            });
+                    }
+                });
+        }
+        populateStyleCardChoice();
 
         wireToggle("btReloadViaF5", m_processor.config().getBoolValue("reloadSkinViaF5", false),
                    [this](const bool _enabled)
@@ -524,6 +549,23 @@ namespace emu88Player
                                       });
     }
 
+    void Editor::populateStyleCardChoice()
+    {
+        if (!m_settingsRoot)
+            return;
+        const auto labels = m_processor.styleCardLabels();
+        if (auto* row = m_settingsRoot->GetElementById("styleCardChoice"))
+            row->SetProperty("display", labels.size() > 1 ? "block" : "none");
+        auto* choice = dynamic_cast<juceRmlUi::ElemComboBox*>(m_settingsRoot->GetElementById("styleCardIndex"));
+        if (!choice || labels.size() < 2)
+            return;
+        std::vector<Rml::String> options;
+        for (size_t i = 0; i < labels.size(); ++i)
+            options.push_back(std::to_string(i + 1) + "  " + labels[i]);
+        choice->setOptions(options);
+        choice->setSelectedIndex(m_processor.styleCardIndex(), false);
+    }
+
     void Editor::applyCardPath(const Processor::CardSlot _slot, const std::string& _path)
     {
         const auto& ui = cardSlotUi(_slot);
@@ -539,6 +581,8 @@ namespace emu88Player
             juceRmlUi::RmlInterfaces::ScopedAccess access(m_settingsWindow->rmlComponent());
             if (auto* card = dynamic_cast<Rml::ElementFormControlInput*>(m_settingsRoot->GetElementById(ui.pathId)))
                 card->SetValue(m_processor.cardPath(_slot));
+            if (_slot == Processor::CardSlot::Style)
+                populateStyleCardChoice();
         }
 
         if (!applied)

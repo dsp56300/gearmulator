@@ -23,7 +23,8 @@
 // PROE_SEQ=<row>.<bit>,... presses switches of the matrix in turn (a+b together), with the style card
 // PROE_CARD in the slot, and prints the LCD and the style state after each; PROE_PC_SCAN=<hex> lists the
 // switches that make the firmware run the code at that address (PROE_PC_SCAN_STYLE: after STYLE).
-// EMU88_PROE_TEST_CARD=<file> names a style card (a TN-SC1 dump) to check the card slot with.
+// EMU88_PROE_TEST_CARD=<file> names a style card (a TN-SC1 dump, or a multi-card's dump of several) to check
+// the card slot with, each card of it in turn.
 namespace
 {
 	using emu88Lib::ProE;
@@ -363,8 +364,29 @@ int main(const int _argc, char** _argv)
 		bad[13] = 'N';
 		CHECK(!ProE::isCardImage(bad));
 		CHECK(!ProE::isCardImage(std::vector<uint8_t>(e20.begin(), e20.begin() + 0x4000)));
+
+		// A multi-card's dump: 32 KiB cards back to back, each with its header.
+		const char id[] = "TN-SC1-09";
+		std::copy(std::begin(id), std::end(id), e20.begin() + 0x10);
+		const char style[] = "J-POP1          ";
+		std::copy(style, style + 16, e20.begin() + 0x30);
+		CHECK(ProE::cardCount(e20) == 1);
+		CHECK(ProE::cardLabel(e20, 0) == "TN-SC1-09: J-POP1");
+		std::vector<uint8_t> multi;
+		for(int i = 0; i < 4; ++i)
+			multi.insert(multi.end(), e20.begin(), e20.end());
+		multi[3 * ProE::CardBankSize + 0x18] = '2';
+		CHECK(ProE::cardCount(multi) == 4);
+		CHECK(ProE::cardInImage(multi, 3).size() == ProE::CardBankSize);
+		CHECK(ProE::cardLabel(multi, 3) == "TN-SC1-02: J-POP1");
+		CHECK(ProE::cardInImage(multi, 4).empty());
+		CHECK(!ProE::isCardImage(multi));
+		multi[2 * ProE::CardBankSize] = 'X';
+		CHECK(ProE::cardCount(multi) == 0);
+		// Two cards make a 64 KiB image, which is one card of 64 KiB.
+		CHECK(ProE::cardCount(std::vector<uint8_t>(multi.begin(), multi.begin() + 2 * ProE::CardBankSize)) == 1);
 	}
-	// Without a card, BANK 5 (the card's first bank) does not leave the internal styles. With one
+	// Without a card, BANK 5 (the card's bank) shows CARD NOT READY and leaves no internal style. With one
 	// (EMU88_PROE_TEST_CARD, a TN-SC1 style card), it selects the card's styles, marked C, and they play.
 	{
 		const auto pressKey = [](ProE& _board, const ProEButton _button)
@@ -384,23 +406,27 @@ int main(const int _argc, char** _argv)
 
 		if(const char* cardFile = std::getenv("EMU88_PROE_TEST_CARD"))
 		{
-			auto card = load(cardFile);
-			CHECK(ProE::isCardImage(card));
-			ProE withCard(roms, sound, card);
-			CHECK(withCard.hasCard());
-			render(withCard, 4.0);
-			pressKey(withCard, ProEButton::Style);
-			pressKey(withCard, ProEButton::Bank5);
-			pressKey(withCard, ProEButton::Number1);
-			pressKey(withCard, ProEButton::StartStop);
-			for(const uint8_t note : {0x30, 0x34, 0x37})
-				withCard.addMidiEvent(synthLib::SMidiEvent(synthLib::MidiEventSource::Host, 0x90, note, 0x64));
-			const auto cardPeak = render(withCard, 3.0);
-			std::printf("card: LCD |%s|%s|, peak %d\n", lcdLine(withCard, 0).c_str(), lcdLine(withCard, 1).c_str(),
-				cardPeak);
-			CHECK(lcdLine(withCard, 0).rfind("C1 ", 0) == 0);
-			CHECK(cardPeak > 1000);
-			CHECK(withCard.machine().cpu().illegal_instructions() == 0);
+			const auto image = load(cardFile);
+			CHECK(ProE::cardCount(image) > 0);
+			for(size_t index = 0; index < ProE::cardCount(image); ++index)
+			{
+				ProE withCard(roms, sound, ProE::cardInImage(image, index));
+				CHECK(withCard.hasCard());
+				render(withCard, 4.0);
+				pressKey(withCard, ProEButton::Style);
+				pressKey(withCard, ProEButton::Bank5);
+				pressKey(withCard, ProEButton::Number1);
+				pressKey(withCard, ProEButton::StartStop);
+				for(const uint8_t note : {0x30, 0x34, 0x37})
+					withCard.addMidiEvent(synthLib::SMidiEvent(synthLib::MidiEventSource::Host, 0x90, note, 0x64));
+				const auto cardPeak = render(withCard, 3.0);
+				std::printf("card %zu (%s): LCD |%s|%s|, peak %d\n", index + 1,
+					ProE::cardLabel(image, index).c_str(), lcdLine(withCard, 0).c_str(),
+					lcdLine(withCard, 1).c_str(), cardPeak);
+				CHECK(lcdLine(withCard, 0).rfind("C1 ", 0) == 0);
+				CHECK(cardPeak > 1000);
+				CHECK(withCard.machine().cpu().illegal_instructions() == 0);
+			}
 		}
 	}
 

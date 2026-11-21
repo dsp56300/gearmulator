@@ -450,7 +450,9 @@ Plugin Manager:
 
 - [New] PRO-E: style cards. Choose a card image in Settings > General, PRO-E
         style card. Both PRO-E cards and the E-20's TN-SC1 series are
-        accepted. The card's styles are on BANK 5 and show as C1 to C8.
+        accepted. The card's styles are on BANK 5 and show as C1 to C8. The
+        dump of a multi-card, several cards in one image, is accepted too;
+        pick its card below the path.
 
 - [Fix] Settings: a page taller than the window, such as General, can be
         scrolled. Its last controls were cut off.

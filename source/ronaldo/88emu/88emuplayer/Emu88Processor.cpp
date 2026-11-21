@@ -4,6 +4,7 @@
 #include "88emuplayer/ui/Emu88Editor.h"
 #include "jucePlayerLib/portMidiBridge.h"
 
+#include "88lib/boards/proe.h"
 #include "88lib/gs/gs.h"
 #include "88lib/rom/romloader.h"
 
@@ -21,6 +22,7 @@ namespace emu88Player
 		constexpr auto g_fastBootKey = "fastBoot";
 		constexpr auto g_pcmCardPathKey = "pcmCardPath";
 		constexpr auto g_styleCardPathKey = "styleCardPath";
+		constexpr auto g_styleCardIndexKey = "styleCardIndex";
 
 		const char* cardPathKey(const Processor::CardSlot _slot)
 		{
@@ -98,7 +100,7 @@ namespace emu88Player
 		// empty rather than keeping the player from starting.
 		for(const auto slot : {CardSlot::Pcm, CardSlot::Style})
 		{
-			auto& card = slot == CardSlot::Style ? m_styleCard : m_pcmCard;
+			auto& card = slot == CardSlot::Style ? m_styleCardImage : m_pcmCard;
 			if(const auto path = juce::String::fromUTF8(cardPath(slot).c_str());
 			   path.isNotEmpty() && juce::File::isAbsolutePath(path))
 			{
@@ -112,6 +114,7 @@ namespace emu88Player
 				}
 			}
 		}
+		m_styleCard = emu88Lib::ProE::cardInImage(m_styleCardImage, styleCardIndex());
 		auto params = createDeviceParams(m_deviceModel);
 		m_device = std::make_unique<emu88Lib::HardwareDevice>(params, bootOptions(), m_pcmCard, m_styleCard);
 		// Before the engine sees the device, so the first host rate it negotiates already
@@ -281,8 +284,42 @@ namespace emu88Player
 				return false;
 			}
 		}
-		(_slot == CardSlot::Style ? m_styleCard : m_pcmCard) = std::move(card);
+		if(_slot == CardSlot::Style)
+		{
+			m_styleCardImage = std::move(card);
+			m_styleCard = emu88Lib::ProE::cardInImage(m_styleCardImage, 0);
+			m_config->setValue(g_styleCardIndexKey, 0);
+		}
+		else
+		{
+			m_pcmCard = std::move(card);
+		}
 		m_config->setValue(cardPathKey(_slot), path);
+		m_config->saveIfNeeded();
+		return true;
+	}
+
+	std::vector<std::string> Processor::styleCardLabels() const
+	{
+		std::vector<std::string> labels;
+		for(size_t i = 0; i < emu88Lib::ProE::cardCount(m_styleCardImage); ++i)
+			labels.push_back(emu88Lib::ProE::cardLabel(m_styleCardImage, i));
+		return labels;
+	}
+
+	size_t Processor::styleCardIndex() const
+	{
+		const auto index = m_config->getIntValue(g_styleCardIndexKey, 0);
+		return index > 0 && static_cast<size_t>(index) < emu88Lib::ProE::cardCount(m_styleCardImage)
+			? static_cast<size_t>(index) : 0;
+	}
+
+	bool Processor::setStyleCardIndex(const size_t _index)
+	{
+		if(_index >= emu88Lib::ProE::cardCount(m_styleCardImage))
+			return false;
+		m_styleCard = emu88Lib::ProE::cardInImage(m_styleCardImage, _index);
+		m_config->setValue(g_styleCardIndexKey, static_cast<int>(_index));
 		m_config->saveIfNeeded();
 		return true;
 	}

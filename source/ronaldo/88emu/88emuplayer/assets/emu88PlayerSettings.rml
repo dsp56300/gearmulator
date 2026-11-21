@@ -44,6 +44,9 @@
 					<input id="styleCardPath" type="text"/>
 					<button id="btStyleCardBrowse" class="button">Open...</button>
 				</div>
+				<div id="styleCardChoice" class="hardwareFormGrid hardwareFormList" style="display: none;">
+					<div class="hardwareField hardwareWideField"><label>Card of the multi-card</label><combo id="styleCardIndex" popup="window"/></div>
+				</div>
 			</div>
 
 			<div id="pageSettingsSkin" class="hardwareSettingsPage" style="display: none;">

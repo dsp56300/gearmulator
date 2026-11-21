@@ -272,6 +272,17 @@ body {
 	padding: 4dp 6dp;
 }
 
+/* A field across the page, for entries too long for the usual control, such as a card's styles. */
+.hardwareFormList .hardwareField.hardwareWideField {
+	width: 100%;
+}
+
+.hardwareField.hardwareWideField combo {
+	flex: 1 1 auto;
+	width: auto;
+	margin-left: 10dp;
+}
+
 /* A long entry, such as an output device name, is cut off before the arrow. */
 .hardwareField combotext {
 	display: block;

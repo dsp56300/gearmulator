@@ -6,6 +6,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -101,9 +102,16 @@ namespace emu88Lib
 	// tables at ED5D) and looks for it at C37F -> D456, which reads BFFF of the card, bit 1 set
 	// meaning a card is in the slot, then checks the header at 4000: "Roland PROE D" for its own
 	// cards, "Roland E-20 N" for the E-20's TN-SC1 series, each letter followed by its complement
-	// and a second letter, X or Q, with its own. An empty slot reads 00 here, so the firmware
-	// sees none. The card's styles are on BANK 5 (style numbers 40h up, shown as C1-C8); without
-	// a card BANK 5 stays on the internal styles.
+	// and a second letter, X or Q, with its own. Bits 1-0 of BFFF are taken as the slot's status
+	// rather than the card's data, bit 1 set with a card in it: the E-20 cards TN-SC1-09 to 14 fill
+	// their 32 KiB, and four of them end in a byte with bit 1 clear, which the firmware would take
+	// for an empty slot. An empty slot reads 00.
+	//
+	// A card has 8 style slots, whose names D543 copies from the offset in the word at 20 (0x80
+	// bytes to 2728): BANK 5 NUMBER 1-8, style numbers 40h-47h, shown as C1-C8. Most TN-SC1 cards
+	// hold 4 styles and list them twice, so 5-5 to 5-8 repeat 5-1 to 5-4 (TN-SC1-10 has 8). Without
+	// a card BANK 5 shows CARD NOT READY. BANK 6-8 do nothing while selecting a style: the switch
+	// handler at 7B3D in pattern bank 0 returns on their codes, BD-BF.
 	//
 	// Register map and key matrix after MAME's driver (roland_proe.cpp).
 	class ProE
@@ -122,6 +130,14 @@ namespace emu88Lib
 		ProE(const ProERomSet& _roms, const LaRomSet& _soundBoard, std::vector<uint8_t> _card = {});
 		// Whether _image is a style card the firmware takes: 32 or 64 KiB with a PRO-E or E-20 header.
 		static bool isCardImage(const std::vector<uint8_t>& _image);
+		// The cards in a style card image: 1 for a card, more for the dump of a multi-card, which holds
+		// 32 KiB cards back to back, each with its header, of which a switch on it puts one in the
+		// slot; 0 for anything else.
+		static size_t cardCount(const std::vector<uint8_t>& _image);
+		// Card _index of the image, empty past cardCount().
+		static std::vector<uint8_t> cardInImage(const std::vector<uint8_t>& _image, size_t _index);
+		// How the card names itself: its ID and, for the E-20 format, its four styles.
+		static std::string cardLabel(const std::vector<uint8_t>& _image, size_t _index);
 		bool hasCard() const { return !m_card.empty(); }
 
 		ProE(const ProE&) = delete;

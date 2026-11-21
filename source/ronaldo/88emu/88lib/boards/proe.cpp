@@ -16,23 +16,45 @@ namespace emu88Lib
 		// The bank latch's card select, and its choice of a 64 KiB card's half.
 		constexpr uint8_t g_latchCard = 0x08;
 		constexpr uint8_t g_latchCardHalf = 0x04;
+		// BFFF of the card, bits 1-0: the slot's status, see the class comment.
+		constexpr uint32_t g_cardStatusOffset = 0x7fff;
+		constexpr uint8_t g_cardStatusMask = 0x03, g_cardPresent = 0x03;
 		// selectRomBank()'s code banks past the pattern ROMs' 0-7: the card's halves, an empty slot,
 		// and the ROM banks 8-15 the latch can name, which no chip answers.
 		constexpr uint8_t g_codeBankCard = 8, g_codeBankNoCard = 10, g_codeBankUnmapped = 11;
 
+		bool isE20Card(const std::vector<uint8_t>& _card, const size_t _base)
+		{
+			return _card.size() >= _base + 12 && std::memcmp(_card.data() + _base, "Roland E-20 ", 12) == 0;
+		}
+
 		// D4A3-D541: the 12 bytes from 4000 against "Roland PROE " or "Roland E-20 ", then the
 		// format letter (D or N) and its complement, and X or Q (by format) and its complement.
-		bool hasCardHeader(const std::vector<uint8_t>& _card)
+		bool hasCardHeader(const std::vector<uint8_t>& _card, const size_t _base = 0)
 		{
+			if(_card.size() < _base + 16)
+				return false;
 			const auto letter = [&](const size_t _offset, const uint8_t _value)
 			{
-				return _card[_offset] == _value && _card[_offset + 1] == static_cast<uint8_t>(~_value);
+				return _card[_base + _offset] == _value &&
+					_card[_base + _offset + 1] == static_cast<uint8_t>(~_value);
 			};
-			if(std::memcmp(_card.data(), "Roland PROE ", 12) == 0)
-				return (letter(12, 'D') || letter(12, 'N')) && letter(14, 'X');
-			if(std::memcmp(_card.data(), "Roland E-20 ", 12) == 0)
+			if(isE20Card(_card, _base))
 				return letter(12, 'N') && letter(14, 'Q');
+			if(std::memcmp(_card.data() + _base, "Roland PROE ", 12) == 0)
+				return (letter(12, 'D') || letter(12, 'N')) && letter(14, 'X');
 			return false;
+		}
+
+		// Printable text at _offset, up to _size bytes, a NUL or erased memory (FF), trailing spaces dropped.
+		std::string cardText(const std::vector<uint8_t>& _card, const size_t _offset, const size_t _size)
+		{
+			std::string text;
+			for(size_t i = _offset; i < _offset + _size && i < _card.size() && _card[i] && _card[i] != 0xff; ++i)
+				text += _card[i] >= 0x20 && _card[i] < 0x7f ? static_cast<char>(_card[i]) : '?';
+			while(!text.empty() && text.back() == ' ')
+				text.pop_back();
+			return text;
 		}
 
 		// The dial's PA7 pulse: low for 0.5 ms, one detent every 2 ms.
@@ -79,6 +101,50 @@ namespace emu88Lib
 	bool ProE::isCardImage(const std::vector<uint8_t>& _image)
 	{
 		return (_image.size() == CardBankSize || _image.size() == MaxCardSize) && hasCardHeader(_image);
+	}
+
+	size_t ProE::cardCount(const std::vector<uint8_t>& _image)
+	{
+		if(isCardImage(_image))
+			return 1;
+		if(_image.size() <= MaxCardSize || _image.size() % CardBankSize)
+			return 0;
+		for(size_t base = 0; base < _image.size(); base += CardBankSize)
+			if(!hasCardHeader(_image, base))
+				return 0;
+		return _image.size() / CardBankSize;
+	}
+
+	std::vector<uint8_t> ProE::cardInImage(const std::vector<uint8_t>& _image, const size_t _index)
+	{
+		const auto count = cardCount(_image);
+		if(_index >= count)
+			return {};
+		if(count == 1)
+			return _image;
+		const auto begin = _image.begin() + static_cast<std::ptrdiff_t>(_index * CardBankSize);
+		return {begin, begin + static_cast<std::ptrdiff_t>(CardBankSize)};
+	}
+
+	std::string ProE::cardLabel(const std::vector<uint8_t>& _image, const size_t _index)
+	{
+		const auto card = cardInImage(_image, _index);
+		if(card.empty())
+			return {};
+		// The E-20 format: the ID at 10, the four style names of 16 characters from 30.
+		auto label = cardText(card, 0x10, 16);
+		if(!isE20Card(card, 0))
+			return label;
+		std::string styles;
+		for(size_t i = 0; i < 4; ++i)
+		{
+			const auto name = cardText(card, 0x30 + i * 16, 16);
+			if(!name.empty())
+				styles += (styles.empty() ? "" : ", ") + name;
+		}
+		if(!styles.empty())
+			label += (label.empty() ? "" : ": ") + styles;
+		return label;
 	}
 
 	ProE::ProE(const ProERomSet& _roms, const LaRomSet& _soundBoard, std::vector<uint8_t> _card)
@@ -368,7 +434,11 @@ namespace emu88Lib
 		else if(bank == g_codeBankUnmapped)
 			std::memset(window, 0xff, RomWindowSize);
 		else
+		{
 			std::memcpy(window, m_card.data() + size_t(bank - g_codeBankCard) * CardBankSize, RomWindowSize);
+			auto& status = window[g_cardStatusOffset];
+			status = static_cast<uint8_t>((status & ~g_cardStatusMask) | g_cardPresent);
+		}
 		// Code runs from the window too.
 		m_machine.cpu().select_code_bank(RomWindow, RomWindowSize, bank);
 	}

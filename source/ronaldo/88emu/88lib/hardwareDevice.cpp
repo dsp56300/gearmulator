@@ -273,9 +273,9 @@ namespace emu88Lib
 		return !Cm32p::decodeCard(_image).empty();
 	}
 
-	bool HardwareDevice::isStyleCardImage(const std::vector<uint8_t>& _image)
+	size_t HardwareDevice::styleCardCount(const std::vector<uint8_t>& _image)
 	{
-		return ProE::isCardImage(_image);
+		return ProE::cardCount(_image);
 	}
 
 	float HardwareDevice::getSamplerate() const
