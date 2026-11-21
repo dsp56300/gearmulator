@@ -438,6 +438,95 @@ namespace
 		expect(answerAfter(6, 2.0f) == MidiEventSource::Editor);
 		expect(answerAfter(7, 4.0f) == MidiEventSource::Unknown);
 	}
+
+	// MIDI clock on host start: the first timing clock after Start marks the next beat. Starting on a beat (ppq 0), that
+	// is now, not a beat later; starting half way through a beat, it is half a beat later
+	void testMidiClockFirstTickOnStart()
+	{
+		auto firstTickBlock = [](const double _startPpq)
+		{
+			TestDevice device;
+			Plugin plugin(&device, [](auto* _d) { return _d; });
+			plugin.setHostSamplerate(44100.0f, 0.0f);
+			plugin.setBlockSize(64);
+
+			float left[64] = {};
+			float right[64] = {};
+			TAudioInputs in{};
+			TAudioOutputs out{};
+			out[0] = left;
+			out[1] = right;
+			double ppq = _startPpq;
+			for (int block = 0; block < 2000; ++block)
+			{
+				plugin.process(in, out, 64, 120.0f, ppq, true, true);
+				ppq += 64.0 / 44100.0 * 2.0;
+				for (const auto& e : device.m_midiSent)
+					if (e.a == M_TIMINGCLOCK)
+						return block;
+			}
+			return -1;
+		};
+		expect(firstTickBlock(0.0) == 0);
+		expect(firstTickBlock(4.0) == 0);
+		const auto half = firstTickBlock(0.5);	// 11025 samples = block 172
+		expect(half >= 171 && half <= 173);
+	}
+
+	// A seek while playing, back or forward, starts the clock again at the new position: Stop, Start, and the first
+	// timing clock on the next beat from there. A straight run sends no further Start
+	void testMidiClockResyncOnSeek()
+	{
+		TestDevice device;
+		Plugin plugin(&device, [](auto* _d) { return _d; });
+		plugin.setHostSamplerate(44100.0f, 0.0f);
+		plugin.setBlockSize(64);
+
+		float left[64] = {};
+		float right[64] = {};
+		TAudioInputs in{};
+		TAudioOutputs out{};
+		out[0] = left;
+		out[1] = right;
+
+		constexpr double ppqPerBlock = 64.0 / 44100.0 * 2.0;
+		double ppq = 0.0;
+
+		auto run = [&](const int _blocks, int& _starts, int& _firstTickBlock)
+		{
+			_starts = 0;
+			_firstTickBlock = -1;
+			for (int block = 0; block < _blocks; ++block)
+			{
+				device.m_midiSent.clear();
+				plugin.process(in, out, 64, 120.0f, ppq, true, true);
+				ppq += ppqPerBlock;
+				for (const auto& e : device.m_midiSent)
+				{
+					if (e.a == M_START)
+						++_starts;
+					else if (e.a == M_TIMINGCLOCK && _firstTickBlock < 0)
+						_firstTickBlock = block;
+				}
+			}
+		};
+
+		int starts = 0;
+		int firstTick = 0;
+
+		run(400, starts, firstTick);
+		expect(starts == 1 && firstTick == 0);
+
+		ppq = 0.0;	// back, as a loop to the song start does
+		run(1, starts, firstTick);
+		expect(starts == 1 && firstTick == 0);
+
+		run(100, starts, firstTick);
+		ppq = 10.5;	// forward, half way through a beat: the next beat is 11025 samples away, block 172
+		run(200, starts, firstTick);
+		expect(starts == 1);
+		expect(firstTick >= 171 && firstTick <= 173);
+	}
 } // namespace
 
 int main()
@@ -451,5 +540,7 @@ int main()
 	testMissingInputDoesNotHearMissingOutput();
 	testRepliesGoBackToWhoAsked();
 	testFirmwareRepliesGoBackToWhoAsked();
+	testMidiClockFirstTickOnStart();
+	testMidiClockResyncOnSeek();
 	return 0;
 }

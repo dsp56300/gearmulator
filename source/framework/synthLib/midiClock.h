@@ -12,7 +12,8 @@ namespace synthLib
 	public:
 		explicit MidiClock(Plugin& _plugin) : m_plugin(_plugin) {}
 
-		void process(float _bpm, double _ppqPos, bool _isPlaying, size_t _sampleCount);
+		// _seek: the host jumped while playing, see TransportDiscontinuity::Seek. The clock then starts again from there
+		void process(float _bpm, double _ppqPos, bool _isPlaying, size_t _sampleCount, bool _seek = false);
 
 		void restart();
 
