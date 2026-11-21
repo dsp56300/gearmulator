@@ -66,7 +66,7 @@ else()
 endif()
 
 if(NOT MSVC)
-	target_link_libraries(synthLib PUBLIC dl)
+	target_link_libraries(synthLib PUBLIC ${CMAKE_DL_LIBS})
 endif()
 
 if(APPLE)

@@ -47,7 +47,7 @@ int instm::dorawread(char* buf, int count)
 	return -1;
 #ifdef WIN32
     unsigned long ret;
-    if (!ReadFile(HANDLE(handle), buf, count, &ret, nil)) 
+    if (!ReadFile(fromsyshandle(handle), buf, count, &ret, nil)) 
 #else
     int ret;
     if ((ret = ::read(handle, buf, count)) < 0)

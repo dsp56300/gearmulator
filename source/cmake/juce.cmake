@@ -132,6 +132,31 @@ target_include_directories(juce_plugin_modules
 
 _juce_fixup_module_source_groups()
 
+# MinGW links only mingw-w64's default manifest, which does not ask for comctl32 6; MSVC gets that
+# dependency from JUCE's linker pragma. Embed the same manifest for a target that shows dialogs.
+function(tus_embedWindowsManifest target)
+	if(NOT WIN32 OR MSVC)
+		return()
+	endif()
+
+	if(NOT TARGET ${target})
+		message(WARNING "tus_embedWindowsManifest: target '${target}' does not exist")
+		return()
+	endif()
+
+	if(NOT CMAKE_RC_COMPILER)
+		message(WARNING "tus_embedWindowsManifest: RC language not enabled, '${target}' gets no manifest")
+		return()
+	endif()
+
+	set(manifest ${JUCE_CMAKE_DIR}/windows/app.manifest)
+	set(rcFile   ${JUCE_CMAKE_DIR}/windows/app.manifest.rc)
+
+	target_sources(${target} PRIVATE ${rcFile})
+	set_source_files_properties(${rcFile} PROPERTIES INCLUDE_DIRECTORIES ${JUCE_CMAKE_DIR}/windows)
+	set_property(SOURCE ${rcFile} PROPERTY OBJECT_DEPENDS ${manifest})
+endfunction()
+
 # juce::juce_audio_plugin_client is the lib that every plugin links. However, this pulls in lots of juce modules that are 
 # all INTERFACE targets, causing all the sources to end up in every plugin we build. We remove this dependency as we already
 # link them via our rebuilt static lib that we created above. This causes all juce modules to only show up in our static
@@ -282,6 +307,20 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set_target_properties(${targetName}_VST PROPERTIES PREFIX "")
 	endif()
 
+	# MinGW's CMake platform module gives shared and module libraries a "lib" prefix,
+	# MSVC's is empty. Windows hosts take the plugin name from the file name, and the
+	# LV2 bundle would otherwise carry a different DLL name than the MSVC build.
+	# Windows plugin binaries carry no prefix at all. (MSVC is already empty, so this
+	# is a no-op there.)
+	if(WIN32)
+		if(TARGET ${targetName}_VST)
+			set_target_properties(${targetName}_VST PROPERTIES PREFIX "")
+		endif()
+		if(TARGET ${targetName}_LV2)
+			set_target_properties(${targetName}_LV2 PROPERTIES PREFIX "")
+		endif()
+	endif()
+
 	if(USE_VST2)
 		add_dependencies(PluginFormat_VST2 ${targetName}_VST)
 	endif()
@@ -304,7 +343,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		add_dependencies(PluginFormat_VST3 ${targetName}_VST3)
 	endif()
 
-	if(MSVC OR APPLE)
+	if(WIN32 OR APPLE)
 		if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST DESTINATION . COMPONENT ${productName}-VST2)
 			if(APPLE)
@@ -334,12 +373,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	
 	if(USE_LV2)
 		get_target_property(lv2OutputFolder ${targetName}_LV2 ARCHIVE_OUTPUT_DIRECTORY)
-		if(MSVC)
+		if(WIN32)
 			set(pattern "*.dll")
 		else()
 			set(pattern "*.so")
 		endif()
-		if(MSVC OR APPLE)
+		if(WIN32 OR APPLE)
 			set(dest .)
 		else()
 			set(dest lib/lv2/)
@@ -364,6 +403,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	if(USE_Standalone AND TARGET ${targetName}_Standalone)
 		add_dependencies(PluginFormat_Standalone ${targetName}_Standalone)
+
+		if(MINGW)
+			tus_embedWindowsManifest(${targetName}_Standalone)
+		endif()
 
 		# Without this the Standalone package held nothing but the changelog every format gets, so the
 		# program was never shipped at all.
@@ -422,6 +465,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set(serverTarget ${productName}ServerPlugin)
 
 		add_library(${serverTarget} SHARED)
+
+		if(WIN32)
+			set_target_properties(${serverTarget} PROPERTIES PREFIX "")
+		endif()
 
 		target_compile_definitions(${serverTarget} PUBLIC 
 			PluginName="${productName}"
