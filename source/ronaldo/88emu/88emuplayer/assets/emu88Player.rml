@@ -155,9 +155,9 @@
 			<button id="btMv30Down" class="hit mv30Arrow" style="left: 478.667dp; top: 55dp; width: 18.667dp; height: 10dp;" title="Cursor down (Down arrow)"><div class="mv30Face mv30_down"/></button>
 		</div>
 
-		<!-- The PRO-E: the arranger's switches only, the ones a style is picked and played with; the panel's others
-		     edit its memory. No artwork has wells for them, so they are drawn here, with the lamps of those that have one;
-		     the beat lamps and the TEMPO / VALUE dial sit on the lip. -->
+		<!-- The PRO-E: the arranger's switches, the ones a style is picked and played with, and under the display the
+		     setup menus' and the reverb's; the panel's others edit its memory. No artwork has wells for them, so they are
+		     drawn here, with the lamps of those that have one; the beat lamps and the TEMPO / VALUE dial sit on the lip. -->
 		<div class="modelProEPanel">
 			<div class="proeCaption" style="left: 396dp; top: 5dp;">BANK</div>
 			<div class="proeCaption" style="left: 396dp; top: 27dp;">NUMBER</div>
@@ -191,6 +191,12 @@
 			<button id="btProESyncStart" class="hit proeKey proeLampKey" style="left: 437dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="SYNC START (C)"><div class="proeLamp"/>SYNC START</button>
 			<button id="btProESyncStop" class="hit proeKey proeLampKey" style="left: 478dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="SYNC STOP (X)"><div class="proeLamp"/>SYNC STOP</button>
 			<button id="btProEStartStop" class="hit proeKey proeLampKey" style="left: 519dp; top: 94dp; width: 79dp; height: 15dp; line-height: 15dp;" title="START/STOP (Space)"><div class="proeLamp"/>START/STOP</button>
+			<button id="btProEMidiFnct" class="hit proeKey proeLampKey" style="left: 162dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="MIDI FUNCTION (I)"><div class="proeLamp"/>MIDI FNCT</button>
+			<button id="btProEParameter" class="hit proeKey proeLampKey" style="left: 203dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="PARAMETER (P)"><div class="proeLamp"/>PARAMETER</button>
+			<button id="btProECursor" class="hit proeKey" style="left: 244dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="CURSOR (Right arrow)">CURSOR</button>
+			<div class="proeCaption" style="left: 301dp; top: 86dp;">REVERB</div>
+			<button id="btProERevOnOff" class="hit proeKey proeLampKey" style="left: 301dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="REVERB ON/OFF (R)"><div class="proeLamp"/>ON/OFF</button>
+			<button id="btProERevType" class="hit proeKey" style="left: 342dp; top: 94dp; width: 38dp; height: 15dp; line-height: 15dp;" title="REVERB TYPE (K)">TYPE</button>
 			<!-- The beat lamps: the bar's beats while a style plays, beat 1 blinking at the tempo while stopped. -->
 			<div class="proeCaption" style="left: 396dp; top: 140dp;">BEAT</div>
 			<div id="ledProEBeat1" class="proeBeat" style="left: 397dp; top: 149dp;"/>

@@ -266,9 +266,10 @@ namespace emu88Player::editor
 	constexpr Key g_mv30ValueUpKey = Key::KI_PRIOR;
 	constexpr Key g_mv30FootswitchKey = Key::KI_LCONTROL;
 
-	// The PRO-E's arranger switches, the ones a style is picked and played with (emu88Lib::ProEButton); the panel's
-	// others edit its memory and are left out. MAME's keys where they are free here: Q is the player's power key,
-	// so the BANK switches are on F1-F8, and START/STOP is Space as on the MV-30. The dial turns a detent per press.
+	// The PRO-E's arranger switches, the ones a style is picked and played with, and its reverb and setup switches
+	// (emu88Lib::ProEButton); the panel's others edit its memory and are left out. MAME's keys where they are free
+	// here: Q is the player's power key, so the BANK switches are on F1-F8, and START/STOP is Space as on the MV-30.
+	// CURSOR moves to the next field of a menu, so it is on the right arrow. The dial turns a detent per press.
 	using ProEButton = emu88Lib::ProEButton;
 	constexpr std::array g_proeButtons{
 		bind("btProEStartStop", ProEButton::StartStop, Key::KI_SPACE, "START/STOP"),
@@ -301,11 +302,16 @@ namespace emu88Player::editor
 		bind("btProENumber6", ProEButton::Number6, Key::KI_6, "NUMBER 6"),
 		bind("btProENumber7", ProEButton::Number7, Key::KI_7, "NUMBER 7"),
 		bind("btProENumber8", ProEButton::Number8, Key::KI_8, "NUMBER 8"),
+		bind("btProERevOnOff", ProEButton::ReverbOnOff, Key::KI_R, "REVERB ON/OFF"),
+		bind("btProERevType", ProEButton::ReverbType, Key::KI_K, "REVERB TYPE"),
+		bind("btProEMidiFnct", ProEButton::MidiFunction, Key::KI_I, "MIDI FUNCTION"),
+		bind("btProEParameter", ProEButton::Parameter, Key::KI_P, "PARAMETER"),
+		bind("btProECursor", ProEButton::Cursor, Key::KI_RIGHT, "CURSOR"),
 	};
 	static_assert(g_proeButtons.size() == static_cast<size_t>(ProEButton::Count));
 	constexpr Key g_proeDialUpKey = Key::KI_UP;
 	constexpr Key g_proeDialDownKey = Key::KI_DOWN;
-	constexpr uint32_t g_proeButtonMask = (uint64_t{1} << static_cast<unsigned>(ProEButton::Count)) - 1;
+	constexpr uint64_t g_proeButtonMask = (uint64_t{1} << static_cast<unsigned>(ProEButton::Count)) - 1;
 
 	// The bindings the help dialog has to spell out; RmlUi's identifiers are
 	// contiguous for the letter, digit and function-key runs.
@@ -389,7 +395,7 @@ namespace emu88Player::editor
 		return emu88Lib::isLaModel(_model) || _model == emu88Lib::DeviceModel::Cm64;
 	}
 
-	constexpr uint32_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint32_t _buttons)
+	constexpr uint64_t panelButtonsForDevice(const emu88Lib::DeviceModel _model, uint64_t _buttons)
 	{
 		if(_model == emu88Lib::DeviceModel::ProE)
 			return _buttons & g_proeButtonMask;

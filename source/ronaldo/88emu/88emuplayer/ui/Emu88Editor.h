@@ -151,7 +151,7 @@ namespace emu88Player
 		void refreshButtonElements(emu88Lib::DeviceModel _model);
 		void refreshLedElements(emu88Lib::DeviceModel _model);
 		void updateButtonVisuals();
-		void updateLeds(uint16_t _leds);
+		void updateLeds(uint32_t _leds);
 
 		Processor& m_processor;
 		const bool m_offline;
@@ -181,13 +181,13 @@ namespace emu88Player
 		Rml::Element* m_playlistEntries = nullptr;
 		Rml::Element* m_playerPlayGraphic = nullptr;
 		Rml::Element* m_playerPauseGraphic = nullptr;
-		std::array<Rml::Element*, 32> m_buttonElements{};
+		std::array<Rml::Element*, 64> m_buttonElements{};
 		// One per bit of the display snapshot's leds, in the board's order.
-		std::array<Rml::Element*, 16> m_leds{};
+		std::array<Rml::Element*, 32> m_leds{};
 		float m_valueKnobDownX = 0.0f;
 		float m_valueKnobDownY = 0.0f;
-		uint32_t m_pointerButtons = 0;
-		uint32_t m_keyboardButtons = 0;
+		uint64_t m_pointerButtons = 0;
+		uint64_t m_keyboardButtons = 0;
 		bool m_powerKeyDown = false;
 		// The MV-30's switches held on the keyboard, bit n = Mv30Button n, and its footswitch, and what was sent
 		uint64_t m_mv30Buttons = 0;
@@ -204,7 +204,7 @@ namespace emu88Player
 		uint8_t m_mv30DialKeys = 0;
 		uint64_t m_mv30SentButtons = 0;
 		bool m_mv30SentFootswitch = false;
-		uint32_t m_sentButtons = 0;
+		uint64_t m_sentButtons = 0;
 		uint64_t m_displayRevision = 0;
 		uint64_t m_playlistRevision = ~uint64_t{0};
 		uint64_t m_playerStatusRevision = ~uint64_t{0};

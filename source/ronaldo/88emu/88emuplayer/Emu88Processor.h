@@ -93,7 +93,7 @@ namespace emu88Player
 		bool setDeviceModel(emu88Lib::DeviceModel _model);
 		bool restartDevice();
 		bool isPoweredOn() const { return m_device != nullptr; }
-		bool setPower(bool enabled, uint32_t heldButtons = 0);
+		bool setPower(bool enabled, uint64_t heldButtons = 0);
 		void sendGmReset();
 		void sendGm2Reset();
 		void sendGsReset();
@@ -204,7 +204,7 @@ namespace emu88Player
 
 	private:
 		synthLib::DeviceCreateParams createDeviceParams(emu88Lib::DeviceModel _model) const;
-		bool replaceDevice(emu88Lib::DeviceModel _model, bool _persistModel, uint32_t heldButtons = 0);
+		bool replaceDevice(emu88Lib::DeviceModel _model, bool _persistModel, uint64_t heldButtons = 0);
 		uint8_t midiPortCount() const;
 		void sendSystemExclusive(const std::vector<uint8_t>& _bytes);
 		// Every message for the board goes through here, under the callback lock, so that the part state sees it.

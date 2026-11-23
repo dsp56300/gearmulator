@@ -474,7 +474,7 @@ namespace emu88Player
 
 	void Editor::setPointerButton(const uint32_t _button, const bool _pressed)
 	{
-		const auto mask = uint32_t{1} << _button;
+		const auto mask = uint64_t{1} << _button;
 		if(panelButtonsForDevice(m_processor.deviceModel(), mask) == 0) return;
 		if(_pressed) m_pointerButtons |= mask;
 		else m_pointerButtons &= ~mask;
@@ -484,7 +484,7 @@ namespace emu88Player
 
 	void Editor::setKeyboardButton(const uint32_t _button, const bool _pressed)
 	{
-		const auto mask = uint32_t{1} << _button;
+		const auto mask = uint64_t{1} << _button;
 		if(panelButtonsForDevice(m_processor.deviceModel(), mask) == 0) return;
 		if(_pressed) m_keyboardButtons |= mask;
 		else m_keyboardButtons &= ~mask;
@@ -553,7 +553,7 @@ namespace emu88Player
 		for(uint32_t button = 0; button < m_buttonElements.size(); ++button)
 			if(auto* element = m_buttonElements[button])
 			{
-				if(panelButtonsForDevice(_model, uint32_t{1} << button) == 0)
+				if(panelButtonsForDevice(_model, uint64_t{1} << button) == 0)
 					element->SetAttribute("disabled", "");
 				else
 					element->RemoveAttribute("disabled");
@@ -605,10 +605,12 @@ namespace emu88Player
 			assign({"ledCmMidi"});
 			break;
 		case emu88Lib::DeviceModel::ProE:
-			// emu88Lib::ProELed bit order: the lamps of the arranger switches, then the four beat lamps.
+			// emu88Lib::ProELed bit order: the lamps of the arranger switches, the four beat lamps, then the
+			// reverb's and the setup menus'.
 			assign({"btProEStartStop", "btProEIntroEnd", "btProESyncStart", "btProESyncStop", "btProEArrHold",
 			        "btProEAdvArr", "btProEVariation", "btProEFadeIn", "btProEFadeOut", "btProEStyle", "btProEGroup",
-			        "ledProEBeat1", "ledProEBeat2", "ledProEBeat3", "ledProEBeat4"});
+			        "ledProEBeat1", "ledProEBeat2", "ledProEBeat3", "ledProEBeat4",
+			        "btProERevOnOff", "btProEMidiFnct", "btProEParameter"});
 			break;
 		default:
 			// Gate-array LED port bit order, shared by SC-88, SC-88VL and SC-88Pro.
@@ -630,14 +632,14 @@ namespace emu88Player
 		const auto buttons = m_pointerButtons | m_keyboardButtons;
 		for(uint32_t button = 0; button < m_buttonElements.size(); ++button)
 			if(m_buttonElements[button])
-				m_buttonElements[button]->SetClass("pressed", (buttons & (uint32_t{1} << button)) != 0);
+				m_buttonElements[button]->SetClass("pressed", (buttons & (uint64_t{1} << button)) != 0);
 	}
 
-	void Editor::updateLeds(const uint16_t _value)
+	void Editor::updateLeds(const uint32_t _value)
 	{
 		for(uint8_t i = 0; i < m_leds.size(); ++i)
 			if(m_leds[i])
-				m_leds[i]->SetClass("on", (_value & (uint16_t{1} << i)) != 0);
+				m_leds[i]->SetClass("on", (_value & (uint32_t{1} << i)) != 0);
 
 		if(auto* efx = m_leds[7])
 		{
@@ -711,6 +713,8 @@ namespace emu88Player
 		groups.push_back({"Style", {{"F1 - F8", "BANK 1 - 8"}, {"1 - 8", "NUMBER 1 - 8"}}});
 		for(auto& row : rows({ProEButton::Style, ProEButton::GroupAB}))
 			groups.back().rows.push_back(std::move(row));
+		groups.push_back({"Reverb", rows({ProEButton::ReverbOnOff, ProEButton::ReverbType})});
+		groups.push_back({"Setup", rows({ProEButton::MidiFunction, ProEButton::Parameter, ProEButton::Cursor})});
 		groups.push_back({"Dial", {{keyName(g_proeDialUpKey) + " / " + keyName(g_proeDialDownKey),
 		                            "TEMPO / VALUE dial, a detent"}}});
 		return groups;
@@ -738,7 +742,7 @@ namespace emu88Player
 		};
 		const auto populated = [model, is8850](const uint8_t _button)
 		{
-			const auto bit = uint32_t{1} << _button;
+			const auto bit = uint64_t{1} << _button;
 			return is8850 ? bit != 0 : panelButtonsForDevice(model, bit) != 0;
 		};
 

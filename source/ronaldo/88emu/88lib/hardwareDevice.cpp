@@ -245,12 +245,14 @@ namespace emu88Lib
 
 		if(_boot.initialPanelButtons)
 		{
-			if(m_sc88Pro) m_sc88Pro->setButtons(_boot.initialPanelButtons);
-			else if(m_sc88) m_sc88->setButtons(_boot.initialPanelButtons);
-			else if(m_sc8850) m_sc8850->setButtons(_boot.initialPanelButtons);
-			else if(m_sc55) m_sc55->setButtons(_boot.initialPanelButtons);
-			else if(m_la) m_la->setButtons(_boot.initialPanelButtons);
-			else if(m_cm64) m_cm64->setButtons(_boot.initialPanelButtons);
+			// Only the PRO-E has switches past the first 32.
+			const auto buttons = static_cast<uint32_t>(_boot.initialPanelButtons);
+			if(m_sc88Pro) m_sc88Pro->setButtons(buttons);
+			else if(m_sc88) m_sc88->setButtons(buttons);
+			else if(m_sc8850) m_sc8850->setButtons(buttons);
+			else if(m_sc55) m_sc55->setButtons(buttons);
+			else if(m_la) m_la->setButtons(buttons);
+			else if(m_cm64) m_cm64->setButtons(buttons);
 			else if(m_proe) m_proe->setButtons(_boot.initialPanelButtons);
 		}
 
@@ -350,14 +352,14 @@ namespace emu88Lib
 		       (m_mv30 && m_mv30->isValid()) || (m_proe && m_proe->isValid());
 	}
 
-	void HardwareDevice::setPanelButtons(const uint32_t _buttons)
+	void HardwareDevice::setPanelButtons(const uint64_t _buttons)
 	{
 		std::lock_guard lock(m_panelMutex);
 		if(!m_pendingPanelCommands.empty() &&
 		   m_pendingPanelCommands.back().type == PanelCommandType::Buttons &&
-		   m_pendingPanelCommands.back().value == static_cast<int32_t>(_buttons))
+		   m_pendingPanelCommands.back().wide == _buttons)
 			return;
-		m_pendingPanelCommands.push_back({PanelCommandType::Buttons, static_cast<int32_t>(_buttons)});
+		m_pendingPanelCommands.push_back({PanelCommandType::Buttons, 0, _buttons});
 	}
 
 	void HardwareDevice::setMv30Panel(const uint64_t _buttons, const bool _footswitch)
@@ -532,14 +534,15 @@ namespace emu88Lib
 		m_panelCommands.pop_front();
 		if(command.type == PanelCommandType::Buttons)
 		{
-			const auto buttons = static_cast<uint32_t>(command.value);
+			// Only the PRO-E has switches past the first 32.
+			const auto buttons = static_cast<uint32_t>(command.wide);
 			if(m_sc88Pro) m_sc88Pro->setButtons(buttons);
 			else if(m_sc88) m_sc88->setButtons(buttons);
 			else if(m_sc8850) m_sc8850->setButtons(buttons);
 			else if(m_sc55) m_sc55->setButtons(buttons);
 			else if(m_la) m_la->setButtons(buttons);
 			else if(m_cm64) m_cm64->setButtons(buttons);
-			else if(m_proe) m_proe->setButtons(buttons);
+			else if(m_proe) m_proe->setButtons(command.wide);
 			m_nextPanelCommandSample = m_renderedSamples + g_minimumPanelEdgeSamples;
 		}
 		else if(command.type == PanelCommandType::Mv30Panel)

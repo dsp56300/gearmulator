@@ -45,7 +45,7 @@ namespace
 		return text;
 	}
 
-	uint32_t bit(const ProEButton _button) { return uint32_t{1} << static_cast<uint8_t>(_button); }
+	uint64_t bit(const ProEButton _button) { return uint64_t{1} << static_cast<uint8_t>(_button); }
 
 	int32_t render(ProE& _proe, const double _seconds)
 	{
@@ -251,7 +251,8 @@ int main(const int _argc, char** _argv)
 		const char* names[] = {"START", "INTRO", "FILLORIG", "FILLVARI", "SYNCSTART", "SYNCSTOP", "ARRHOLD",
 		                       "ADVARR", "VARIATION", "TAP", "FADEIN", "FADEOUT", "STYLE", "GROUP",
 		                       "BANK1", "BANK2", "BANK3", "BANK4", "BANK5", "BANK6", "BANK7", "BANK8",
-		                       "NUM1", "NUM2", "NUM3", "NUM4", "NUM5", "NUM6", "NUM7", "NUM8"};
+		                       "NUM1", "NUM2", "NUM3", "NUM4", "NUM5", "NUM6", "NUM7", "NUM8",
+		                       "REVONOFF", "REVTYPE", "MIDIFNCT", "PARAMETER", "CURSOR"};
 		if(std::getenv("PROE_LED_BEAT"))
 		{
 			// Row 6's low nibble every 50 ms, stopped and then playing at 110 bpm (a beat is 545 ms).
@@ -276,7 +277,7 @@ int main(const int _argc, char** _argv)
 		for(const char* p = order; *p; )
 		{
 			const int b = std::atoi(p);
-			proe.setButtons(uint32_t{1} << b);
+			proe.setButtons(uint64_t{1} << b);
 			render(proe, 0.15);
 			proe.setButtons(0);
 			survey(names[b]);
@@ -352,6 +353,49 @@ int main(const int _argc, char** _argv)
 		dt1(guarded);
 		std::printf("protected: LCD |%s|%s|\n", lcdLine(guarded, 0).c_str(), lcdLine(guarded, 1).c_str());
 		CHECK(protectedShown(guarded));
+	}
+
+	// The reverb and setup switches, past bit 31 of setButtons(): REV ON/OFF puts out the reverb's lamp,
+	// lit from power-on; MIDI FNCT and PARAMETER open their menus and light their lamps; CURSOR moves the
+	// blinking field of the MIDI menu.
+	{
+		ProE setup(roms, sound);
+		render(setup, 4.0);
+		const auto lamp = [&](const emu88Lib::ProELed _led) { return (setup.leds() >> static_cast<uint8_t>(_led)) & 1; };
+		const auto press = [&](const ProEButton _button)
+		{
+			setup.setButtons(bit(_button));
+			render(setup, 0.15);
+			setup.setButtons(0);
+			render(setup, 0.5);
+		};
+		CHECK(lamp(emu88Lib::ProELed::ReverbOnOff));
+		press(ProEButton::ReverbOnOff);
+		CHECK(!lamp(emu88Lib::ProELed::ReverbOnOff));
+		CHECK(!lamp(emu88Lib::ProELed::MidiFunction));
+		press(ProEButton::MidiFunction);
+		std::printf("MIDI FNCT: LCD |%s|%s|\n", lcdLine(setup, 0).c_str(), lcdLine(setup, 1).c_str());
+		CHECK(lcdLine(setup, 1).find("midi ch") != std::string::npos);
+		CHECK(lamp(emu88Lib::ProELed::MidiFunction));
+		// The field the cursor is on blinks: sampled over a second, the channel field is blank at times only after CURSOR.
+		const auto blanks = [&](const size_t _column)
+		{
+			bool blank = false;
+			for(int i = 0; i < 20; ++i)
+			{
+				render(setup, 0.05);
+				blank |= lcdLine(setup, 1)[_column] == ' ';
+			}
+			return blank;
+		};
+		const auto channel = lcdLine(setup, 1).find("midi ch=") + 10;
+		CHECK(!blanks(channel));
+		press(ProEButton::Cursor);
+		CHECK(blanks(channel));
+		press(ProEButton::Parameter);
+		CHECK(lcdLine(setup, 0).find("MASTER TUNE") != std::string::npos);
+		CHECK(lamp(emu88Lib::ProELed::Parameter));
+		CHECK(!lamp(emu88Lib::ProELed::MidiFunction));
 	}
 
 	// The style card slot: an image the firmware takes is accepted, anything else is not.

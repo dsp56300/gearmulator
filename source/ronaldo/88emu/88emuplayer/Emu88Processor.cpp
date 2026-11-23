@@ -343,7 +343,7 @@ namespace emu88Player
 		return replaceDevice(m_deviceModel, false);
 	}
 
-	bool Processor::setPower(const bool enabled, const uint32_t heldButtons)
+	bool Processor::setPower(const bool enabled, const uint64_t heldButtons)
 	{
 		if(enabled == isPoweredOn()) return !enabled || hasValidRom();
 		if(enabled) return replaceDevice(m_deviceModel, false, heldButtons);
@@ -364,7 +364,7 @@ namespace emu88Player
 		return true;
 	}
 
-	bool Processor::replaceDevice(const emu88Lib::DeviceModel _model, const bool _persistModel, const uint32_t heldButtons)
+	bool Processor::replaceDevice(const emu88Lib::DeviceModel _model, const bool _persistModel, const uint64_t heldButtons)
 	{
 		if(!emu88Lib::isDeviceModelValue(static_cast<uint32_t>(_model)))
 			return false;

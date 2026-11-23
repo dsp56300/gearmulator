@@ -80,21 +80,27 @@ namespace emu88Lib
 			{4, 1},	// GROUP A/B
 			{7, 0}, {7, 1}, {7, 2}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7},	// BANK 1-8
 			{1, 8}, {1, 9}, {1, 10}, {0, 8}, {0, 9}, {0, 10}, {7, 8}, {7, 9},	// NUMBER 1-8
+			{1, 5},	// REV ON/OFF
+			{7, 10},	// REV TYPE
+			{0, 4},	// MIDI FNCT
+			{0, 5},	// PARAMETER
+			{6, 10},	// CURSOR
 		}};
 	}
 
-	uint16_t ProE::leds() const
+	uint32_t ProE::leds() const
 	{
 		// Each ProELed's LED row and bit.
 		static constexpr MatrixPosition positions[] = {
 			{6, 6}, {4, 4}, {2, 7}, {2, 6}, {2, 4}, {2, 3}, {2, 2}, {6, 5}, {6, 4}, {1, 0}, {5, 1},
 			{6, 3}, {6, 2}, {6, 1}, {6, 0},
+			{2, 5}, {1, 4}, {1, 5},
 		};
 		static_assert(std::size(positions) == static_cast<size_t>(ProELed::Count));
-		uint16_t result = 0;
+		uint32_t result = 0;
 		for(size_t i = 0; i < std::size(positions); ++i)
 			if((m_leds[positions[i].row] >> positions[i].bit) & 1)
-				result |= static_cast<uint16_t>(1u << i);
+				result |= uint32_t{1} << i;
 		return result;
 	}
 
@@ -259,13 +265,13 @@ namespace emu88Lib
 	// ---------------------------------------------------------------------------
 	// Panel
 
-	void ProE::setButtons(const uint32_t _buttons)
+	void ProE::setButtons(const uint64_t _buttons)
 	{
 		const auto changed = _buttons ^ m_buttons;
 		m_buttons = _buttons;
 		for(size_t i = 0; i < g_buttonPositions.size(); ++i)
 		{
-			if(changed & (uint32_t{1} << i))
+			if(changed & (uint64_t{1} << i))
 				setKey(g_buttonPositions[i].row, g_buttonPositions[i].bit, (_buttons >> i) & 1);
 		}
 	}

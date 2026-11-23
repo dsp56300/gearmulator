@@ -18,7 +18,8 @@
 namespace emu88Lib
 {
 	// The PRO-E's switches the player offers, as bits of ProE::setButtons(): the ones a style is
-	// picked and played with. The panel has 88; the rest edit the arranger's memory and parts.
+	// picked and played with, the reverb's and the setup menus'. The panel has 88; the rest edit
+	// the arranger's memory and parts.
 	enum class ProEButton : uint8_t
 	{
 		StartStop,
@@ -37,14 +38,20 @@ namespace emu88Lib
 		GroupAB,
 		Bank1, Bank2, Bank3, Bank4, Bank5, Bank6, Bank7, Bank8,
 		Number1, Number2, Number3, Number4, Number5, Number6, Number7, Number8,
+		ReverbOnOff,
+		ReverbType,
+		MidiFunction,
+		Parameter,
+		Cursor,
 
 		Count
 	};
-	static_assert(static_cast<unsigned>(ProEButton::Count) <= 32);
+	static_assert(static_cast<unsigned>(ProEButton::Count) <= 64);
 
 	// The PRO-E's lamps the player shows, as bits of ProE::leds(): those of the arranger switches
-	// that have one, and the four beat lamps. The LED matrix follows the key matrix: LED row r + 1,
-	// bit b is the lamp of the switch at key row r, bit b. BANK, NUMBER and the fills have none.
+	// that have one, the four beat lamps, then those of the reverb and setup switches. The LED matrix
+	// follows the key matrix: LED row r + 1, bit b is the lamp of the switch at key row r, bit b.
+	// BANK, NUMBER, the fills, REV TYPE and CURSOR have none.
 	enum class ProELed : uint8_t
 	{
 		StartStop,
@@ -60,10 +67,15 @@ namespace emu88Lib
 		GroupAB,
 		// Row 6 bits 3-0 count the beats of the bar while a style plays; stopped, beat 1 blinks at the tempo.
 		Beat1, Beat2, Beat3, Beat4,
+		// Lit while the reverb is on, which it is from power-on.
+		ReverbOnOff,
+		// Lit while their menu shows.
+		MidiFunction,
+		Parameter,
 
 		Count
 	};
-	static_assert(static_cast<unsigned>(ProELed::Count) <= 16);
+	static_assert(static_cast<unsigned>(ProELed::Count) <= 32);
 
 	// =====================================================================
 	// ProE - the Roland PRO-E Intelligent Arranger
@@ -159,7 +171,7 @@ namespace emu88Lib
 
 		// ---- Front panel ----
 		// The arranger switches, bit n = ProEButton n.
-		void setButtons(uint32_t _buttons);
+		void setButtons(uint64_t _buttons);
 		// Any switch of the matrix: row 0-7 (PA5-PA3), bit 0-10.
 		void setKey(unsigned _row, unsigned _bit, bool _pressed);
 		// Turn the dial by _detents steps, positive clockwise; queued behind a turn in progress.
@@ -168,7 +180,7 @@ namespace emu88Lib
 		// LedWindow E cycles.
 		const std::array<uint8_t, 8>& ledRows() const { return m_leds; }
 		// The lamps of ProELed, bit n = ProELed n.
-		uint16_t leds() const;
+		uint32_t leds() const;
 		static constexpr uint64_t LedWindow = EClock * 3 / 100;
 		const hwLib::Hd44780& lcd() const { return m_lcd; }
 
@@ -243,7 +255,7 @@ namespace emu88Lib
 		uint64_t m_ledSince = 0, m_ledWindowStart = 0;
 		std::array<std::array<uint32_t, 8>, 8> m_ledTime{};
 		std::array<uint8_t, 8> m_leds{};
-		uint32_t m_buttons = 0;
+		uint64_t m_buttons = 0;
 
 		int m_dialPending = 0;
 		bool m_dialPulseLow = false;

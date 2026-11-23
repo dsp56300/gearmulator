@@ -41,7 +41,7 @@ namespace emu88Lib
 		// Then keep the board running for another 10 s, so it starts past its power-on intro.
 		bool fastBoot = false;
 		// Held switches at power-on; bypass automatic initialization and intro skipping.
-		uint32_t initialPanelButtons = 0;
+		uint64_t initialPanelButtons = 0;
 	};
 
 	// Runs a board and exposes audio, MIDI and front-panel snapshots.
@@ -78,7 +78,7 @@ namespace emu88Lib
 			// Only a board with two panels fills the second - see deviceHasSecondLcd(), which is
 			// the CM-64 and its two service displays.
 			std::array<Screen, 2> screens;
-			uint16_t leds = 0;
+			uint32_t leds = 0;
 			uint64_t revision = 0;
 		};
 
@@ -104,9 +104,8 @@ namespace emu88Lib
 		uint32_t getChannelCountOut() override { return 2; }
 		uint64_t getDspClockHz() const override;
 		DeviceModel model() const { return m_model; }
-		void setPanelButtons(uint32_t _buttons);
-		// The MV-30's front panel: its switches, bit n = Mv30Button n, more than setPanelButtons() carries, and
-		// the footswitch
+		void setPanelButtons(uint64_t _buttons);
+		// The MV-30's front panel: its switches, bit n = Mv30Button n, and the footswitch
 		void setMv30Panel(uint64_t _buttons, bool _footswitch);
 		// The SC-8850's VALUE encoder, or the MT-32's VOLUME/VALUE knob, which a detent turns
 		// by a 32nd of its travel.
@@ -140,7 +139,7 @@ namespace emu88Lib
 		{
 			PanelCommandType type = PanelCommandType::Buttons;
 			int32_t value = 0;
-			// Mv30Panel: the switches, and value the footswitch
+			// Buttons: the switches; Mv30Panel: the switches, and value the footswitch
 			uint64_t wide = 0;
 		};
 
