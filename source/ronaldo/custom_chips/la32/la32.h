@@ -183,7 +183,8 @@ namespace la32Lib
 		void updateInactive();
 		void updateSlot();
 		void finishSlot();
-		static RampStep stepRamp(const Ramp& _ramp, uint32_t& _counter, bool _inactive, uint32_t _inactiveLevel);
+		static uint32_t rampStepSize(const Ramp& _ramp);
+		static RampStep stepRamp(const Ramp& _ramp, uint32_t _step, uint32_t& _counter, bool _inactive, uint32_t _inactiveLevel);
 		int32_t computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], uint32_t _phase, bool _signFlip);
 		int32_t computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_tv)[2], uint32_t _phase, bool _signFlip);
 		int32_t mixWaves(uint32_t _w1, uint32_t _w2, bool _ring);
@@ -203,6 +204,9 @@ namespace la32Lib
 		uint16_t m_romOpenBus = 0xffff;
 
 		std::array<Voice, 32> m_voices{};
+		// What the counter of each ramp moves by per frame, kept from the last write of its
+		// register: every slot of every frame needs it, and only a register write changes it.
+		std::array<std::array<uint32_t, 2>, 32> m_rampStep{};
 		std::array<ModulationGroup, 4> m_modulation{};
 		Config m_config;
 

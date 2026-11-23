@@ -144,6 +144,8 @@ LA32::LA32()
 void LA32::reset()
 {
 	m_voices = {};
+	for (size_t slot = 0; slot < m_voices.size(); ++slot)
+		m_rampStep[slot] = {rampStepSize(m_voices[slot].regs.ramp[0]), rampStepSize(m_voices[slot].regs.ramp[1])};
 	m_modulation = {};
 	m_config = {};
 	m_cycle = 0;
@@ -259,7 +261,10 @@ void LA32::commitWord(const uint32_t _offset, const uint16_t _word)
 	const uint32_t reg = (_offset >> 6) & 7;
 	const uint32_t slot = (_offset >> 1) & 31;
 	if (reg < 5)
+	{
 		unpackVoiceRegister(m_voices[slot].regs, reg, _word);
+		m_rampStep[slot] = {rampStepSize(m_voices[slot].regs.ramp[0]), rampStepSize(m_voices[slot].regs.ramp[1])};
+	}
 	else if (reg == 5)
 		writeModulationWord(slot, _word);
 }
@@ -1012,7 +1017,17 @@ static uint16_t smoothTowards(const uint32_t _state, const uint32_t _target)
 // the new level is at or past its target in the direction of travel, which is at once for a
 // ramp pointed away from it; the counter then snaps to the target and the event is reported
 // every frame until the firmware writes a rate of 0. An inactive partial holds its counters.
-RampStep LA32::stepRamp(const Ramp& _ramp, uint32_t& _counter, const bool _inactive, const uint32_t _inactiveLevel)
+// The step is 8 * 2^(rate/8) counter units, negated for a descending ramp; a held ramp keeps
+// the fraction of it only.
+uint32_t LA32::rampStepSize(const Ramp& _ramp)
+{
+	const uint32_t step = exp2Fixed(static_cast<uint32_t>(_ramp.rate) << 9);
+	if (_ramp.rate == 0)
+		return step & ~8u;
+	return _ramp.down ? negated(step, 26) : step;
+}
+
+RampStep LA32::stepRamp(const Ramp& _ramp, const uint32_t _step, uint32_t& _counter, const bool _inactive, const uint32_t _inactiveLevel)
 {
 	const bool hold = _ramp.rate == 0;
 	// A held ramp of an active partial has a step of zero and raises nothing: it stays as it is.
@@ -1020,11 +1035,7 @@ RampStep LA32::stepRamp(const Ramp& _ramp, uint32_t& _counter, const bool _inact
 		return {_counter >> 12, false};
 
 	const uint32_t target = _ramp.target;
-	uint32_t step = exp2Fixed(static_cast<uint32_t>(_ramp.rate) << 9);
-	if (hold)
-		step &= ~8;
-	else if (_ramp.down)
-		step = negated(step, 26);
+	const uint32_t step = _step;
 
 	const uint32_t sum = _counter + step;
 	const bool atTarget = ((sum >> 18) & 0xff) >= target;
@@ -1085,7 +1096,7 @@ uint32_t LA32::quietSlotsAhead(const uint32_t _max) const
 			if (regs.ramp[i].rate == 0)
 				continue;
 			uint32_t counter = voice.state.rampCounter[i];
-			if (stepRamp(regs.ramp[i], counter, false, 0).reached)
+			if (stepRamp(regs.ramp[i], m_rampStep[cycle][i], counter, false, 0).reached)
 				return ahead;
 		}
 
@@ -1169,14 +1180,7 @@ void LA32::updateSlot()
 	if (inactive && m_config.rampBPreset == 0)
 	{
 		for (uint32_t i = 0; i < 2; i++)
-		{
-			uint32_t step = exp2Fixed(static_cast<uint32_t>(regs.ramp[i].rate) << 9);
-			if (regs.ramp[i].rate == 0)
-				step &= ~8u;
-			else if (regs.ramp[i].down)
-				step = negated(step, 26);
-			state.rampCounter[i] = (state.rampCounter[i] + step) & 0xffff;
-		}
+			state.rampCounter[i] = (state.rampCounter[i] + m_rampStep[m_cycle][i]) & 0xffff;
 		state.phase = 0;
 		state.pcmEnded = {};
 		m_prevOutput = 0;
@@ -1189,7 +1193,7 @@ void LA32::updateSlot()
 	for (uint32_t i = 0; i < 2; i++)
 	{
 		const uint32_t inactiveLevel = i == 1 ? static_cast<uint32_t>(m_config.rampBPreset) << 22 : 0;
-		const RampStep step = stepRamp(regs.ramp[i], state.rampCounter[i], inactive, inactiveLevel);
+		const RampStep step = stepRamp(regs.ramp[i], m_rampStep[m_cycle][i], state.rampCounter[i], inactive, inactiveLevel);
 		tv_value[i] = step.level;
 
 		// Level-sensitive: a ramp held at its target by a running rate presents its event again
