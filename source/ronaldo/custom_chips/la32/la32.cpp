@@ -101,6 +101,28 @@ namespace la32Lib
 		return table;
 	}
 
+	// The hot path's copies of the ROMs, filled by the first chip constructed: a plain array has
+	// no initialization guard to test on every read. The exp ROM is kept with its three-bit
+	// interpolation already applied, 4096 mantissas for the 12 fraction bits of exp2Fixed().
+	static uint16_t g_logsinRom[512];
+	static uint16_t g_expMantissa[4096];
+
+	static void initFastTables()
+	{
+		static const bool done = []
+		{
+			for (uint32_t i = 0; i < 512; ++i)
+				g_logsinRom[i] = logsinTable()[i];
+			for (uint32_t i = 0; i < 4096; ++i)
+			{
+				const uint32_t m0 = expTable()[i >> 3];
+				g_expMantissa[i] = static_cast<uint16_t>(m0 + (((expTable()[(i >> 3) + 1] - m0) * (i & 7)) >> 3));
+			}
+			return true;
+		}();
+		(void)done;
+	}
+
 	uint32_t logsin(const uint32_t _index)
 	{
 		return logsinTable()[_index & 511];
@@ -115,8 +137,7 @@ namespace la32Lib
 LA32::LA32()
 {
 	// Pay for the lookup tables here rather than on the audio thread's first frame.
-	(void)expTable();
-	(void)logsinTable();
+	initFastTables();
 	reset();
 }
 
@@ -174,7 +195,9 @@ uint8_t LA32::readPcm(const uint32_t _address) const
 		return static_cast<uint8_t>((_address & 1) ? m_romOpenBus : m_romOpenBus >> 8);
 	if (m_pcmRom.empty())
 		return 0xff;
-	return m_pcmRom[(_address ^ m_romAddressXor) % m_pcmRom.size()];
+	const size_t size = m_pcmRom.size();
+	const uint32_t address = _address ^ m_romAddressXor;
+	return m_pcmRom[(size & (size - 1)) == 0 ? address & (size - 1) : address % size];
 }
 
 // Drives the INT line; m_irqPending (the latch guard) is kept by the callers.
@@ -406,14 +429,7 @@ static uint32_t mul14x8u(const uint32_t _a, const uint32_t _b)
 // fraction resolved by the exp ROM with linear interpolation over its three low bits.
 static uint32_t exp2Fixed(const uint32_t _v)
 {
-	const uint32_t index = (_v >> 3) & 511;
-	const uint32_t integer = (_v >> 12) & 15;
-	const uint32_t low = _v & 7;
-
-	const uint32_t m0 = exp(index);
-	const uint32_t mantissa = m0 + (((exp(index + 1) - m0) * low) >> 3);
-
-	return (mantissa << integer) >> 9;
+	return (static_cast<uint32_t>(g_expMantissa[_v & 4095]) << ((_v >> 12) & 15)) >> 9;
 }
 
 // The active flags live in an eight-bit history that normally shifts once per slot, taking the
@@ -556,7 +572,7 @@ static uint32_t foldedLogsin(const uint32_t _index)
 	uint32_t quarter = _index & 0x1ff;
 	if (_index & 0x200)
 		quarter ^= 0x1ff;
-	return logsin(quarter);
+	return g_logsinRom[quarter];
 }
 
 // ---- PCM reads --------------------------------------------------------------------------------
@@ -757,6 +773,14 @@ int32_t LA32::computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], const uin
 
 	queuePcmEvent(muted1, muted2);
 
+	// Below 400h a gain leaves a level under 400h whatever the sample is, which is a linear value
+	// under 32 and too quiet for its sign: nothing of it survives the mixer or the interpolator.
+	if (gain1 < 0x400 && (interpolate || gain2 < 0x400))
+	{
+		m_prevOutput = 0;
+		return 0;
+	}
+
 	const uint32_t address2 = pcmAddress(ph, page2, mask);
 
 	// The sample gain add carries in like logMul: measured on the D-550 bus, where the
@@ -826,6 +850,15 @@ int32_t LA32::computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_t
 	const uint32_t amplitude = logMul(_tv[1] & 0x3fff, modGain(ampWord));
 	const uint32_t ampCutoff = logMul(amplitude, cutoffClipped << 1);
 
+	// Every level below is a product with this one, so none exceeds it. Under 400h the linear
+	// values stay under 32 and wave 2 is too quiet for its sign: the mixer's sum is zero, and so
+	// are the ring product and what the next slot holds as its modulator.
+	if (ampCutoff < 0x400)
+	{
+		m_prevOutput = 0;
+		return 0;
+	}
+
 	// Two ramps run from the phase: the sawtooth position, and the inverted phase offset by the
 	// resonance so its segment boundary (bit 16) moves with the cutoff.
 	uint32_t sawPosition = (_phase >> 6) & 0xfff;
@@ -857,7 +890,7 @@ int32_t LA32::computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_t
 	uint32_t resonanceGainIndex = 0x1ff;
 	if ((cutoff & 0x1c00) == 0)
 		resonanceGainIndex = (cutoff >> 1) & 0x1ff;
-	const uint32_t resonanceGain = logsin(resonanceGainIndex);
+	const uint32_t resonanceGain = g_logsinRom[resonanceGainIndex];
 
 	const uint32_t segmentSineIndex = secondSegment ? resB.sineIndex : resA.sineIndex;
 	const bool resonanceNegative = !(baseNegative ^ ((segmentSineIndex & 0x400) == 0));
@@ -981,9 +1014,13 @@ static uint16_t smoothTowards(const uint32_t _state, const uint32_t _target)
 // every frame until the firmware writes a rate of 0. An inactive partial holds its counters.
 RampStep LA32::stepRamp(const Ramp& _ramp, uint32_t& _counter, const bool _inactive, const uint32_t _inactiveLevel)
 {
+	const bool hold = _ramp.rate == 0;
+	// A held ramp of an active partial has a step of zero and raises nothing: it stays as it is.
+	if (hold && !_inactive)
+		return {_counter >> 12, false};
+
 	const uint32_t target = _ramp.target;
 	uint32_t step = exp2Fixed(static_cast<uint32_t>(_ramp.rate) << 9);
-	const bool hold = _ramp.rate == 0;
 	if (hold)
 		step &= ~8;
 	else if (_ramp.down)
@@ -1020,6 +1057,61 @@ RampStep LA32::stepRamp(const Ramp& _ramp, uint32_t& _counter, const bool _inact
 	return {level >> 12, reached};
 }
 
+// INT moves in three places: a slot presents a ramp that reached its target, a PCM partial
+// presents a one-shot read that ran out of its window, and an acknowledge timed into a later
+// cycle releases the line. Each is decided here for the slots ahead exactly as updateSlot() will
+// decide it - a slot comes round once in 32, so one step of look-ahead per slot is all it takes.
+uint32_t LA32::quietSlotsAhead(const uint32_t _max) const
+{
+	if (m_ackPending || m_pendingWriteCount)
+		return 0;
+	// A taken latch keeps every slot from presenting anything until the host acknowledges.
+	if (m_irqPending)
+		return _max;
+
+	uint8_t history = m_inactiveHistory;
+	for (uint32_t ahead = 0; ahead < _max; ++ahead)
+	{
+		const uint32_t cycle = (m_cycle + ahead) & 31;
+		const Voice& voice = m_voices[cycle];
+		const VoiceRegisters& regs = voice.regs;
+		history = nextInactiveHistory(history, cycle, m_config, regs.octave == 0xf);
+		// An inactive partial completes no ramp and holds its PCM position at the start.
+		if (history & 1)
+			continue;
+
+		for (uint32_t i = 0; i < 2; i++)
+		{
+			if (regs.ramp[i].rate == 0)
+				continue;
+			uint32_t counter = voice.state.rampCounter[i];
+			if (stepRamp(regs.ramp[i], counter, false, 0).reached)
+				return ahead;
+		}
+
+		if (!regs.isPcm)
+			continue;
+		const VoiceRegisters::Pcm& pcm = regs.pcm;
+		const bool loop2 = pcm.interpolate ? pcm.wave[0].loop : pcm.wave[1].loop;
+		if (pcm.wave[0].loop && loop2)
+			continue;
+		const uint32_t phase = voice.state.phase + exp2Fixed((static_cast<uint32_t>(regs.octave) << 12) | regs.fraction);
+		uint32_t ph = (phase >> 8) & 0x3ffff;
+		bool ended = voice.state.pcmEnded[0];
+		if (advanceWindow(ph, pageMask(pcm.wave[0].sizeLog2), pcm.wave[0].loop, ended))
+			return ahead;
+		uint32_t mask = pageMask(pcm.wave[0].sizeLog2);
+		if (pcm.interpolate)
+			ph = (ph + 1) & 0x3ffff;
+		else
+			mask = pageMask(pcm.wave[1].sizeLog2);
+		ended = voice.state.pcmEnded[1];
+		if (advanceWindow(ph, mask, loop2, ended))
+			return ahead;
+	}
+	return _max;
+}
+
 void LA32::updateSlot()
 {
 	if (m_pendingWriteCount)
@@ -1047,7 +1139,16 @@ void LA32::updateSlot()
 		}
 	}
 
-	updateInactive();
+	// Scheduling mode 0, the only one the MT-32 family uses, is the plain case of
+	// nextInactiveHistory(): every 2^grouping slots the pitch register's flag is shifted in.
+	if (m_config.scheduleMode == 0)
+	{
+		const uint32_t grouping = m_config.grouping[(m_cycle >> 3) & 3];
+		if ((m_cycle & ((1u << grouping) - 1)) == 0)
+			m_inactiveHistory = static_cast<uint8_t>((m_inactiveHistory << 1) | (m_voices[m_cycle].regs.octave == 0xf ? 1 : 0));
+	}
+	else
+		updateInactive();
 
 	if (m_cycle == 0)
 	{
@@ -1059,6 +1160,29 @@ void LA32::updateSlot()
 	const VoiceRegisters& regs = voice.regs;
 	VoiceState& state = voice.state;
 	const bool inactive = (m_inactiveHistory & 1) != 0;
+
+	// An inactive partial with ramp B preset to level 0, as the MT-32 family leaves it, is silent
+	// whatever its registers say: its ramps hold level 0 and only count their fractions on, which
+	// puts both ramp levels under 16, far below the 400h a partial needs to reach the mixer. It
+	// raises no event either: a ramp does not complete while inactive, and the PCM position is
+	// held at the start of its window.
+	if (inactive && m_config.rampBPreset == 0)
+	{
+		for (uint32_t i = 0; i < 2; i++)
+		{
+			uint32_t step = exp2Fixed(static_cast<uint32_t>(regs.ramp[i].rate) << 9);
+			if (regs.ramp[i].rate == 0)
+				step &= ~8u;
+			else if (regs.ramp[i].down)
+				step = negated(step, 26);
+			state.rampCounter[i] = (state.rampCounter[i] + step) & 0xffff;
+		}
+		state.phase = 0;
+		state.pcmEnded = {};
+		m_prevOutput = 0;
+		finishSlot();
+		return;
+	}
 
 	// The two ramps. An inactive partial holds ramp B at the configured preset level.
 	uint32_t tv_value[2];
@@ -1100,7 +1224,12 @@ void LA32::updateSlot()
 		: computeVoiceSynth(regs, tv_value, phase, sign_flip);
 
 	addToBus(value, regs.pan, regs.outputPair);
+	finishSlot();
+}
 
+// What every slot ends with: the group smoothers and the cycle counter.
+void LA32::finishSlot()
+{
 	// Slots 1-3 of a group step one smoother each, starting from the value latched for the
 	// group; slot 7 latches the next group's smoothed values for its eight partials.
 	const uint32_t slotInGroup = m_cycle & 7;

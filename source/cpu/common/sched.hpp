@@ -57,11 +57,21 @@ class Scheduler {
   }
   // Absolute time of the earliest pending event, or kNever.
   u64 next_time() {
-    drop_cancelled();
+    if (heap_.empty()) return kNever;
+    if (heap_.front().fn == nullptr) drop_cancelled();
     return heap_.empty() ? kNever : heap_.front().when;
   }
   // Fire every event with when <= now, in time order.
   void run_due(u64 now) {
+    // The common call finds a live event that is not due yet: decide that here, in the caller.
+    if (!heap_.empty() && heap_.front().fn != nullptr && heap_.front().when > now) return;
+    run_due_slow(now);
+  }
+  bool empty() const { return heap_.empty(); }
+  size_t pending() const { return heap_.size(); }
+
+ private:
+  void run_due_slow(u64 now) {
     for (;;) {
       drop_cancelled();
       if (heap_.empty() || heap_.front().when > now) return;
@@ -71,10 +81,6 @@ class Scheduler {
       e.fn(e.ctx, e.when, now);
     }
   }
-  bool empty() const { return heap_.empty(); }
-  size_t pending() const { return heap_.size(); }
-
- private:
   struct Event {
     u64 when;
     EventId id;

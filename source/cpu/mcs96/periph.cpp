@@ -360,7 +360,9 @@ bool Peripherals::arbitrate(Interrupt& out) const {
     out = {0x0000, false, false, u8(IrqSrc::Nmi)};
     return true;
   }
-  if (kb()) {
+  // Asked at every instruction boundary the machine stops at, and nearly always with nothing
+  // to report: leave before looking for the highest source.
+  if (kb() && (pending_high_ & (mask_high_ | 0x80)) != 0) {
     for (int source = 15; source >= 8; --source) {
       const u8 bit = u8(1u << (source - 8));
       const bool enabled = source == 15 || (mask_high_ & bit) != 0;
@@ -371,6 +373,7 @@ bool Peripherals::arbitrate(Interrupt& out) const {
     }
   }
   const u8 enabled_low = u8(pending_low_ & cpu_.regs().psw);
+  if (!enabled_low) return false;
   for (int source = 7; source >= 0; --source) {
     const u8 bit = u8(1u << source);
     if (enabled_low & bit) {

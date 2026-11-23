@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <random>
 #include <utility>
 #include <vector>
 
@@ -259,6 +260,55 @@ int main()
 		assert(anyNonZero(heard, 1) && !anyNonZero(absent, 1));	// the product follows the PCM modulator
 		for (size_t i = 0; i < heard.size(); ++i)
 			assert(heard[i][1] == dropped[i][1]);
+	}
+
+	// quietSlotsAhead() is a promise a board lets its CPU run ahead on: the slots it counts do not
+	// move INT as long as no register is written. Random register traffic, in every scheduling
+	// mode and through both write paths, must never catch it out - and it has to find something
+	// to promise, or the test would pass on a chip that always answered 0.
+	{
+		std::mt19937 rng(777);
+		uint64_t promised = 0, edges = 0;
+		for (int run = 0; run < 12; ++run)
+		{
+			la32Lib::LA32 chip;
+			std::vector<uint8_t> rom(1 << 16);
+			for (auto& byte : rom)
+				byte = static_cast<uint8_t>(rng());
+			chip.setPcmRom(rom);
+			bool moved = false;
+			chip.setIrqCallback([&](bool) { moved = true; ++edges; });
+			const unsigned density = 1 + rng() % 600;
+			for (int step = 0; step < 50000; ++step)
+			{
+				const unsigned writes = rng() % density == 0 ? 1 + rng() % 6 : 0;
+				for (unsigned w = 0; w < writes; ++w)
+				{
+					const uint32_t offset = rng() & 0x1ff;
+					auto data = static_cast<uint8_t>(rng());
+					// Mostly scheduling mode 0, the one the firmwares use, and ramp B preset 0 in half the runs.
+					if ((offset & 0x1c3) == 0x1c1 && rng() % 8 != 0)
+						data &= ~0x30;
+					if ((offset & 0x1c3) == 0x1c3 && (run & 1))
+						data &= 0x0f;
+					if (run % 4 == 0 && (rng() & 1))
+						chip.writeFromBus(offset, data);
+					else
+						chip.write(offset, data);
+				}
+				const uint32_t quiet = chip.quietSlotsAhead(1 + rng() % 32);
+				for (uint32_t i = 0; i < quiet; ++i)
+				{
+					moved = false;
+					chip.stepSlot();
+					assert(!moved);
+				}
+				promised += quiet;
+				if (quiet == 0)
+					chip.stepSlot();
+			}
+		}
+		assert(promised > 1000000 && edges > 1000);
 	}
 	return 0;
 }

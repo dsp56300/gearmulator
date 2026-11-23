@@ -68,6 +68,7 @@ namespace emu88Lib
 		// The old-type board pulls P0.5 up through 22k; nothing has been found to read it.
 		m_port0 = isOldBoard() ? 0x20 : 0x00;
 		m_cpuRemainder = 0;
+		m_ahead = {};
 		// C44 starts discharged, so the board fades up out of silence as the firmware takes
 		// the PWM down - the same soft start the real one makes.
 		m_vcaGain = 0.0f;
@@ -198,10 +199,49 @@ namespace emu88Lib
 		if(address == 0x0800) { m_reverbLevel = value; updateReverbParameters(); return; }
 		if(isOldBoard())
 		{
-			if(address >= 0x0c00 && address < 0x1000) { m_la32.write((address - 0x0c00) >> 1, value); return; }
+			if(address >= 0x0c00 && address < 0x1000) { writeLa32((address - 0x0c00) >> 1, value); return; }
 		}
-		else if(address >= 0x0c00 && address < 0x0e00) { m_la32.write(address - 0x0c00, value); return; }
+		else if(address >= 0x0c00 && address < 0x0e00) { writeLa32(address - 0x0c00, value); return; }
 		if(address >= 0x8000 && address < 0xc000) writeBank(address - 0x8000, value);
+	}
+
+	// The slot the instruction in flight belongs to while the CPU is ahead, counted from the
+	// first slot of the stretch: the first one whose share of CPU time, added to what was left
+	// over before, pays for an instruction starting where this one did. It is the slot in
+	// which the one-slot-at-a-time loop of renderSample() runs that instruction.
+	uint32_t LaBoard::aheadSlot() const
+	{
+		const auto slotRate = static_cast<int64_t>(La32SlotRate);
+		const auto perSlot = static_cast<int64_t>(m_cpuStateRate);
+		const auto elapsed = static_cast<int64_t>(m_machine.now() - m_ahead.start);
+		const int64_t owed = (elapsed + 1) * slotRate - m_ahead.remainder;
+		if(owed <= perSlot)
+			return 0;
+		return static_cast<uint32_t>((owed + perSlot - 1) / perSlot - 1);
+	}
+
+	void LaBoard::writeLa32(const uint32_t offset, const uint8_t value)
+	{
+		// A low byte only waits in the latch for its high byte, no slot looks at it. Anything
+		// else the chip must see at the right slot: while the CPU is ahead, the chip first
+		// catches up with the slots before the one this instruction belongs to. What the
+		// write does to the slots behind it nobody has looked into, so the CPU's stretch ends
+		// with this slot, and renderSample() carries on from the next.
+		const bool latchOnly = (offset & 0x1c0) != 0x1c0 && (offset & 1) == 0;
+		if(m_ahead.active && !latchOnly)
+		{
+			const auto slot = std::min(aheadSlot(), m_ahead.count - 1);
+			for(; m_ahead.stepped < slot; ++m_ahead.stepped)
+				m_la32.stepSlot();
+			m_ahead.written = true;
+			if(slot + 1 < m_ahead.count)
+			{
+				m_ahead.count = slot + 1;
+				m_cpuRemainder = m_ahead.remainder + static_cast<int64_t>(m_ahead.count) * m_cpuStateRate;
+				m_machine.limit_run(m_ahead.start + static_cast<uint64_t>(m_cpuRemainder / static_cast<int64_t>(La32SlotRate)));
+			}
+		}
+		m_la32.write(offset, value);
 	}
 
 	void LaBoard::flushLcd(const uint8_t control)
@@ -258,17 +298,53 @@ namespace emu88Lib
 		// Clock the CPU alongside the LA32's 32 time-multiplexed partial slots. This also
 		// presents the real LA32 SH3 level on P0.4: SH3 changes twice per 32 kHz output frame,
 		// rather than once per completed sample.
-		for(unsigned slot = 0; slot < 32; ++slot)
+		//
+		// A slot is worth under four CPU states, so taken one at a time nearly every slot runs
+		// the CPU for a single instruction. But the two only meet in three places: SH3, a
+		// register access, and INT. So the CPU is given all the slots up to the next change of
+		// SH3 at once, as far as the chip can tell that it will leave INT alone in them
+		// (quietSlotsAhead), and the chip steps through them afterwards. A register the CPU
+		// writes on the way reaches the chip at the slot it would have (writeLa32). Either way
+		// every instruction and every slot sees what it sees going one slot at a time.
+		const auto slotRate = static_cast<int64_t>(La32SlotRate);
+		const auto runCpu = [this, slotRate]
+		{
+			if(m_cpuRemainder < slotRate)
+				return;
+			// A slot is worth under four states, so one instruction usually covers several
+			// slots: run only once the debt is paid off.
+			const auto used = m_machine.run(static_cast<uint64_t>(m_cpuRemainder / slotRate));
+			m_cpuRemainder -= static_cast<int64_t>(used) * slotRate;
+		};
+		for(unsigned slot = 0; slot < 32;)
 		{
 			m_port0 = static_cast<uint8_t>((m_port0 & ~0x10) | (m_la32.sh3() << 4));
 			m_machine.periph().set_port_input(0, m_port0);
-			// A slot is worth under four states, so one instruction usually covers several
-			// slots: run only once the debt is paid off.
-			m_cpuRemainder += m_cpuStateRate;
-			if(m_cpuRemainder >= static_cast<int64_t>(La32SlotRate))
-				m_cpuRemainder -= static_cast<int64_t>(
-					m_machine.run(static_cast<uint64_t>(m_cpuRemainder / La32SlotRate))) * La32SlotRate;
-			m_la32.stepSlot();
+			const unsigned toSh3 = 16 - (slot & 15);
+			const unsigned quiet = toSh3 < 2 ? 0 : m_la32.quietSlotsAhead(toSh3);
+			if(quiet < 2)
+			{
+				m_cpuRemainder += m_cpuStateRate;
+				runCpu();
+				m_la32.stepSlot();
+				++slot;
+				continue;
+			}
+			m_ahead.active = true;
+			m_ahead.count = quiet;
+			m_ahead.stepped = 0;
+			m_ahead.written = false;
+			m_ahead.remainder = m_cpuRemainder;
+			m_ahead.start = m_machine.now();
+			m_cpuRemainder += static_cast<int64_t>(quiet) * m_cpuStateRate;
+			runCpu();
+			m_ahead.active = false;
+			// The slots still to step. Only the last one of a stretch that a write ended was
+			// not looked at beforehand with that write in place and may move INT - behind the
+			// CPU's instructions of that slot, which is where it belongs.
+			for(; m_ahead.stepped < m_ahead.count; ++m_ahead.stepped)
+				m_la32.stepSlot();
+			slot += m_ahead.count;
 		}
 		// The LA32 and the reverb share the digital audio bus. The firmware assigns
 		// reverb-enabled partials to SYN1 (pair 2) and dry-only partials to SYN2 (pair 3).

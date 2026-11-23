@@ -69,6 +69,13 @@ class Cpu final : public emu::SliceCore {
   unsigned step();
   u64 run(u64 states);
   u64 poll();
+  // run() for a caller that has just called poll(), with nothing in between that could raise
+  // or mask a request: the first slice starts from the arbitration poll() already did.
+  u64 run_after_poll(u64 states);
+  // poll() where the request state cannot have changed behind the core's back since it was
+  // last arbitrated: after a slice or a scheduler callback, whose every change to a pending
+  // bit, a mask or the PSW goes through reeval_irq() itself.
+  u64 poll_arbitrated();
 
   void set_sfr_block(SfrBlock* b) { sfr_ = b; reeval_irq(); }
   // The chip's pending / mask state changed: re-check for an acceptable request.
@@ -174,7 +181,7 @@ class Cpu final : public emu::SliceCore {
   // runs on its own slice so the boundary after it is checked.
   void hold_off() { holdoff_ = true; raise(kPendHoldoff); }
 
-  u64 run_slice(s32 states);
+  u64 run_slice(s32 states, bool arbitrated = false);
   bool take_interrupt();
   unsigned enter_interrupt(const SfrBlock::Interrupt& irq);
   void reset_architectural_state();

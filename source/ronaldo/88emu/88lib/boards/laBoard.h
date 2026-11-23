@@ -141,6 +141,8 @@ namespace emu88Lib
 		void write(uint16_t address, uint8_t value);
 		uint8_t readBank(uint16_t offset) const;
 		void writeBank(uint16_t offset, uint8_t value);
+		void writeLa32(uint32_t offset, uint8_t value);
+		uint32_t aheadSlot() const;
 		void flushLcd(uint8_t control);
 		void updateReverbParameters();
 		float applyVca();
@@ -173,6 +175,17 @@ namespace emu88Lib
 		uint8_t m_port0 = 0;
 		uint16_t m_knob = KnobMaximum;
 		int64_t m_cpuRemainder = 0;
+		// The CPU running ahead of the LA32, see renderSample().
+		struct Ahead
+		{
+			bool active = false;
+			uint32_t count = 0;		// slots the CPU was given
+			uint32_t stepped = 0;	// of which the LA32 has caught up with this many
+			bool written = false;	// a register write ended the stretch at its slot
+			int64_t remainder = 0;	// m_cpuRemainder before the stretch
+			uint64_t start = 0;		// CPU time before the stretch
+		};
+		Ahead m_ahead;
 		// R39/C44-smoothed control and the offset-corrected M5207L01 gain.
 		float m_vcaControl = 0.0f;
 		float m_vcaGain = 0.0f;

@@ -484,6 +484,8 @@ Plugin Manager:
         models based on them: delay memory precision, the effect multiplier
         and the effect input.
 
+- [Imp] Faster and more accurate LA32 emulation and MT32.
+
 - [Fix] MT-32/CM-32L: timbres with a ring-only partial structure (10-13) played
         their first partial on top of the ring product, up to 5 dB too loud and
         with the wrong timbre; a synth first partial was also ring modulated

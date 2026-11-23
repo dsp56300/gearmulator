@@ -156,6 +156,10 @@ namespace la32Lib
 		void writeFromBus(uint32_t _offset, uint8_t _data);
 		uint32_t cycle() const { return m_cycle; }
 		void stepSlot();
+		// How many of the next _max slots (at most 32) are certain to leave INT alone, provided
+		// no register is written before they are stepped. A host can let its CPU run that far
+		// ahead of the chip: nothing the chip does in those slots reaches the CPU.
+		uint32_t quietSlotsAhead(uint32_t _max) const;
 		Outputs currentOutput() const;
 		Outputs renderSample();
 
@@ -178,6 +182,7 @@ namespace la32Lib
 		void writeModulationWord(unsigned _slot, uint16_t _word);
 		void updateInactive();
 		void updateSlot();
+		void finishSlot();
 		static RampStep stepRamp(const Ramp& _ramp, uint32_t& _counter, bool _inactive, uint32_t _inactiveLevel);
 		int32_t computeVoicePcm(Voice& _voice, const uint32_t (&_tv)[2], uint32_t _phase, bool _signFlip);
 		int32_t computeVoiceSynth(const VoiceRegisters& _regs, const uint32_t (&_tv)[2], uint32_t _phase, bool _signFlip);

@@ -44,17 +44,29 @@ class Machine final : public ResetSink {
   // event.  Returns the number of states actually elapsed.
   u64 run(u64 states) {
     const u64 start = now();
-    const u64 end = start + states;
-    while (now() < end) {
-      sched_.run_due(now());
-      cpu_.poll();
-      const u64 next = std::min(sched_.next_time(), end);
-      const u64 want = next > now() ? next - now() : 1;
-      cpu_.run(want);
-    }
+    run_end_ = start + states;
+    // The caller may have driven pins or registers since the last call: arbitrate afresh.
+    // Within the loop only a slice and scheduler callbacks run, which keep the core's
+    // request flag current themselves.
     sched_.run_due(now());
     cpu_.poll();
+    while (now() < run_end_) {
+      const u64 next = std::min(sched_.next_time(), run_end_);
+      const u64 want = next > now() ? next - now() : 1;
+      cpu_.run_after_poll(want);
+      sched_.run_due(now());
+      cpu_.poll_arbitrated();
+    }
     return now() - start;
+  }
+
+  // From a bus access while run() is under way: have that run() end at the first instruction
+  // boundary at or after absolute state `at` instead of where it was asked to. For a board
+  // that hands run() several of its own time steps at once and finds, at an access, that it
+  // has to take over again after an earlier one.
+  void limit_run(u64 at) {
+    if (at < run_end_) run_end_ = at;
+    cpu_.cut_slice(at);
   }
 
  private:
@@ -63,6 +75,7 @@ class Machine final : public ResetSink {
   emu::Scheduler sched_;
   Peripherals periph_;
   u64 resets_ = 0;
+  u64 run_end_ = 0;
 };
 
 }  // namespace mcs96

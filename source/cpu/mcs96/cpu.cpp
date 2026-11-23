@@ -156,12 +156,12 @@ bool Cpu::take_interrupt() {
 // ---------------------------------------------------------------------------
 // Run loop
 
-u64 Cpu::run_slice(s32 slice) {
+u64 Cpu::run_slice(s32 slice, bool arbitrated) {
   if (EMU_UNLIKELY(pending_ & kPendRefetch)) {
     clear_pending(kPendRefetch);
     page_pc_ = kNoPage;
   }
-  reeval_irq();
+  if (!arbitrated) reeval_irq();
   begin_slice(slice);
   if (power_down_ || idle_) {
     // Idle: the core is frozen until an acceptable interrupt (or a wake-up
@@ -217,11 +217,30 @@ u64 Cpu::poll() {
   return end_slice();
 }
 
+u64 Cpu::poll_arbitrated() {
+  if (holdoff_ || !(pending_ & kPendIrq)) return 0;
+  begin_slice(0);
+  take_interrupt();
+  return end_slice();
+}
+
 u64 Cpu::run(u64 states) {
   u64 used = 0;
   while (used < states) {
     const s32 slice = s32(std::min<u64>(states - used, u64(kMaxSlice)));
     used += run_slice(slice);
+    if (take_cut()) break;
+  }
+  return used;
+}
+
+u64 Cpu::run_after_poll(u64 states) {
+  u64 used = 0;
+  bool arbitrated = true;
+  while (used < states) {
+    const s32 slice = s32(std::min<u64>(states - used, u64(kMaxSlice)));
+    used += run_slice(slice, arbitrated);
+    arbitrated = false;
     if (take_cut()) break;
   }
   return used;
