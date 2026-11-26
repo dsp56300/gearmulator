@@ -138,6 +138,9 @@ Framework:
         for a moment. The frame at the new size now reaches the screen
         together with the resize.
 
+- [Fix] macOS: the LV2 version contained the plugin's debug symbols, which
+        made its download about three times as large as the other formats.
+
 - [Fix] A skin that changes its own size could show one frame cut off, or
         with an empty band, before the window followed.
 

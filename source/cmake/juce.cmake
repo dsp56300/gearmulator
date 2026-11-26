@@ -344,7 +344,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		else()
 			set(dest lib/lv2/)
 		endif()
-		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION ${dest} COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
+		# Xcode writes the dSYM into the bundle and its DWARF file carries the plugin's name, which *.so matches.
+		# scripts/deploySymbols.cmake archives the symbols, they do not go into the package
+		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION ${dest} COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl" PATTERN "*.dSYM" EXCLUDE)
 		if(APPLE)
 			installMacSetupScript(${dest} ${productName}-LV2)
 		endif()
