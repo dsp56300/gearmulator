@@ -294,6 +294,16 @@ int main(const int _argc, char** _argv)
 	// The power-on setup of the sound board went over the link.
 	CHECK(proe.linkBytes() > 100);
 	CHECK(proe.machine().cpu().illegal_instructions() == 0);
+
+	// The dial: every detent steps the tempo once, clockwise up, including the first after power-on.
+	const auto tempo = [&] { return lcdLine(proe, 0).substr(lcdLine(proe, 0).find('=') + 1, 3); };
+	CHECK_EQ(tempo(), std::string("110"));
+	for(const auto& [detents, expected] : {std::pair{1, "111"}, {1, "112"}, {-1, "111"}, {3, "114"}, {-4, "110"}})
+	{
+		proe.turnDial(detents);
+		render(proe, 0.1);
+		CHECK_EQ(tempo(), std::string(expected));
+	}
 	// ADVANCED ARRANGER is on from power-on and VARIATION off; the latter toggles.
 	const auto led = [&](const emu88Lib::ProELed _led) { return (proe.leds() >> static_cast<uint8_t>(_led)) & 1; };
 	CHECK(led(emu88Lib::ProELed::AdvancedArranger));

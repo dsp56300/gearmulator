@@ -57,9 +57,10 @@ namespace emu88Lib
 			return text;
 		}
 
-		// The dial's PA7 pulse: low for 0.5 ms, one detent every 2 ms.
+		// The dial's PA7 pulses: low for 0.5 ms, high for 0.5 ms, two per detent.
 		constexpr uint64_t g_dialLowStates = ProE::EClock / 2000;
-		constexpr uint64_t g_dialStepStates = ProE::EClock / 500;
+		constexpr uint64_t g_dialHighStates = ProE::EClock / 2000;
+		constexpr int g_dialPulsesPerDetent = 2;
 
 		// Where each ProEButton sits in the key matrix: row (PA5-PA3), bit.
 		struct MatrixPosition { uint8_t row, bit; };
@@ -208,6 +209,14 @@ namespace emu88Lib
 		m_romBank = 0xff;
 		m_ramBank = 0;
 		selectRomBank(0);
+		// A turn in progress does not carry over into the new boot, whose pulse divider starts afresh.
+		if(m_dialEvent)
+			m_machine.sched().cancel(m_dialEvent);
+		m_dialEvent = 0;
+		m_dialPending = m_dialPulses = 0;
+		m_dialPulseLow = false;
+		m_pa7 = true;
+		m_machine.periph().set_port_input(m6801::Hc11Peripherals::kPortA, portAPins());
 		m_machine.reset();
 		m_sound.reset();
 	}
@@ -306,20 +315,26 @@ namespace emu88Lib
 		auto& p = b->m_machine.periph();
 		if(b->m_dialPulseLow)
 		{
-			// The trailing edge of the pulse, then a pause before the next detent.
+			// The trailing edge of the pulse, then the gap before the next one.
 			b->m_dialPulseLow = false;
 			b->m_pa7 = true;
 			p.set_port_input(m6801::Hc11Peripherals::kPortA, b->portAPins());
-			if(b->m_dialPending)
-				b->m_dialEvent = b->m_machine.sched().schedule(_when + g_dialStepStates - g_dialLowStates, &onDial, b);
+			if(b->m_dialPulses || b->m_dialPending)
+				b->m_dialEvent = b->m_machine.sched().schedule(_when + g_dialHighStates, &onDial, b);
 			return;
 		}
-		if(!b->m_dialPending)
-			return;
-		// PD2 tells the PAI handler the direction; the falling edge of PA7 counts.
-		const bool up = b->m_dialPending > 0;
-		b->m_dialPending += up ? -1 : 1;
-		p.set_port_input(m6801::Hc11Peripherals::kPortD, up ? 0xff : 0xfb);
+		if(!b->m_dialPulses)
+		{
+			if(!b->m_dialPending)
+				return;
+			// A new detent: PD2 low turns clockwise (the PAI handler increments), high counter-clockwise.
+			const bool up = b->m_dialPending > 0;
+			b->m_dialPending += up ? -1 : 1;
+			b->m_dialPulses = g_dialPulsesPerDetent;
+			p.set_port_input(m6801::Hc11Peripherals::kPortD, up ? 0xfb : 0xff);
+		}
+		// The falling edge of PA7 counts.
+		--b->m_dialPulses;
 		b->m_dialPulseLow = true;
 		b->m_pa7 = false;
 		p.set_port_input(m6801::Hc11Peripherals::kPortA, b->portAPins());
