@@ -29,6 +29,10 @@ namespace emu88Lib
         {baseLib::MD5("89e42e386e82e0cacb4a2704a03706ca"), 0x00000000}, // R15449121
         {baseLib::MD5("f7909bed95b04d8dc4cc47970e2bc3e6"), 0x0000175e}, // R15179945
         {baseLib::MD5("5626206284b22c2734f3e9efefcd2675"), 0xa100f018}, // 1.07, 10 Oct 87
+        {baseLib::MD5("abe0982e4f662f881affa7d8a932c739"), 0xa100f018}, // 1.06, 31 Aug 87
+        {baseLib::MD5("5de47ca37a3712ed32993f865ee9fb5b"), 0xa100f018}, // 1.05, 06 Aug 87
+        {baseLib::MD5("c5233e4594f9b7bc4f773ae6ba5aa87d"), 0xa100f018}, // 1.04, 14 July 87
+        {baseLib::MD5("9513fec4f09a7d327748340ce3a2a59b"), 0xa100f018}, // Blue Ridge, verX.XX 30 Sep 88
         {baseLib::MD5("b7180ac1be56e740b0f635062c791b5a"), 0xa100f018}, // M-9, ver1.07 10 Oct 87
         {baseLib::MD5("d241220ed9c171ffcf347413eaf5969b"), 0xa1f0a180}, // 1.07 A, IC27
         {baseLib::MD5("346d6c8ef954c1901822d349dd658aef"), 0x00180078}, // 1.07 B, IC26
@@ -47,7 +51,9 @@ namespace emu88Lib
         {baseLib::MD5("21efb00e7881f7fa0b6fcdfadd2d33c3"), 0x00000000}, // BAD_DUMP: R15449121
         {baseLib::MD5("181499301ad745424fee81ad61102588"), 0xfb133f07}, // R15179857
         {baseLib::MD5("8c4b2c7708be8e88a3ac14777575629c"), 0xffffffff}, // 2.07
+        {baseLib::MD5("daa3ea8e557b85e1ae25a1348db37343"), 0xffffffff}, // 2.06
         {baseLib::MD5("615a866337ecb752768ac03ed4ddf85c"), 0x46816781}, // 2.04, 88-11-11
+        {baseLib::MD5("ef4978c0a278f284d12b1632aa0b804b"), 0x46816781}, // 2.03, MT-100
         {baseLib::MD5("ccd61a220f433a62a53b48eb9bb36827"), 0xffffffff}, // 1.00
         {baseLib::MD5("21efdc888020fe99303ef34265349021"), 0x526f6c61}, // R15179970
         {baseLib::MD5("69e39536391fe79250f67cd3c7794217"), 0x526f6c61}, // R15179971
@@ -99,6 +105,12 @@ namespace emu88Lib
         {baseLib::MD5("4ca058f7db05f51e97bb30a162e9610a"), 0x0000016c}, // H8/532 boot
         {baseLib::MD5("63b24c7193ce34afefce9cec32ac39f0"), 0x00034050}, // 1.01, R00233567
         {baseLib::MD5("fe2ba2027fa06dca43f2379f18b24a4d"), 0x00034050}, // 1.00, R00561423
+        {baseLib::MD5("34e5802afd4c12230e775e0c94c4873b"), 0x00034050}, // GS-28 2.00, CTF patch: SC-55 tones, SC-55 v1.21 drums
+        {baseLib::MD5("c3db7620a8438c48e96f4b343da48943"), 0x00034050}, // GS-28 2.00, CTF patch: SC-55 tones, SC-55 v2.00 drums
+        {baseLib::MD5("08fc3433479b1d60c7070ecec25ac532"), 0x00034050}, // GS-28 2.00, CTF patch: strict SC-55 tones, SC-55 v1.21 drums
+        {baseLib::MD5("40c1447c07aca6f299c7722d09791c56"), 0x00034050}, // GS-28 2.00, CTF patch: strict SC-55 tones, SC-55 v2.00 drums
+        {baseLib::MD5("1bfee46852377ada090dd2b2e76fd6ed"), 0x00034050}, // GS-28 2.00, CTF patch: SC-55mkII tones, SC-55 v1.21 drums
+        {baseLib::MD5("f365d0131fe381c82f99117ca08cc953"), 0x00034050}, // GS-28 2.00, CTF patch: SC-55mkII tones, SC-55 v2.00 drums
         {baseLib::MD5("30df645acf7f1b621d5f2891ea53e00b"), 0x526f6c61}, // PCM 1
         {baseLib::MD5("f86e0433a11707a048a8a79e8d98a3be"), 0x524f4c41}, // PCM 2
         {baseLib::MD5("462cb3a2ce9e54f4e54a52f643931ffd"), 0x0000016c}, // 1.20/1.21, R15199778
@@ -134,20 +146,6 @@ namespace emu88Lib
         {baseLib::MD5("54731f82ec7fba29baf8ad1ee043fb17"), 0xa4eb64a5}, // Ver001 1999-10-13, decoded
     };
 
-    // Rows without a signature, as no dump of them was at hand:
-    //   abe0982e4f662f881affa7d8a932c739 1.06, 31 Aug 87
-    //   5de47ca37a3712ed32993f865ee9fb5b 1.05, 06 Aug 87
-    //   c5233e4594f9b7bc4f773ae6ba5aa87d 1.04, 14 July 87
-    //   9513fec4f09a7d327748340ce3a2a59b Blue Ridge, verX.XX 30 Sep 88
-    //   daa3ea8e557b85e1ae25a1348db37343 2.06
-    //   ef4978c0a278f284d12b1632aa0b804b 2.03, MT-100
-    //   34e5802afd4c12230e775e0c94c4873b GS-28 2.00, CTF patch: SC-55 tones, SC-55 v1.21 drums
-    //   c3db7620a8438c48e96f4b343da48943 GS-28 2.00, CTF patch: SC-55 tones, SC-55 v2.00 drums
-    //   08fc3433479b1d60c7070ecec25ac532 GS-28 2.00, CTF patch: strict SC-55 tones, SC-55 v1.21 drums
-    //   40c1447c07aca6f299c7722d09791c56 GS-28 2.00, CTF patch: strict SC-55 tones, SC-55 v2.00 drums
-    //   1bfee46852377ada090dd2b2e76fd6ed GS-28 2.00, CTF patch: SC-55mkII tones, SC-55 v1.21 drums
-    //   f365d0131fe381c82f99117ca08cc953 GS-28 2.00, CTF patch: SC-55mkII tones, SC-55 v2.00 drums
-    //
     // Rows known only by a published SHA-1 or SHA-256 have no MD5 to key a signature by, and no
     // dump here either; every file of their size is hashed for them. Today these are the CM-300
     // internal ROM R15199774 (32 KiB) and the RLP-3237 program 2.01, R15209486 (256 KiB).
