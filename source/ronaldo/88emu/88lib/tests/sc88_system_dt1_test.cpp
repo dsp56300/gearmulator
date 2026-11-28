@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iterator>
 #include <iostream>
+#include <memory>
 
 using namespace emu88Lib;
 using namespace test;
@@ -75,14 +76,20 @@ int main(int argc, char** argv)
 		normalizeH8WordOrder(rom);
 		return rom;
 	};
-	Probe<Sc88> sc88(load(argv[1]), {}, Model::Sc88);
-	std::cerr << "SC-88\n";
-	exercise(sc88, 0x088020, 0x08da20);
-	Probe<Sc88> vl(load(argv[2]), {}, Model::Sc88VL);
-	std::cerr << "SC-88VL\n";
-	exercise(vl, 0x088020, 0x08da20);
-	Probe<Sc88Pro> pro(load(argv[3]));
-	std::cerr << "SC-88Pro\n";
-	exercise(pro, 0xc05020, 0xc0ca20);
+	{
+		auto sc88 = std::make_unique<Probe<Sc88>>(load(argv[1]), std::vector<uint8_t>{}, Model::Sc88);
+		std::cerr << "SC-88\n";
+		exercise(*sc88, 0x088020, 0x08da20);
+	}
+	{
+		auto vl = std::make_unique<Probe<Sc88>>(load(argv[2]), std::vector<uint8_t>{}, Model::Sc88VL);
+		std::cerr << "SC-88VL\n";
+		exercise(*vl, 0x088020, 0x08da20);
+	}
+	{
+		auto pro = std::make_unique<Probe<Sc88Pro>>(load(argv[3]));
+		std::cerr << "SC-88Pro\n";
+		exercise(*pro, 0xc05020, 0xc0ca20);
+	}
 	return finish("sc88_system_dt1");
 }
