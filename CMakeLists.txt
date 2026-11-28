@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 # build a fat binary that runs on both intel and the new Apple M1 chip
 if(APPLE)
