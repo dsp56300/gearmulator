@@ -98,7 +98,9 @@ namespace emu88Lib
 	//   4000-BFFF  pattern ROM banks 0-7, or the style card
 	//   C000-FFFF  program ROM
 	//
-	// The dial pulses PA7, which the pulse accumulator counts, with its direction on PD2.
+	// The dial pulses PA7, which the pulse accumulator counts, with its direction on PD2. The PAI
+	// handler (E9A3) steps once per two pulses (its divider at 54-55 is set to 2 at power-on, C0EF)
+	// and decrements while PD2 is high, so a detent is two pulses with PD2 low for clockwise.
 	//
 	// The firmware turns INTERNAL MEMORY protection on at every power-on: the code at C07A clears
 	// the system area and loads 2451-2452 from a default word in the style ROM, bit 7 of 2452 being
@@ -258,6 +260,7 @@ namespace emu88Lib
 		uint64_t m_buttons = 0;
 
 		int m_dialPending = 0;
+		int m_dialPulses = 0;	// pulses left of the detent in progress
 		bool m_dialPulseLow = false;
 		bool m_pa7 = true;
 		emu::Scheduler::EventId m_dialEvent = 0;
