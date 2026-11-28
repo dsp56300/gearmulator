@@ -71,7 +71,9 @@ namespace wLib
 
 		// timing
 		const double m_samplerateInv;
-		uint32_t m_esaiFrameIndex = 0;
+		// The DSP thread advances it, the UC thread reads it in the ucYieldLoop spin condition outside any mutex;
+		// plain would let the read be hoisted out of that loop, which spins there for the rest of the session
+		std::atomic<uint32_t> m_esaiFrameIndex{0};
 		uint32_t m_lastEsaiFrameIndex = 0;
 		int64_t m_remainingUcCycles = 0;
 		double m_remainingUcCyclesD = 0;
