@@ -239,6 +239,51 @@ def doGitHub()
 	}
 }
 
+// "2.2.28" from project(gearmulator VERSION x.y.z), "?" when the checkout never got that far
+def buildVersion()
+{
+	try {
+		def text = readFile('CMakeLists.txt')
+		def key = 'project(gearmulator VERSION '
+		def start = text.indexOf(key)
+		if(start < 0)
+			return '?'
+		start += key.length()
+		return text.substring(start, text.indexOf(')', start)).trim()
+	} catch(e) {
+		return '?'
+	}
+}
+
+// where the build goes, by the same rules as doUpload() and doGitHub()
+def uploadTarget()
+{
+	def folder = "${params.UploadFolder}"
+	def targets = []
+	if(params.Upload)
+		targets << (folder == "" ? "root" : folder)
+	if(params.GitHub && (folder.contains("beta") || folder == ""))
+		targets << "github"
+	if(targets)
+		return targets.join(', ')
+	return params.Deploy ? "deploy only" : "none"
+}
+
+// the -D...=on options of params.Synths by their last name part (OSIRUS, DSPBRIDGE, Standalone), the off ones left out
+def enabledProducts()
+{
+	def names = []
+	for(def opt in params.Synths.tokenize(' '))
+	{
+		def kv = opt.tokenize('=')
+		if(kv.size() == 2 && kv[1].toLowerCase() == 'on')
+			names << kv[0].substring(kv[0].lastIndexOf('_') + 1)
+	}
+	if(params.FXPlugins)
+		names << 'FX'
+	return names ? names.join(', ') : 'none'
+}
+
 def notifyDiscord()
 {
 	def result = currentBuild.currentResult
@@ -257,7 +302,9 @@ def notifyDiscord()
 				[name: 'Platform', value: platformName(), inline: true],
 				[name: 'Duration', value: currentBuild.durationString.replace(' and counting', ''), inline: true],
 				[name: 'Branch',   value: params.Branch,     inline: true],
-				[name: 'Synths',   value: params.Synths,     inline: false]
+				[name: 'Version',  value: buildVersion(),    inline: true],
+				[name: 'Target',   value: uploadTarget(),    inline: true],
+				[name: 'Products', value: enabledProducts(), inline: false]
 			]
 		]]
 	]
