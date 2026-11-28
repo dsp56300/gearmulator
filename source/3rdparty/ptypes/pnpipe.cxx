@@ -168,7 +168,7 @@ retry:
         sa.lpSecurityDescriptor = NULL;
         sa.bInheritHandle = TRUE;
 
-        handle = int(CreateFileA(pipename, GENERIC_READ | GENERIC_WRITE,
+        handle = tosyshandle(CreateFileA(pipename, GENERIC_READ | GENERIC_WRITE,
             0, &sa, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0));
         if (handle == invhandle)
         {
@@ -225,13 +225,13 @@ int namedpipe::dorawread(char* buf, int count)
     unsigned long ret = uint(-1);
     ovr.Offset = 0;
     ovr.OffsetHigh = 0;
-    if (!ReadFile(HANDLE(handle), buf, count, &ret, &ovr)) 
+    if (!ReadFile(fromsyshandle(handle), buf, count, &ret, &ovr)) 
     {
         if (GetLastError() == ERROR_IO_PENDING)
         {
             if (WaitForSingleObject(ovr.hEvent, DEF_PIPE_TIMEOUT) == WAIT_TIMEOUT)
                 error(EIO, "Timed out");
-            if (!GetOverlappedResult(HANDLE(handle), &ovr, &ret, false))
+            if (!GetOverlappedResult(fromsyshandle(handle), &ovr, &ret, false))
                 error(uerrno(), "Couldn't read");
         }
         else
@@ -246,13 +246,13 @@ int namedpipe::dorawwrite(const char* buf, int count)
     unsigned long ret = uint(-1);
     ovr.Offset = 0;
     ovr.OffsetHigh = 0;
-    if (!WriteFile(HANDLE(handle), buf, count, &ret, &ovr))
+    if (!WriteFile(fromsyshandle(handle), buf, count, &ret, &ovr))
     {
         if (GetLastError() == ERROR_IO_PENDING)
         {
             if (WaitForSingleObject(ovr.hEvent, DEF_PIPE_TIMEOUT) == WAIT_TIMEOUT)
                 error(EIO, "Timed out");
-            if (!GetOverlappedResult(HANDLE(handle), &ovr, &ret, false))
+            if (!GetOverlappedResult(fromsyshandle(handle), &ovr, &ret, false))
                 error(uerrno(), "Couldn't write");
         }
         else
@@ -269,7 +269,7 @@ void namedpipe::doclose()
 {
 #ifdef WIN32
     if (svhandle != invhandle)
-        DisconnectNamedPipe(HANDLE(handle)); 
+        DisconnectNamedPipe(fromsyshandle(handle)); 
 #endif
     svhandle = invhandle;
     fdxstm::doclose();
@@ -280,7 +280,7 @@ void namedpipe::flush()
 {
 #ifdef WIN32
     if (!cancelled)
-        FlushFileBuffers(HANDLE(handle));
+        FlushFileBuffers(fromsyshandle(handle));
 #endif
     fdxstm::flush();
 }

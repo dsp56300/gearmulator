@@ -126,4 +126,8 @@ if(APPLE)
 	endif()
 endif()
 
+if(MINGW)
+	target_link_libraries(juceRmlUi PRIVATE comctl32)
+endif()
+
 target_include_directories(juceRmlUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
